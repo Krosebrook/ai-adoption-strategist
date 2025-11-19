@@ -2,7 +2,8 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle } from 'lucide-react';
+import { Textarea } from "@/components/ui/textarea";
+import { AlertCircle, MessageSquare } from 'lucide-react';
 import { PAIN_POINTS } from './AssessmentData';
 
 export default function WizardStep4({ formData, setFormData }) {
@@ -16,7 +17,8 @@ export default function WizardStep4({ formData, setFormData }) {
   };
 
   return (
-    <Card className="border-slate-200">
+    <div className="space-y-6">
+      <Card className="border-slate-200">
       <CardHeader className="space-y-1 pb-4">
         <CardTitle className="text-2xl font-semibold text-slate-900 flex items-center gap-2">
           <AlertCircle className="h-6 w-6 text-slate-700" />
@@ -78,5 +80,27 @@ export default function WizardStep4({ formData, setFormData }) {
         )}
       </CardContent>
     </Card>
+
+    <Card className="border-slate-200">
+      <CardHeader>
+        <CardTitle className="text-slate-900 flex items-center gap-2">
+          <MessageSquare className="h-5 w-5 text-blue-600" />
+          Additional Context (Optional)
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-slate-600 mb-3">
+          Share any additional details about your challenges, goals, or specific requirements. 
+          Our AI will analyze this to provide more accurate recommendations.
+        </p>
+        <Textarea
+          placeholder="Example: We're struggling with document processing across multiple languages, need strong security for healthcare data, and want to integrate with our legacy ERP system..."
+          value={formData.additional_context || ''}
+          onChange={(e) => setFormData({ ...formData, additional_context: e.target.value })}
+          className="min-h-32"
+        />
+      </CardContent>
+    </Card>
+    </div>
   );
 }
