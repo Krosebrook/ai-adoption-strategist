@@ -11,8 +11,8 @@ import { BrandCard, BrandCardContent, BrandCardHeader, BrandCardTitle } from '..
 import TrendAnalysis from '../components/dashboard/TrendAnalysis';
 import InsightsSummary from '../components/dashboard/InsightsSummary';
 import InteractiveFilters from '../components/dashboard/InteractiveFilters';
-import { useAssessmentFilters } from '../hooks/useAssessmentFilters';
-import { getStatusStyle, formatDate } from '../utils/formatters';
+import { useAssessmentFilters } from '../components/utils/hooks';
+import { getStatusStyle, formatDate } from '../components/utils/formatters';
 
 export default function Dashboard() {
   const { data: allAssessments, isLoading } = useQuery({

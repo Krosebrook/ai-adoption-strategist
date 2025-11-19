@@ -17,8 +17,8 @@ import FeedbackModal from '../components/feedback/FeedbackModal';
 import AIInsights from '../components/results/AIInsights';
 import ImplementationRoadmap from '../components/results/ImplementationRoadmap';
 import InsightsPanel from '../components/insights/InsightsPanel';
-import { useAIInsights } from '../hooks/useAIInsights';
-import { formatDate } from '../utils/formatters';
+import { useAIInsights } from '../components/utils/hooks';
+import { formatDate } from '../components/utils/formatters';
 
 export default function Results() {
   const [assessmentId, setAssessmentId] = useState(null);

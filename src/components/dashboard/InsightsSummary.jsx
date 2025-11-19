@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, AlertTriangle, TrendingUp, Target, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { BrandCard, BrandCardContent, BrandCardHeader, BrandCardTitle } from '../ui/BrandCard';
+import { getSeverityStyle } from '../utils/formatters';
 
 export default function InsightsSummary({ assessments }) {
   const [insights, setInsights] = useState(null);
@@ -79,29 +80,20 @@ Provide:
     }
   };
 
-  const getSeverityColor = (severity) => {
-    switch(severity) {
-      case 'high': return 'bg-red-100 text-red-800 border-red-300';
-      case 'medium': return 'bg-amber-100 text-amber-800 border-amber-300';
-      case 'low': return 'bg-blue-100 text-blue-800 border-blue-300';
-      default: return 'bg-slate-100 text-slate-800 border-slate-300';
-    }
-  };
-
   if (loading) {
     return (
-      <Card style={{ background: 'var(--color-surface)', borderColor: 'var(--color-card-border)' }}>
+      <BrandCard>
         <CardContent className="py-12 text-center">
           <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4" style={{ color: 'var(--color-primary)' }} />
           <p style={{ color: 'var(--color-text)' }}>Analyzing patterns across assessments...</p>
-        </CardContent>
-      </Card>
+        </BrandCardContent>
+      </BrandCard>
     );
   }
 
   if (!insights) {
     return (
-      <Card style={{ background: 'var(--color-surface)', borderColor: 'var(--color-card-border)' }}>
+      <BrandCard>
         <CardContent className="py-12 text-center">
           <Sparkles className="h-12 w-12 mx-auto mb-4" style={{ color: 'var(--color-primary)' }} />
           <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--color-text)' }}>
@@ -121,20 +113,20 @@ Provide:
             <Sparkles className="h-4 w-4 mr-2" />
             Generate Insights
           </Button>
-        </CardContent>
-      </Card>
+        </BrandCardContent>
+      </BrandCard>
     );
   }
 
   return (
-    <Card style={{ background: 'var(--color-surface)', borderColor: 'var(--color-card-border)' }}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
+    <BrandCard>
+      <BrandCardHeader>
+        <BrandCardTitle className="flex items-center gap-2">
           <Sparkles className="h-5 w-5" style={{ color: 'var(--color-primary)' }} />
           AI-Driven Insights
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
+        </BrandCardTitle>
+      </BrandCardHeader>
+      <BrandCardContent className="space-y-6">
         <div>
           <h4 className="font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
             <AlertTriangle className="h-4 w-4 text-red-500" />
@@ -147,7 +139,7 @@ Provide:
                   <span className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>
                     {risk.risk}
                   </span>
-                  <Badge className={getSeverityColor(risk.severity)}>{risk.severity}</Badge>
+                  <Badge className={getSeverityStyle(risk.severity)}>{risk.severity}</Badge>
                 </div>
                 <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
                   Frequency: {risk.frequency}
@@ -199,7 +191,7 @@ Provide:
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </BrandCardContent>
+    </BrandCard>
   );
 }
