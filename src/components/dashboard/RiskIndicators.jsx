@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Shield, Plug, CheckCircle2, XCircle } from 'lucide-react';
 import { AI_PLATFORMS } from '../assessment/AssessmentData';
+import QuickFeedback from '../results/QuickFeedback';
 
-export default function RiskIndicators({ complianceScores, integrationScores, complianceRequirements, integrations }) {
+export default function RiskIndicators({ complianceScores, integrationScores, complianceRequirements, integrations, assessmentId }) {
   // Identify critical compliance gaps
   const complianceRisks = [];
   Object.entries(complianceScores || {}).forEach(([platformId, data]) => {
@@ -126,6 +127,19 @@ export default function RiskIndicators({ complianceScores, integrationScores, co
                 </p>
               </div>
             )}
+
+            <div className="mt-4 pt-4 border-t border-slate-200">
+              <QuickFeedback
+                assessmentId={assessmentId}
+                feedbackType="risk_assessment"
+                context={{
+                  complianceRisks: complianceRisks.length,
+                  integrationRisks: integrationRisks.length,
+                  overallRiskLevel
+                }}
+                label="Are these risks accurate?"
+              />
+            </div>
           </div>
         )}
       </CardContent>

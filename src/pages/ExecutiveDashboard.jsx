@@ -183,6 +183,7 @@ export default function ExecutiveDashboard() {
             integrationScores={latestAssessment.integration_scores}
             complianceRequirements={latestAssessment.compliance_requirements}
             integrations={latestAssessment.desired_integrations}
+            assessmentId={latestAssessment.id}
           />
 
           {/* Pain Points Summary */}

@@ -220,7 +220,12 @@ export default function Results() {
           <h2 className="text-2xl font-bold text-slate-900 mb-4">Platform Recommendations</h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {recommendations.slice(0, 4).map((rec, index) => (
-              <RecommendationCard key={rec.platform} recommendation={rec} rank={index + 1} />
+              <RecommendationCard 
+                key={rec.platform} 
+                recommendation={rec} 
+                rank={index + 1}
+                assessmentId={assessmentId}
+              />
             ))}
           </div>
         </div>

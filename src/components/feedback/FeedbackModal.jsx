@@ -4,17 +4,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Star, Send, Loader2, X } from 'lucide-react';
+import { Star, Send, Loader2, X, CheckCircle2, XCircle } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-export default function FeedbackModal({ isOpen, onClose, assessmentId }) {
+export default function FeedbackModal({ isOpen, onClose, assessmentId, feedbackType = 'general', context = {} }) {
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [usefulness, setUsefulness] = useState('');
   const [comments, setComments] = useState('');
   const [missingFeatures, setMissingFeatures] = useState('');
+  const [recommendationAccurate, setRecommendationAccurate] = useState(null);
+  const [riskAccurate, setRiskAccurate] = useState(null);
+  const [roiRealistic, setRoiRealistic] = useState(null);
 
   const submitFeedbackMutation = useMutation({
     mutationFn: async (feedbackData) => {
@@ -36,6 +39,9 @@ export default function FeedbackModal({ isOpen, onClose, assessmentId }) {
     setUsefulness('');
     setComments('');
     setMissingFeatures('');
+    setRecommendationAccurate(null);
+    setRiskAccurate(null);
+    setRoiRealistic(null);
   };
 
   const handleSubmit = (e) => {
@@ -50,8 +56,14 @@ export default function FeedbackModal({ isOpen, onClose, assessmentId }) {
       assessment_id: assessmentId || null,
       rating: rating,
       usefulness_score: parseInt(usefulness) || null,
+      feedback_type: feedbackType,
+      platform_specific: context.platform || null,
+      recommendation_accurate: recommendationAccurate,
+      risk_assessment_accurate: riskAccurate,
+      roi_realistic: roiRealistic,
       missing_features: missingFeatures ? missingFeatures.split('\n').filter(f => f.trim()) : [],
-      comments: comments
+      comments: comments,
+      context: context
     };
 
     submitFeedbackMutation.mutate(feedbackData);
@@ -99,6 +111,85 @@ export default function FeedbackModal({ isOpen, onClose, assessmentId }) {
               )}
             </div>
           </div>
+
+          {/* Specific Feedback Questions */}
+          {feedbackType === 'platform_recommendation' && (
+            <div className="space-y-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <Label className="text-slate-700 font-medium">Recommendation Accuracy</Label>
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant={recommendationAccurate === true ? 'default' : 'outline'}
+                  onClick={() => setRecommendationAccurate(true)}
+                  className={recommendationAccurate === true ? 'bg-green-600 hover:bg-green-700' : ''}
+                >
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Accurate
+                </Button>
+                <Button
+                  type="button"
+                  variant={recommendationAccurate === false ? 'default' : 'outline'}
+                  onClick={() => setRecommendationAccurate(false)}
+                  className={recommendationAccurate === false ? 'bg-red-600 hover:bg-red-700' : ''}
+                >
+                  <XCircle className="h-4 w-4 mr-2" />
+                  Not Accurate
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {feedbackType === 'risk_assessment' && (
+            <div className="space-y-3 p-4 bg-amber-50 rounded-lg border border-amber-200">
+              <Label className="text-slate-700 font-medium">Risk Assessment Accuracy</Label>
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant={riskAccurate === true ? 'default' : 'outline'}
+                  onClick={() => setRiskAccurate(true)}
+                  className={riskAccurate === true ? 'bg-green-600 hover:bg-green-700' : ''}
+                >
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Accurate
+                </Button>
+                <Button
+                  type="button"
+                  variant={riskAccurate === false ? 'default' : 'outline'}
+                  onClick={() => setRiskAccurate(false)}
+                  className={riskAccurate === false ? 'bg-red-600 hover:bg-red-700' : ''}
+                >
+                  <XCircle className="h-4 w-4 mr-2" />
+                  Not Accurate
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {feedbackType === 'roi_accuracy' && (
+            <div className="space-y-3 p-4 bg-green-50 rounded-lg border border-green-200">
+              <Label className="text-slate-700 font-medium">ROI Projections</Label>
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant={roiRealistic === true ? 'default' : 'outline'}
+                  onClick={() => setRoiRealistic(true)}
+                  className={roiRealistic === true ? 'bg-green-600 hover:bg-green-700' : ''}
+                >
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Realistic
+                </Button>
+                <Button
+                  type="button"
+                  variant={roiRealistic === false ? 'default' : 'outline'}
+                  onClick={() => setRoiRealistic(false)}
+                  className={roiRealistic === false ? 'bg-red-600 hover:bg-red-700' : ''}
+                >
+                  <XCircle className="h-4 w-4 mr-2" />
+                  Unrealistic
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* Usefulness Score */}
           <div className="space-y-2">
