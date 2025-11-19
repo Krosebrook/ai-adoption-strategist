@@ -12,6 +12,7 @@ import RecommendationCard from '../components/results/RecommendationCard';
 import ROIChart from '../components/results/ROIChart';
 import ComplianceMatrix from '../components/results/ComplianceMatrix';
 import IntegrationMatrix from '../components/results/IntegrationMatrix';
+import ScenarioPlanner from '../components/results/ScenarioPlanner';
 
 export default function Results() {
   const [assessmentId, setAssessmentId] = useState(null);
@@ -189,6 +190,7 @@ export default function Results() {
             <TabsTrigger value="roi">ROI Analysis</TabsTrigger>
             <TabsTrigger value="compliance">Compliance</TabsTrigger>
             <TabsTrigger value="integrations">Integrations</TabsTrigger>
+            <TabsTrigger value="scenarios">Scenario Planning</TabsTrigger>
             <TabsTrigger value="details">Full Details</TabsTrigger>
           </TabsList>
 
@@ -315,6 +317,10 @@ export default function Results() {
               integrationData={assessment.integration_scores}
               integrations={assessment.desired_integrations}
             />
+          </TabsContent>
+
+          <TabsContent value="scenarios">
+            <ScenarioPlanner baseAssessment={assessment} />
           </TabsContent>
 
           <TabsContent value="details">
