@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Download, Share2, Loader2, FileDown, Presentation } from 'lucide-react';
+import { FileText, Download, Share2, Loader2, FileDown, Presentation, Star } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
 
@@ -12,6 +12,8 @@ import RecommendationCard from '../components/results/RecommendationCard';
 import ROIChart from '../components/results/ROIChart';
 import ComplianceMatrix from '../components/results/ComplianceMatrix';
 import IntegrationMatrix from '../components/results/IntegrationMatrix';
+import ScenarioPlanner from '../components/results/ScenarioPlanner';
+import FeedbackModal from '../components/feedback/FeedbackModal';
 
 export default function Results() {
   const [assessmentId, setAssessmentId] = useState(null);
@@ -197,6 +199,7 @@ export default function Results() {
             <TabsTrigger value="roi">ROI Analysis</TabsTrigger>
             <TabsTrigger value="compliance">Compliance</TabsTrigger>
             <TabsTrigger value="integrations">Integrations</TabsTrigger>
+            <TabsTrigger value="scenarios">Scenario Planning</TabsTrigger>
             <TabsTrigger value="details">Full Details</TabsTrigger>
           </TabsList>
 
@@ -323,6 +326,10 @@ export default function Results() {
               integrationData={assessment.integration_scores}
               integrations={assessment.desired_integrations}
             />
+          </TabsContent>
+
+          <TabsContent value="scenarios">
+            <ScenarioPlanner baseAssessment={assessment} />
           </TabsContent>
 
           <TabsContent value="details">
