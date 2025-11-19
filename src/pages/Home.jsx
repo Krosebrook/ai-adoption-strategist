@@ -47,19 +47,23 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+    <div className="min-h-screen" style={{ background: 'var(--color-background)' }}>
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
         <div className="text-center space-y-6 mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-full mb-4">
-            <Sparkles className="h-4 w-4 text-slate-600" />
-            <span className="text-sm font-medium text-slate-700">Enterprise AI Assessment Platform</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4" style={{ 
+            background: 'rgba(33, 128, 141, 0.08)' 
+          }}>
+            <Sparkles className="h-4 w-4" style={{ color: 'var(--color-primary)' }} />
+            <span className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>
+              Enterprise AI Assessment Platform
+            </span>
           </div>
           
-          <h1 className="text-5xl md:text-6xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-5xl md:text-6xl font-bold tracking-tight" style={{ color: 'var(--color-text)' }}>
             Choose the Right AI Platform
             <br />
-            <span className="text-slate-600">for Your Enterprise</span>
+            <span style={{ color: 'var(--color-text-secondary)' }}>for Your Enterprise</span>
           </h1>
           
           <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
@@ -69,13 +73,25 @@ export default function Home() {
 
           <div className="flex items-center justify-center gap-4 pt-4">
             <Link to={createPageUrl('Assessment')}>
-              <Button size="lg" className="bg-slate-900 hover:bg-slate-800 text-white px-8 py-6 text-lg">
+              <Button 
+                size="lg" 
+                className="text-white px-8 py-6 text-lg"
+                style={{ 
+                  background: 'linear-gradient(135deg, var(--color-teal-500), var(--color-teal-600))',
+                  border: 'none'
+                }}
+              >
                 Start Assessment
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
             <Link to={createPageUrl('Dashboard')}>
-              <Button size="lg" variant="outline" className="border-slate-300 px-8 py-6 text-lg">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="px-8 py-6 text-lg"
+                style={{ borderColor: 'var(--color-border)' }}
+              >
                 <FileText className="mr-2 h-5 w-5" />
                 View Results
               </Button>
@@ -117,10 +133,14 @@ export default function Home() {
         </div>
 
         {/* How It Works */}
-        <div className="bg-slate-900 rounded-2xl p-8 md:p-12 text-white">
+        <div className="rounded-2xl p-8 md:p-12 text-white" style={{ 
+          background: 'linear-gradient(135deg, var(--color-teal-600), var(--color-teal-700))' 
+        }}>
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
-            <p className="text-slate-300 text-lg">Four simple steps to your AI platform recommendation</p>
+            <p className="text-lg" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+              Four simple steps to your AI platform recommendation
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -131,11 +151,15 @@ export default function Home() {
               { step: 4, title: 'Get Results', desc: 'Receive detailed recommendations and reports' }
             ].map((item, index) => (
               <div key={index} className="text-center space-y-3">
-                <div className="w-16 h-16 rounded-full bg-white text-slate-900 flex items-center justify-center mx-auto text-2xl font-bold">
+                <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center mx-auto text-2xl font-bold" style={{ 
+                  color: 'var(--color-teal-600)' 
+                }}>
                   {item.step}
                 </div>
                 <h4 className="text-lg font-semibold">{item.title}</h4>
-                <p className="text-sm text-slate-300">{item.desc}</p>
+                <p className="text-sm" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
+                  {item.desc}
+                </p>
               </div>
             ))}
           </div>
