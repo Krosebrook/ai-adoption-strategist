@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Download, Share2, Loader2 } from 'lucide-react';
+import { FileText, Download, Share2, Loader2, FileDown, Presentation } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { toast } from 'sonner';
 
 import RecommendationCard from '../components/results/RecommendationCard';
 import ROIChart from '../components/results/ROIChart';
@@ -29,6 +30,80 @@ export default function Results() {
     },
     enabled: !!assessmentId
   });
+
+  const exportPDFMutation = useMutation({
+    mutationFn: async () => {
+      const response = await base44.functions.invoke('exportPDF', { 
+        assessmentId: assessmentId 
+      });
+      return response.data;
+    },
+    onSuccess: (data) => {
+      // Create blob and download
+      const blob = new Blob([data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${assessment?.organization_name?.replace(/[^a-z0-9]/gi, '_') || 'Assessment'}_Executive_Summary.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+      toast.success('PDF downloaded successfully!');
+    },
+    onError: (error) => {
+      console.error('PDF export error:', error);
+      toast.error('Failed to generate PDF. Please try again.');
+    }
+  });
+
+  const exportPowerPointMutation = useMutation({
+    mutationFn: async () => {
+      const response = await base44.functions.invoke('exportPowerPoint', { 
+        assessmentId: assessmentId 
+      });
+      return response.data;
+    },
+    onSuccess: (data) => {
+      // Currently returns JSON structure (placeholder)
+      // In production with PptxGenJS, this would be a .pptx file
+      if (data.structure) {
+        // Download JSON structure as placeholder
+        const blob = new Blob([JSON.stringify(data.structure, null, 2)], { 
+          type: 'application/json' 
+        });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${assessment?.organization_name?.replace(/[^a-z0-9]/gi, '_') || 'Assessment'}_Report_Structure.json`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+        toast.success('Report structure downloaded! (PowerPoint generation requires PptxGenJS library)');
+      }
+    },
+    onError: (error) => {
+      console.error('PowerPoint export error:', error);
+      toast.error('Failed to generate PowerPoint. Please try again.');
+    }
+  });
+
+  const handleExportPDF = () => {
+    if (!assessmentId) {
+      toast.error('No assessment selected');
+      return;
+    }
+    exportPDFMutation.mutate();
+  };
+
+  const handleExportPowerPoint = () => {
+    if (!assessmentId) {
+      toast.error('No assessment selected');
+      return;
+    }
+    exportPowerPointMutation.mutate();
+  };
 
   if (isLoading) {
     return (
@@ -68,13 +143,31 @@ export default function Results() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" className="border-slate-300">
-              <Share2 className="h-4 w-4 mr-2" />
-              Share
-            </Button>
-            <Button variant="outline" className="border-slate-300">
-              <Download className="h-4 w-4 mr-2" />
+            <Button 
+              variant="outline" 
+              className="border-slate-300"
+              onClick={handleExportPDF}
+              disabled={exportPDFMutation.isPending}
+            >
+              {exportPDFMutation.isPending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <FileDown className="h-4 w-4 mr-2" />
+              )}
               Export PDF
+            </Button>
+            <Button 
+              variant="outline" 
+              className="border-slate-300"
+              onClick={handleExportPowerPoint}
+              disabled={exportPowerPointMutation.isPending}
+            >
+              {exportPowerPointMutation.isPending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Presentation className="h-4 w-4 mr-2" />
+              )}
+              Export Report
             </Button>
           </div>
         </div>
@@ -101,12 +194,35 @@ export default function Results() {
 
           <TabsContent value="executive">
             <Card className="border-slate-200">
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-slate-900">Executive Summary</CardTitle>
+                <Button 
+                  size="sm"
+                  variant="outline"
+                  onClick={handleExportPDF}
+                  disabled={exportPDFMutation.isPending}
+                >
+                  {exportPDFMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <FileDown className="h-4 w-4 mr-2" />
+                  )}
+                  Download as PDF
+                </Button>
               </CardHeader>
               <CardContent>
                 <div className="prose prose-slate max-w-none">
                   <ReactMarkdown>{assessment.executive_summary}</ReactMarkdown>
+                </div>
+                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <h4 className="text-sm font-semibold text-blue-900 mb-2">📄 Export Options</h4>
+                  <p className="text-sm text-blue-700 mb-3">
+                    Download this executive summary as a formatted PDF document for sharing with stakeholders.
+                  </p>
+                  <p className="text-xs text-blue-600">
+                    <strong>Note:</strong> PDF generation uses jsPDF. For production use with advanced layouts, 
+                    consider pdfmake or Puppeteer for HTML-to-PDF rendering.
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -203,10 +319,43 @@ export default function Results() {
 
           <TabsContent value="details">
             <Card className="border-slate-200">
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-slate-900">Complete Assessment Data</CardTitle>
+                <Button 
+                  size="sm"
+                  variant="outline"
+                  onClick={handleExportPowerPoint}
+                  disabled={exportPowerPointMutation.isPending}
+                >
+                  {exportPowerPointMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Presentation className="h-4 w-4 mr-2" />
+                  )}
+                  Export Full Report
+                </Button>
               </CardHeader>
               <CardContent>
+                <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                  <h4 className="text-sm font-semibold text-amber-900 mb-2 flex items-center gap-2">
+                    <Presentation className="h-4 w-4" />
+                    PowerPoint Export (Placeholder)
+                  </h4>
+                  <p className="text-sm text-amber-700 mb-3">
+                    Click "Export Full Report" to generate a comprehensive presentation structure. 
+                    This includes all assessment data formatted for PowerPoint slides.
+                  </p>
+                  <div className="bg-amber-100 p-3 rounded text-xs text-amber-900 space-y-1">
+                    <p><strong>⚠️ Implementation Note:</strong></p>
+                    <p>Currently generates JSON structure. For actual .pptx files, install:</p>
+                    <code className="block mt-2 bg-white p-2 rounded">npm install pptxgenjs@3.12.0</code>
+                    <p className="mt-2">
+                      See <code>functions/exportPowerPoint.js</code> for implementation details and 
+                      recommended libraries (PptxGenJS, officegen, node-pptx).
+                    </p>
+                  </div>
+                </div>
+
                 <pre className="bg-slate-50 p-4 rounded-lg text-xs overflow-auto max-h-96 text-slate-700">
                   {JSON.stringify(assessment, null, 2)}
                 </pre>
