@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { createPageUrl } from './utils';
+import { createPageUrl } from '@/utils';
 import { FileText, Plus, Calendar, Building2, Loader2, TrendingUp } from 'lucide-react';
 
 export default function Dashboard() {

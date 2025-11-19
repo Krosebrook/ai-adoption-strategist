@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight, Save, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useMutation } from '@tanstack/react-query';
-import { createPageUrl } from './utils';
+import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
 
 import WizardStep1 from '../components/assessment/WizardStep1';
