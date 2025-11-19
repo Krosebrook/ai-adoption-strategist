@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, X, TrendingUp, DollarSign, Users, Percent, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { calculateROI } from '../assessment/CalculationEngine';
 import { AI_PLATFORMS, PLATFORM_PRICING } from '../assessment/AssessmentData';
+import ScenarioComparison from './ScenarioComparison';
 
 export default function ScenarioPlanner({ baseAssessment }) {
   const [scenarios, setScenarios] = useState([]);
@@ -228,10 +229,17 @@ export default function ScenarioPlanner({ baseAssessment }) {
         </Card>
       )}
 
+      {/* Cross-Scenario Comparison */}
+      {scenarios.length > 0 && (
+        <>
+          <ScenarioComparison baseAssessment={baseAssessment} scenarios={scenarios} />
+        </>
+      )}
+
       {/* Scenario Comparisons */}
       {scenarios.length > 0 && (
         <div className="space-y-6">
-          <h3 className="text-xl font-bold text-slate-900">Scenario Comparison</h3>
+          <h3 className="text-xl font-bold text-slate-900">Detailed Scenario Breakdown</h3>
           
           {AI_PLATFORMS.map(platform => {
             const baselinePlatformROI = baseROI.find(r => r.platform === platform.id);
