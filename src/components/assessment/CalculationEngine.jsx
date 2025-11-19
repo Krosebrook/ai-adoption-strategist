@@ -155,9 +155,17 @@ export function assessPainPoints(painPoints) {
   };
 }
 
-export function generateRecommendations(roiData, complianceData, integrationData, painPointData) {
+export function generateRecommendations(roiData, complianceData, integrationData, painPointData, customWeights = null) {
   const platforms = ['google_gemini', 'microsoft_copilot', 'anthropic_claude', 'openai_chatgpt'];
   const recommendations = [];
+
+  // Use custom weights from AI analysis or default weights
+  const weights = customWeights || {
+    roi_weight: 0.35,
+    compliance_weight: 0.25,
+    integration_weight: 0.25,
+    pain_point_weight: 0.15
+  };
 
   platforms.forEach(platformId => {
     const roi = roiData.find(r => r.platform === platformId);
@@ -171,12 +179,12 @@ export function generateRecommendations(roiData, complianceData, integrationData
     const integrationScore = integration?.integration_score || 0;
     const painScore = (painPointScore / 10) * 100; // Normalize
 
-    // Weights: ROI 35%, Compliance 25%, Integration 25%, Pain Points 15%
+    // Apply dynamic weights
     const totalScore = 
-      (roiScore * 0.35) + 
-      (complianceScore * 0.25) + 
-      (integrationScore * 0.25) + 
-      (painScore * 0.15);
+      (roiScore * weights.roi_weight) + 
+      (complianceScore * weights.compliance_weight) + 
+      (integrationScore * weights.integration_weight) + 
+      (painScore * weights.pain_point_weight);
 
     const platformName = AI_PLATFORMS.find(p => p.id === platformId)?.name || platformId;
 

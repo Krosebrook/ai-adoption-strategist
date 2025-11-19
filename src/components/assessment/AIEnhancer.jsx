@@ -1,5 +1,103 @@
 import { base44 } from '@/api/base44Client';
 
+export async function analyzeUnstructuredInput(text, context = 'pain_points') {
+  try {
+    const prompt = `Analyze this unstructured user input about their enterprise AI needs:
+
+"${text}"
+
+Context: ${context}
+
+Extract and identify:
+1. Specific pain points and challenges (be detailed)
+2. Hidden requirements or concerns not explicitly stated
+3. Industry-specific needs or constraints
+4. Urgency indicators and priorities
+5. Technical vs business focus
+6. Compliance or security concerns mentioned
+
+Provide structured analysis.`;
+
+    const response = await base44.integrations.Core.InvokeLLM({
+      prompt: prompt,
+      response_json_schema: {
+        type: "object",
+        properties: {
+          pain_points: {
+            type: "array",
+            items: { type: "string" },
+            description: "Extracted pain points"
+          },
+          hidden_requirements: {
+            type: "array",
+            items: { type: "string" }
+          },
+          compliance_concerns: {
+            type: "array",
+            items: { type: "string" }
+          },
+          integration_needs: {
+            type: "array",
+            items: { type: "string" }
+          },
+          urgency_level: {
+            type: "string",
+            enum: ["low", "medium", "high", "critical"]
+          },
+          technical_complexity: {
+            type: "string",
+            enum: ["low", "medium", "high"]
+          },
+          sentiment: {
+            type: "string",
+            enum: ["frustrated", "neutral", "optimistic", "urgent"]
+          }
+        }
+      }
+    });
+
+    return response;
+  } catch (error) {
+    console.error('Failed to analyze unstructured input:', error);
+    return null;
+  }
+}
+
+export async function refineScoringWithFeedback(assessmentData, feedbackAnalysis) {
+  try {
+    const prompt = `Based on historical user feedback analysis, refine the scoring weights for this assessment:
+
+**Current Assessment:**
+- Departments: ${assessmentData.departments?.map(d => d.name).join(', ')}
+- Pain Points: ${assessmentData.pain_points?.join(', ')}
+- Compliance: ${assessmentData.compliance_requirements?.join(', ')}
+
+**Feedback Insights:**
+${JSON.stringify(feedbackAnalysis, null, 2)}
+
+Provide optimized scoring weights that better reflect user priorities based on feedback trends.`;
+
+    const response = await base44.integrations.Core.InvokeLLM({
+      prompt: prompt,
+      response_json_schema: {
+        type: "object",
+        properties: {
+          roi_weight: { type: "number", description: "0-1 scale" },
+          compliance_weight: { type: "number", description: "0-1 scale" },
+          integration_weight: { type: "number", description: "0-1 scale" },
+          pain_point_weight: { type: "number", description: "0-1 scale" },
+          reasoning: { type: "string" }
+        }
+      }
+    });
+
+    return response;
+  } catch (error) {
+    console.error('Failed to refine scoring:', error);
+    return null;
+  }
+}
+
 export async function analyzeFeedbackTrends() {
   try {
     const feedbacks = await base44.entities.Feedback.list('-created_date', 100);

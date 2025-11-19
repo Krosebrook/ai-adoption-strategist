@@ -21,6 +21,7 @@ import {
   generateRecommendations,
   generateExecutiveSummary
 } from '../components/assessment/CalculationEngine';
+import { analyzeUnstructuredInput, analyzeFeedbackTrends, refineScoringWithFeedback } from '../components/assessment/AIEnhancer';
 
 export default function Assessment() {
   const navigate = useNavigate();
@@ -70,15 +71,46 @@ export default function Assessment() {
   };
 
   const handleComplete = async () => {
+    // Analyze unstructured input if provided
+    let aiInsights = null;
+    let customWeights = null;
+    
+    if (formData.additional_context && formData.additional_context.trim()) {
+      toast.info('Analyzing your input with AI...');
+      aiInsights = await analyzeUnstructuredInput(formData.additional_context, 'assessment');
+      
+      // Get feedback trends and refine scoring
+      const feedbackAnalysis = await analyzeFeedbackTrends();
+      if (feedbackAnalysis && aiInsights) {
+        customWeights = await refineScoringWithFeedback(formData, feedbackAnalysis);
+      }
+    }
+
     // Perform all calculations
     const roiData = calculateAllROI(formData.departments);
     const complianceData = assessCompliance(formData.compliance_requirements);
     const integrationData = assessIntegrations(formData.desired_integrations);
-    const painPointData = assessPainPoints(formData.pain_points);
-    const recommendations = generateRecommendations(roiData, complianceData, integrationData, painPointData);
+    
+    // Enhance pain points with AI analysis if available
+    let enhancedPainPoints = formData.pain_points;
+    if (aiInsights?.pain_points) {
+      enhancedPainPoints = [...new Set([...formData.pain_points, ...aiInsights.pain_points])];
+    }
+    
+    const painPointData = assessPainPoints(enhancedPainPoints);
+    
+    // Generate recommendations with custom weights if available
+    const recommendations = generateRecommendations(
+      roiData, 
+      complianceData, 
+      integrationData, 
+      painPointData,
+      customWeights
+    );
 
     const assessmentData = {
       ...formData,
+      pain_points: enhancedPainPoints,
       roi_calculations: roiData.reduce((acc, roi) => {
         acc[roi.platform] = roi;
         return acc;
@@ -87,6 +119,8 @@ export default function Assessment() {
       integration_scores: integrationData,
       pain_point_mappings: painPointData.pain_point_mappings,
       recommended_platforms: recommendations,
+      ai_insights: aiInsights,
+      custom_weights: customWeights,
       status: 'completed'
     };
 
