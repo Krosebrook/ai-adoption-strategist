@@ -8,8 +8,8 @@ export default function Layout({ children, currentPageName }) {
     { name: 'Home', icon: Home, page: 'Home' },
     { name: 'Executive', icon: LayoutDashboard, page: 'ExecutiveDashboard' },
     { name: 'Assessment', icon: FileText, page: 'Assessment' },
+    { name: 'Reports', icon: FileText, page: 'Reports' },
     { name: 'Dashboard', icon: LayoutDashboard, page: 'Dashboard' },
-    { name: 'Feedback', icon: Star, page: 'FeedbackDashboard' },
     { name: 'Settings', icon: Settings, page: 'Settings' }
   ];
 
