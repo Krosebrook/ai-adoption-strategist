@@ -12,10 +12,10 @@ import RecommendationCard from '../components/results/RecommendationCard';
 import ROIChart from '../components/results/ROIChart';
 import ComplianceMatrix from '../components/results/ComplianceMatrix';
 import IntegrationMatrix from '../components/results/IntegrationMatrix';
-import ScenarioPlanner from '../components/results/ScenarioPlanner';
 
 export default function Results() {
   const [assessmentId, setAssessmentId] = useState(null);
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -170,6 +170,13 @@ export default function Results() {
               )}
               Export Report
             </Button>
+            <Button 
+              className="bg-amber-500 hover:bg-amber-600 text-white"
+              onClick={() => setFeedbackModalOpen(true)}
+            >
+              <Star className="h-4 w-4 mr-2" />
+              Share Feedback
+            </Button>
           </div>
         </div>
 
@@ -190,7 +197,6 @@ export default function Results() {
             <TabsTrigger value="roi">ROI Analysis</TabsTrigger>
             <TabsTrigger value="compliance">Compliance</TabsTrigger>
             <TabsTrigger value="integrations">Integrations</TabsTrigger>
-            <TabsTrigger value="scenarios">Scenario Planning</TabsTrigger>
             <TabsTrigger value="details">Full Details</TabsTrigger>
           </TabsList>
 
@@ -319,10 +325,6 @@ export default function Results() {
             />
           </TabsContent>
 
-          <TabsContent value="scenarios">
-            <ScenarioPlanner baseAssessment={assessment} />
-          </TabsContent>
-
           <TabsContent value="details">
             <Card className="border-slate-200">
               <CardHeader className="flex flex-row items-center justify-between">
@@ -370,6 +372,12 @@ export default function Results() {
           </TabsContent>
         </Tabs>
       </div>
+
+      <FeedbackModal 
+        isOpen={feedbackModalOpen} 
+        onClose={() => setFeedbackModalOpen(false)}
+        assessmentId={assessmentId}
+      />
     </div>
   );
 }

@@ -1,13 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Brain, Home, FileText, LayoutDashboard } from 'lucide-react';
+import { Brain, Home, FileText, LayoutDashboard, Star } from 'lucide-react';
 
 export default function Layout({ children, currentPageName }) {
   const navigation = [
     { name: 'Home', icon: Home, page: 'Home' },
     { name: 'Assessment', icon: FileText, page: 'Assessment' },
-    { name: 'Dashboard', icon: LayoutDashboard, page: 'Dashboard' }
+    { name: 'Dashboard', icon: LayoutDashboard, page: 'Dashboard' },
+    { name: 'Feedback', icon: Star, page: 'FeedbackDashboard' }
   ];
 
   return (
