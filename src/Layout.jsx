@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Brain, Home, FileText, LayoutDashboard, Star } from 'lucide-react';
+import { Brain, Home, FileText, LayoutDashboard, Star, Settings } from 'lucide-react';
 
 export default function Layout({ children, currentPageName }) {
   const navigation = [
@@ -9,7 +9,8 @@ export default function Layout({ children, currentPageName }) {
     { name: 'Executive', icon: LayoutDashboard, page: 'ExecutiveDashboard' },
     { name: 'Assessment', icon: FileText, page: 'Assessment' },
     { name: 'Dashboard', icon: LayoutDashboard, page: 'Dashboard' },
-    { name: 'Feedback', icon: Star, page: 'FeedbackDashboard' }
+    { name: 'Feedback', icon: Star, page: 'FeedbackDashboard' },
+    { name: 'Settings', icon: Settings, page: 'Settings' }
   ];
 
   return (

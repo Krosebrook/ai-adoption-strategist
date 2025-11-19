@@ -4,6 +4,7 @@ import Results from './pages/Results';
 import Dashboard from './pages/Dashboard';
 import FeedbackDashboard from './pages/FeedbackDashboard';
 import ExecutiveDashboard from './pages/ExecutiveDashboard';
+import Settings from './pages/Settings';
 import __Layout from './Layout.jsx';
 
 
@@ -14,6 +15,7 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "FeedbackDashboard": FeedbackDashboard,
     "ExecutiveDashboard": ExecutiveDashboard,
+    "Settings": Settings,
 }
 
 export const pagesConfig = {
