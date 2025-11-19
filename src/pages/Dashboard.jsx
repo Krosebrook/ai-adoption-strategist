@@ -1,85 +1,159 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createPageUrl } from '@/utils';
 import { FileText, Plus, Calendar, Building2, Loader2, TrendingUp } from 'lucide-react';
+import TrendAnalysis from '../components/dashboard/TrendAnalysis';
+import InsightsSummary from '../components/dashboard/InsightsSummary';
+import InteractiveFilters from '../components/dashboard/InteractiveFilters';
 
 export default function Dashboard() {
-  const { data: assessments, isLoading } = useQuery({
+  const [filters, setFilters] = useState({
+    search: '',
+    platform: 'all',
+    status: 'all',
+    timeRange: 'all'
+  });
+
+  const { data: allAssessments, isLoading } = useQuery({
     queryKey: ['assessments'],
-    queryFn: () => base44.entities.Assessment.list('-created_date', 50),
+    queryFn: () => base44.entities.Assessment.list('-created_date', 100),
     initialData: []
   });
 
+  const assessments = useMemo(() => {
+    return allAssessments.filter(assessment => {
+      // Search filter
+      if (filters.search && !assessment.organization_name?.toLowerCase().includes(filters.search.toLowerCase())) {
+        return false;
+      }
+
+      // Platform filter
+      if (filters.platform !== 'all' && assessment.recommended_platforms?.[0]?.platform_name !== filters.platform) {
+        return false;
+      }
+
+      // Status filter
+      if (filters.status !== 'all' && assessment.status !== filters.status) {
+        return false;
+      }
+
+      // Time range filter
+      if (filters.timeRange !== 'all') {
+        const date = new Date(assessment.assessment_date || assessment.created_date);
+        const now = new Date();
+        const daysAgo = parseInt(filters.timeRange);
+        const cutoff = new Date(now.setDate(now.getDate() - daysAgo));
+        if (date < cutoff) return false;
+      }
+
+      return true;
+    });
+  }, [allAssessments, filters]);
+
+  const completedAssessments = allAssessments.filter(a => a.status === 'completed');
+
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen" style={{ background: 'var(--color-background)' }}>
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8 flex items-start justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">Assessment Dashboard</h1>
-            <p className="text-slate-600">View and manage all your AI platform assessments</p>
+            <h1 className="text-3xl font-bold" style={{ color: 'var(--color-text)' }}>Assessment Dashboard</h1>
+            <p style={{ color: 'var(--color-text-secondary)' }}>View, analyze, and manage all assessments</p>
           </div>
-          <Link to={createPageUrl('Assessment')}>
-            <Button className="bg-slate-900 hover:bg-slate-800">
-              <Plus className="h-4 w-4 mr-2" />
-              New Assessment
-            </Button>
-          </Link>
+          <div className="flex gap-2">
+            <Link to={createPageUrl('Reports')}>
+              <Button variant="outline" style={{ borderColor: 'var(--color-border)' }}>
+                <FileText className="h-4 w-4 mr-2" />
+                Generate Report
+              </Button>
+            </Link>
+            <Link to={createPageUrl('Assessment')}>
+              <Button 
+                className="text-white"
+                style={{ 
+                  background: 'linear-gradient(135deg, var(--color-teal-500), var(--color-teal-600))',
+                  border: 'none'
+                }}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                New Assessment
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="border-slate-200">
+          <Card style={{ background: 'var(--color-surface)', borderColor: 'var(--color-card-border)' }}>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600 mb-1">Total Assessments</p>
-                  <p className="text-3xl font-bold text-slate-900">{assessments.length}</p>
+                  <p className="text-sm mb-1" style={{ color: 'var(--color-text-secondary)' }}>Total Assessments</p>
+                  <p className="text-3xl font-bold" style={{ color: 'var(--color-text)' }}>{allAssessments.length}</p>
                 </div>
-                <FileText className="h-10 w-10 text-slate-400" />
+                <FileText className="h-10 w-10 opacity-20" style={{ color: 'var(--color-text)' }} />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-slate-200">
+          <Card style={{ background: 'var(--color-surface)', borderColor: 'var(--color-card-border)' }}>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600 mb-1">Completed</p>
-                  <p className="text-3xl font-bold text-slate-900">
-                    {assessments.filter(a => a.status === 'completed').length}
+                  <p className="text-sm mb-1" style={{ color: 'var(--color-text-secondary)' }}>Completed</p>
+                  <p className="text-3xl font-bold" style={{ color: 'var(--color-text)' }}>
+                    {allAssessments.filter(a => a.status === 'completed').length}
                   </p>
                 </div>
-                <TrendingUp className="h-10 w-10 text-green-500" />
+                <TrendingUp className="h-10 w-10" style={{ color: 'var(--color-teal-500)', opacity: 0.5 }} />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-slate-200">
+          <Card style={{ background: 'var(--color-surface)', borderColor: 'var(--color-card-border)' }}>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600 mb-1">Draft</p>
-                  <p className="text-3xl font-bold text-slate-900">
-                    {assessments.filter(a => a.status === 'draft').length}
+                  <p className="text-sm mb-1" style={{ color: 'var(--color-text-secondary)' }}>Draft</p>
+                  <p className="text-3xl font-bold" style={{ color: 'var(--color-text)' }}>
+                    {allAssessments.filter(a => a.status === 'draft').length}
                   </p>
                 </div>
-                <Calendar className="h-10 w-10 text-slate-400" />
+                <Calendar className="h-10 w-10 opacity-20" style={{ color: 'var(--color-text)' }} />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Assessments List */}
-        <Card className="border-slate-200">
-          <CardHeader>
-            <CardTitle className="text-slate-900">Recent Assessments</CardTitle>
-          </CardHeader>
+        {/* Interactive Dashboard */}
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="trends">Trends</TabsTrigger>
+            <TabsTrigger value="insights">AI Insights</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6">
+            <InteractiveFilters 
+              filters={filters} 
+              onFilterChange={setFilters}
+              assessments={allAssessments}
+            />
+
+            {/* Assessments List */}
+            <Card style={{ background: 'var(--color-surface)', borderColor: 'var(--color-card-border)' }}>
+              <CardHeader>
+                <CardTitle style={{ color: 'var(--color-text)' }}>
+                  Assessments ({assessments.length})
+                </CardTitle>
+              </CardHeader>
           <CardContent>
             {isLoading ? (
               <div className="text-center py-12">
@@ -148,8 +222,18 @@ export default function Dashboard() {
                 ))}
               </div>
             )}
-          </CardContent>
-        </Card>
+            </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="trends">
+            <TrendAnalysis assessments={completedAssessments} />
+          </TabsContent>
+
+          <TabsContent value="insights">
+            <InsightsSummary assessments={completedAssessments} />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

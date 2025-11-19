@@ -23,14 +23,17 @@ import PlatformSummaryCard from '../components/dashboard/PlatformSummaryCard';
 import ROIOverview from '../components/dashboard/ROIOverview';
 import RiskIndicators from '../components/dashboard/RiskIndicators';
 import PainPointsSummary from '../components/dashboard/PainPointsSummary';
+import TrendAnalysis from '../components/dashboard/TrendAnalysis';
+import InsightsSummary from '../components/dashboard/InsightsSummary';
 
 export default function ExecutiveDashboard() {
   const [latestAssessment, setLatestAssessment] = useState(null);
+  const [allAssessments, setAllAssessments] = useState([]);
 
   const { data: assessments, isLoading } = useQuery({
     queryKey: ['assessments'],
     queryFn: async () => {
-      const result = await base44.entities.Assessment.filter({ status: 'completed' }, '-assessment_date', 1);
+      const result = await base44.entities.Assessment.filter({ status: 'completed' }, '-assessment_date', 50);
       return result;
     }
   });
@@ -38,6 +41,7 @@ export default function ExecutiveDashboard() {
   useEffect(() => {
     if (assessments && assessments.length > 0) {
       setLatestAssessment(assessments[0]);
+      setAllAssessments(assessments);
     }
   }, [assessments]);
 
@@ -76,7 +80,7 @@ export default function ExecutiveDashboard() {
   const roiData = Object.values(latestAssessment.roi_calculations || {});
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen" style={{ background: 'var(--color-background)' }}>
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -174,6 +178,14 @@ export default function ExecutiveDashboard() {
 
         {/* ROI Overview */}
         <ROIOverview roiData={roiData} assessmentId={latestAssessment.id} />
+
+        {/* Trends & Insights */}
+        {allAssessments.length > 1 && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+            <TrendAnalysis assessments={allAssessments} />
+            <InsightsSummary assessments={allAssessments} />
+          </div>
+        )}
 
         {/* Two Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
