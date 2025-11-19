@@ -6,6 +6,7 @@ import { Brain, Home, FileText, LayoutDashboard, Star } from 'lucide-react';
 export default function Layout({ children, currentPageName }) {
   const navigation = [
     { name: 'Home', icon: Home, page: 'Home' },
+    { name: 'Executive', icon: LayoutDashboard, page: 'ExecutiveDashboard' },
     { name: 'Assessment', icon: FileText, page: 'Assessment' },
     { name: 'Dashboard', icon: LayoutDashboard, page: 'Dashboard' },
     { name: 'Feedback', icon: Star, page: 'FeedbackDashboard' }
