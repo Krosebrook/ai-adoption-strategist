@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Download, Share2, Loader2, FileDown, Presentation, Star, Sparkles } from 'lucide-react';
+import { FileText, Loader2, FileDown, Presentation, Star, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
 
+import { BrandCard, BrandCardContent, BrandCardHeader, BrandCardTitle } from '../components/ui/BrandCard';
 import RecommendationCard from '../components/results/RecommendationCard';
 import ROIChart from '../components/results/ROIChart';
 import ComplianceMatrix from '../components/results/ComplianceMatrix';
@@ -17,14 +17,13 @@ import FeedbackModal from '../components/feedback/FeedbackModal';
 import AIInsights from '../components/results/AIInsights';
 import ImplementationRoadmap from '../components/results/ImplementationRoadmap';
 import InsightsPanel from '../components/insights/InsightsPanel';
-import { generatePlatformInsights, generateImplementationRoadmap } from '../components/assessment/AIEnhancer';
+import { useAIInsights } from '../hooks/useAIInsights';
+import { formatDate } from '../utils/formatters';
 
 export default function Results() {
   const [assessmentId, setAssessmentId] = useState(null);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
-  const [aiInsights, setAiInsights] = useState(null);
-  const [implementationRoadmap, setImplementationRoadmap] = useState(null);
-  const [loadingAI, setLoadingAI] = useState(false);
+  const { insights: aiInsights, roadmap: implementationRoadmap, loading: loadingAI, loadInsights } = useAIInsights();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -140,31 +139,15 @@ export default function Results() {
   const roiData = Object.values(assessment.roi_calculations || {});
   const recommendations = assessment.recommended_platforms || [];
 
-  const loadAIInsights = async () => {
-    if (!recommendations[0] || loadingAI || aiInsights) return;
-    
-    setLoadingAI(true);
-    try {
-      const topPlatform = recommendations[0];
-      const [insights, roadmap] = await Promise.all([
-        generatePlatformInsights(
-          topPlatform, 
-          assessment, 
-          roiData, 
-          assessment.compliance_scores, 
-          assessment.integration_scores
-        ),
-        generateImplementationRoadmap(topPlatform, assessment)
-      ]);
-      
-      setAiInsights(insights);
-      setImplementationRoadmap(roadmap);
-    } catch (error) {
-      console.error('Failed to load AI insights:', error);
-      toast.error('Failed to generate AI insights');
-    } finally {
-      setLoadingAI(false);
-    }
+  const handleLoadAIInsights = () => {
+    if (!recommendations[0]) return;
+    loadInsights(
+      recommendations[0],
+      assessment,
+      roiData,
+      assessment.compliance_scores,
+      assessment.integration_scores
+    );
   };
 
   return (
@@ -176,7 +159,7 @@ export default function Results() {
             <h1 className="text-3xl font-bold text-slate-900 mb-2">Assessment Results</h1>
             <p className="text-slate-600">{assessment.organization_name}</p>
             <p className="text-sm text-slate-500">
-              Completed on {new Date(assessment.assessment_date).toLocaleDateString()}
+              Completed on {formatDate(assessment.assessment_date, { format: 'long' })}
             </p>
           </div>
           <div className="flex gap-2">
@@ -239,7 +222,7 @@ export default function Results() {
               <Sparkles className="h-4 w-4 mr-1" />
               Insights Engine
             </TabsTrigger>
-            <TabsTrigger value="ai-insights" onClick={loadAIInsights}>
+            <TabsTrigger value="ai-insights" onClick={handleLoadAIInsights}>
               AI Analysis
             </TabsTrigger>
             <TabsTrigger value="roi">ROI Analysis</TabsTrigger>
@@ -255,14 +238,14 @@ export default function Results() {
 
           <TabsContent value="ai-insights">
             {loadingAI ? (
-              <Card className="border-slate-200">
+              <BrandCard>
                 <CardContent className="py-12 text-center">
                   <Loader2 className="h-12 w-12 animate-spin text-slate-400 mx-auto mb-4" />
                   <p className="text-slate-600 mb-2">Generating AI-powered insights...</p>
                   <p className="text-sm text-slate-500">This may take 10-20 seconds</p>
-                </CardContent>
-              </Card>
-            ) : aiInsights && implementationRoadmap ? (
+                </BrandCardContent>
+                </BrandCard>
+                ) : aiInsights && implementationRoadmap ? (
               <div className="space-y-6">
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl p-6">
                   <div className="flex items-center gap-3 mb-2">
@@ -281,15 +264,15 @@ export default function Results() {
                 />
               </div>
             ) : (
-              <Card className="border-slate-200">
-                <CardContent className="py-12 text-center">
+              <BrandCard>
+                <BrandCardContent className="py-12 text-center">
                   <Sparkles className="h-12 w-12 text-slate-300 mx-auto mb-4" />
                   <p className="text-slate-600 mb-3">Click "AI Insights" tab to generate detailed analysis</p>
                   <p className="text-sm text-slate-500">
                     AI will analyze pain points, provide implementation roadmap, and suggest best practices
                   </p>
-                </CardContent>
-              </Card>
+                  </BrandCardContent>
+                  </BrandCard>
             )}
           </TabsContent>
 

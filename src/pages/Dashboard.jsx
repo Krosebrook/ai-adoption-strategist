@@ -1,61 +1,27 @@
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createPageUrl } from '@/utils';
 import { FileText, Plus, Calendar, Building2, Loader2, TrendingUp } from 'lucide-react';
+import { BrandCard, BrandCardContent, BrandCardHeader, BrandCardTitle } from '../components/ui/BrandCard';
 import TrendAnalysis from '../components/dashboard/TrendAnalysis';
 import InsightsSummary from '../components/dashboard/InsightsSummary';
 import InteractiveFilters from '../components/dashboard/InteractiveFilters';
+import { useAssessmentFilters } from '../hooks/useAssessmentFilters';
+import { getStatusStyle, formatDate } from '../utils/formatters';
 
 export default function Dashboard() {
-  const [filters, setFilters] = useState({
-    search: '',
-    platform: 'all',
-    status: 'all',
-    timeRange: 'all'
-  });
-
   const { data: allAssessments, isLoading } = useQuery({
     queryKey: ['assessments'],
     queryFn: () => base44.entities.Assessment.list('-created_date', 100),
     initialData: []
   });
 
-  const assessments = useMemo(() => {
-    return allAssessments.filter(assessment => {
-      // Search filter
-      if (filters.search && !assessment.organization_name?.toLowerCase().includes(filters.search.toLowerCase())) {
-        return false;
-      }
-
-      // Platform filter
-      if (filters.platform !== 'all' && assessment.recommended_platforms?.[0]?.platform_name !== filters.platform) {
-        return false;
-      }
-
-      // Status filter
-      if (filters.status !== 'all' && assessment.status !== filters.status) {
-        return false;
-      }
-
-      // Time range filter
-      if (filters.timeRange !== 'all') {
-        const date = new Date(assessment.assessment_date || assessment.created_date);
-        const now = new Date();
-        const daysAgo = parseInt(filters.timeRange);
-        const cutoff = new Date(now.setDate(now.getDate() - daysAgo));
-        if (date < cutoff) return false;
-      }
-
-      return true;
-    });
-  }, [allAssessments, filters]);
-
+  const { filters, setFilters, filteredAssessments: assessments } = useAssessmentFilters(allAssessments);
   const completedAssessments = allAssessments.filter(a => a.status === 'completed');
 
   return (
@@ -91,8 +57,8 @@ export default function Dashboard() {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card style={{ background: 'var(--color-surface)', borderColor: 'var(--color-card-border)' }}>
-            <CardContent className="pt-6">
+          <BrandCard>
+            <BrandCardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm mb-1" style={{ color: 'var(--color-text-secondary)' }}>Total Assessments</p>
@@ -100,25 +66,25 @@ export default function Dashboard() {
                 </div>
                 <FileText className="h-10 w-10 opacity-20" style={{ color: 'var(--color-text)' }} />
               </div>
-            </CardContent>
-          </Card>
+            </BrandCardContent>
+          </BrandCard>
 
-          <Card style={{ background: 'var(--color-surface)', borderColor: 'var(--color-card-border)' }}>
-            <CardContent className="pt-6">
+          <BrandCard>
+            <BrandCardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm mb-1" style={{ color: 'var(--color-text-secondary)' }}>Completed</p>
                   <p className="text-3xl font-bold" style={{ color: 'var(--color-text)' }}>
-                    {allAssessments.filter(a => a.status === 'completed').length}
+                    {completedAssessments.length}
                   </p>
                 </div>
                 <TrendingUp className="h-10 w-10" style={{ color: 'var(--color-teal-500)', opacity: 0.5 }} />
               </div>
-            </CardContent>
-          </Card>
+            </BrandCardContent>
+          </BrandCard>
 
-          <Card style={{ background: 'var(--color-surface)', borderColor: 'var(--color-card-border)' }}>
-            <CardContent className="pt-6">
+          <BrandCard>
+            <BrandCardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm mb-1" style={{ color: 'var(--color-text-secondary)' }}>Draft</p>
@@ -128,8 +94,8 @@ export default function Dashboard() {
                 </div>
                 <Calendar className="h-10 w-10 opacity-20" style={{ color: 'var(--color-text)' }} />
               </div>
-            </CardContent>
-          </Card>
+            </BrandCardContent>
+          </BrandCard>
         </div>
 
         {/* Interactive Dashboard */}
@@ -148,12 +114,10 @@ export default function Dashboard() {
             />
 
             {/* Assessments List */}
-            <Card style={{ background: 'var(--color-surface)', borderColor: 'var(--color-card-border)' }}>
-              <CardHeader>
-                <CardTitle style={{ color: 'var(--color-text)' }}>
-                  Assessments ({assessments.length})
-                </CardTitle>
-              </CardHeader>
+            <BrandCard>
+              <BrandCardHeader>
+                <BrandCardTitle>Assessments ({assessments.length})</BrandCardTitle>
+              </BrandCardHeader>
           <CardContent>
             {isLoading ? (
               <div className="text-center py-12">
@@ -189,7 +153,7 @@ export default function Dashboard() {
                         <div className="flex items-center gap-4 text-sm text-slate-600">
                           <span className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
-                            {new Date(assessment.assessment_date || assessment.created_date).toLocaleDateString()}
+                            {formatDate(assessment.assessment_date || assessment.created_date)}
                           </span>
                           <span>
                             {assessment.departments?.length || 0} departments
@@ -199,14 +163,7 @@ export default function Dashboard() {
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <Badge
-                        variant="secondary"
-                        className={
-                          assessment.status === 'completed'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-yellow-100 text-yellow-800'
-                        }
-                      >
+                      <Badge variant="secondary" className={getStatusStyle(assessment.status)}>
                         {assessment.status === 'completed' ? 'Completed' : 'Draft'}
                       </Badge>
                       
@@ -222,8 +179,8 @@ export default function Dashboard() {
                 ))}
               </div>
             )}
-            </CardContent>
-            </Card>
+            </BrandCardContent>
+            </BrandCard>
           </TabsContent>
 
           <TabsContent value="trends">
