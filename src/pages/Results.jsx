@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Download, Share2, Loader2, FileDown, Presentation, Star } from 'lucide-react';
+import { FileText, Download, Share2, Loader2, FileDown, Presentation, Star, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
 
@@ -14,10 +14,16 @@ import ComplianceMatrix from '../components/results/ComplianceMatrix';
 import IntegrationMatrix from '../components/results/IntegrationMatrix';
 import ScenarioPlanner from '../components/results/ScenarioPlanner';
 import FeedbackModal from '../components/feedback/FeedbackModal';
+import AIInsights from '../components/results/AIInsights';
+import ImplementationRoadmap from '../components/results/ImplementationRoadmap';
+import { generatePlatformInsights, generateImplementationRoadmap } from '../components/assessment/AIEnhancer';
 
 export default function Results() {
   const [assessmentId, setAssessmentId] = useState(null);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [aiInsights, setAiInsights] = useState(null);
+  const [implementationRoadmap, setImplementationRoadmap] = useState(null);
+  const [loadingAI, setLoadingAI] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -133,6 +139,33 @@ export default function Results() {
   const roiData = Object.values(assessment.roi_calculations || {});
   const recommendations = assessment.recommended_platforms || [];
 
+  const loadAIInsights = async () => {
+    if (!recommendations[0] || loadingAI || aiInsights) return;
+    
+    setLoadingAI(true);
+    try {
+      const topPlatform = recommendations[0];
+      const [insights, roadmap] = await Promise.all([
+        generatePlatformInsights(
+          topPlatform, 
+          assessment, 
+          roiData, 
+          assessment.compliance_scores, 
+          assessment.integration_scores
+        ),
+        generateImplementationRoadmap(topPlatform, assessment)
+      ]);
+      
+      setAiInsights(insights);
+      setImplementationRoadmap(roadmap);
+    } catch (error) {
+      console.error('Failed to load AI insights:', error);
+      toast.error('Failed to generate AI insights');
+    } finally {
+      setLoadingAI(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -196,12 +229,56 @@ export default function Results() {
         <Tabs defaultValue="executive" className="space-y-6">
           <TabsList className="bg-white border border-slate-200">
             <TabsTrigger value="executive">Executive Summary</TabsTrigger>
+            <TabsTrigger value="ai-insights" onClick={loadAIInsights}>
+              <Sparkles className="h-4 w-4 mr-1" />
+              AI Insights
+            </TabsTrigger>
             <TabsTrigger value="roi">ROI Analysis</TabsTrigger>
             <TabsTrigger value="compliance">Compliance</TabsTrigger>
             <TabsTrigger value="integrations">Integrations</TabsTrigger>
             <TabsTrigger value="scenarios">Scenario Planning</TabsTrigger>
             <TabsTrigger value="details">Full Details</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="ai-insights">
+            {loadingAI ? (
+              <Card className="border-slate-200">
+                <CardContent className="py-12 text-center">
+                  <Loader2 className="h-12 w-12 animate-spin text-slate-400 mx-auto mb-4" />
+                  <p className="text-slate-600 mb-2">Generating AI-powered insights...</p>
+                  <p className="text-sm text-slate-500">This may take 10-20 seconds</p>
+                </CardContent>
+              </Card>
+            ) : aiInsights && implementationRoadmap ? (
+              <div className="space-y-6">
+                <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl p-6">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Sparkles className="h-6 w-6" />
+                    <h2 className="text-2xl font-bold">AI-Powered Insights</h2>
+                  </div>
+                  <p className="text-blue-100">
+                    Deep analysis for {recommendations[0]?.platform_name} - your top recommended platform
+                  </p>
+                </div>
+
+                <AIInsights insights={aiInsights} />
+                <ImplementationRoadmap 
+                  roadmap={implementationRoadmap} 
+                  platformName={recommendations[0]?.platform_name}
+                />
+              </div>
+            ) : (
+              <Card className="border-slate-200">
+                <CardContent className="py-12 text-center">
+                  <Sparkles className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+                  <p className="text-slate-600 mb-3">Click "AI Insights" tab to generate detailed analysis</p>
+                  <p className="text-sm text-slate-500">
+                    AI will analyze pain points, provide implementation roadmap, and suggest best practices
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
 
           <TabsContent value="executive">
             <Card className="border-slate-200">
