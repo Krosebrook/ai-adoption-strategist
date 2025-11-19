@@ -118,7 +118,7 @@ export default function Dashboard() {
               <BrandCardHeader>
                 <BrandCardTitle>Assessments ({assessments.length})</BrandCardTitle>
               </BrandCardHeader>
-          <CardContent>
+              <BrandCardContent>
             {isLoading ? (
               <div className="text-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-slate-400 mx-auto mb-4" />

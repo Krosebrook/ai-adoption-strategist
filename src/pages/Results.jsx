@@ -239,13 +239,13 @@ export default function Results() {
           <TabsContent value="ai-insights">
             {loadingAI ? (
               <BrandCard>
-                <CardContent className="py-12 text-center">
+                <BrandCardContent className="py-12 text-center">
                   <Loader2 className="h-12 w-12 animate-spin text-slate-400 mx-auto mb-4" />
                   <p className="text-slate-600 mb-2">Generating AI-powered insights...</p>
                   <p className="text-sm text-slate-500">This may take 10-20 seconds</p>
                 </BrandCardContent>
-                </BrandCard>
-                ) : aiInsights && implementationRoadmap ? (
+              </BrandCard>
+            ) : aiInsights && implementationRoadmap ? (
               <div className="space-y-6">
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl p-6">
                   <div className="flex items-center gap-3 mb-2">
@@ -271,8 +271,8 @@ export default function Results() {
                   <p className="text-sm text-slate-500">
                     AI will analyze pain points, provide implementation roadmap, and suggest best practices
                   </p>
-                  </BrandCardContent>
-                  </BrandCard>
+                </BrandCardContent>
+              </BrandCard>
             )}
           </TabsContent>
 
