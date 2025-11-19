@@ -155,12 +155,12 @@ export function assessPainPoints(painPoints) {
   };
 }
 
-export function generateRecommendations(roiData, complianceData, integrationData, painPointData, customWeights = null) {
+export function generateRecommendations(roiData, complianceData, integrationData, painPointData, customWeights = null, refinedWeights = null) {
   const platforms = ['google_gemini', 'microsoft_copilot', 'anthropic_claude', 'openai_chatgpt'];
   const recommendations = [];
 
-  // Use custom weights from AI analysis or default weights
-  const weights = customWeights || {
+  // Use refined weights from insights engine, then custom weights from AI, then defaults
+  const weights = refinedWeights?.recommended_weights || customWeights || {
     roi_weight: 0.35,
     compliance_weight: 0.25,
     integration_weight: 0.25,

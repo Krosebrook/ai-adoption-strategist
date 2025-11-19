@@ -16,6 +16,7 @@ import ScenarioPlanner from '../components/results/ScenarioPlanner';
 import FeedbackModal from '../components/feedback/FeedbackModal';
 import AIInsights from '../components/results/AIInsights';
 import ImplementationRoadmap from '../components/results/ImplementationRoadmap';
+import InsightsPanel from '../components/insights/InsightsPanel';
 import { generatePlatformInsights, generateImplementationRoadmap } from '../components/assessment/AIEnhancer';
 
 export default function Results() {
@@ -234,9 +235,12 @@ export default function Results() {
         <Tabs defaultValue="executive" className="space-y-6">
           <TabsList className="bg-white border border-slate-200">
             <TabsTrigger value="executive">Executive Summary</TabsTrigger>
-            <TabsTrigger value="ai-insights" onClick={loadAIInsights}>
+            <TabsTrigger value="insights-engine">
               <Sparkles className="h-4 w-4 mr-1" />
-              AI Insights
+              Insights Engine
+            </TabsTrigger>
+            <TabsTrigger value="ai-insights" onClick={loadAIInsights}>
+              AI Analysis
             </TabsTrigger>
             <TabsTrigger value="roi">ROI Analysis</TabsTrigger>
             <TabsTrigger value="compliance">Compliance</TabsTrigger>
@@ -244,6 +248,10 @@ export default function Results() {
             <TabsTrigger value="scenarios">Scenario Planning</TabsTrigger>
             <TabsTrigger value="details">Full Details</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="insights-engine">
+            <InsightsPanel assessment={assessment} />
+          </TabsContent>
 
           <TabsContent value="ai-insights">
             {loadingAI ? (
