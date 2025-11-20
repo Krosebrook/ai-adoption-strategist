@@ -2,8 +2,9 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Users, BookOpen, MessageSquare, Target, CheckCircle2 } from 'lucide-react';
+import InlineFeedback from '../feedback/InlineFeedback';
 
-export default function ImplementationRoadmap({ roadmap, platformName }) {
+export default function ImplementationRoadmap({ roadmap, platformName, assessmentId }) {
   if (!roadmap) return null;
 
   return (
@@ -245,6 +246,17 @@ export default function ImplementationRoadmap({ roadmap, platformName }) {
           </CardContent>
         </Card>
       )}
+
+      {/* Inline Feedback */}
+      <Card className="border-slate-200 bg-slate-50">
+        <CardContent className="py-4">
+          <InlineFeedback 
+            assessmentId={assessmentId}
+            contentType="implementation"
+            contentId="roadmap"
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Target, AlertCircle, TrendingUp, Lightbulb } from 'lucide-react';
+import InlineFeedback from '../feedback/InlineFeedback';
 
 export default function AIInsights({ insights, assessmentId }) {
   if (!insights) return null;
@@ -104,6 +105,17 @@ export default function AIInsights({ insights, assessmentId }) {
           </Card>
         )}
       </div>
+
+      {/* Inline Feedback */}
+      <Card className="border-slate-200 bg-slate-50">
+        <CardContent className="py-4">
+          <InlineFeedback 
+            assessmentId={assessmentId}
+            contentType="general"
+            contentId="ai_insights"
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

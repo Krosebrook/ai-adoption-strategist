@@ -182,6 +182,14 @@ Be specific with steps, tools, and expected outcomes.`;
               </div>
             </div>
           ))}
+          
+          <div className="pt-3 border-t border-red-200">
+            <InlineFeedback 
+              assessmentId={assessment.id}
+              contentType="general"
+              contentId="immediate_actions"
+            />
+          </div>
         </CardContent>
       </Card>
 
