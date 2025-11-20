@@ -62,3 +62,10 @@ export function getStatusStyle(status) {
   };
   return styles[status] || 'bg-slate-100 text-slate-800';
 }
+
+/**
+ * Get priority badge styling (alias for severity)
+ */
+export function getPriorityStyle(priority) {
+  return getSeverityStyle(priority);
+}
