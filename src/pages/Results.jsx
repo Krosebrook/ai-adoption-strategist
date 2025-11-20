@@ -9,6 +9,8 @@ import { toast } from 'sonner';
 
 import { BrandCard, BrandCardContent, BrandCardHeader, BrandCardTitle } from '../components/ui/BrandCard';
 import RecommendationCard from '../components/results/RecommendationCard';
+import EnhancedRecommendationCard from '../components/ai/EnhancedRecommendationCard';
+import ActionRecommendations from '../components/ai/ActionRecommendations';
 import ROIChart from '../components/results/ROIChart';
 import ComplianceMatrix from '../components/results/ComplianceMatrix';
 import IntegrationMatrix from '../components/results/IntegrationMatrix';
@@ -225,6 +227,10 @@ export default function Results() {
             <TabsTrigger value="ai-insights" onClick={handleLoadAIInsights}>
               AI Analysis
             </TabsTrigger>
+            <TabsTrigger value="actions">
+              <Sparkles className="h-4 w-4 mr-1" />
+              Action Plan
+            </TabsTrigger>
             <TabsTrigger value="roi">ROI Analysis</TabsTrigger>
             <TabsTrigger value="compliance">Compliance</TabsTrigger>
             <TabsTrigger value="integrations">Integrations</TabsTrigger>
@@ -274,6 +280,16 @@ export default function Results() {
                 </BrandCardContent>
               </BrandCard>
             )}
+          </TabsContent>
+
+          <TabsContent value="actions">
+            <ActionRecommendations 
+              assessment={assessment}
+              risks={{
+                compliance_gaps: assessment.compliance_scores,
+                integration_challenges: assessment.integration_scores
+              }}
+            />
           </TabsContent>
 
           <TabsContent value="executive">
