@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ReactMarkdown from 'react-markdown';
 
-export default function ReportPreview({ report, reportType }) {
+export default function ReportPreview({ report, reportType, assessmentId }) {
   if (!report) return null;
   
   // Handle custom reports
@@ -20,12 +20,13 @@ export default function ReportPreview({ report, reportType }) {
               </h3>
               
               {section.content.ai_insights && (
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-4">
-                  <h4 className="text-sm font-semibold text-blue-900 mb-2 flex items-center gap-2">
-                    <span className="inline-block w-2 h-2 bg-blue-600 rounded-full"></span>
-                    AI-Enhanced Insights
-                  </h4>
-                  <div className="text-sm text-blue-800 space-y-2">
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-4 space-y-3">
+                  <div>
+                    <h4 className="text-sm font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                      <span className="inline-block w-2 h-2 bg-blue-600 rounded-full"></span>
+                      AI-Enhanced Insights
+                    </h4>
+                    <div className="text-sm text-blue-800 space-y-2">
                     {section.content.ai_insights.key_highlights && (
                       <div>
                         <strong>Key Highlights:</strong>
@@ -51,6 +52,14 @@ export default function ReportPreview({ report, reportType }) {
                         <strong>Recommendation:</strong> {section.content.ai_insights.recommendations}
                       </p>
                     )}
+                    </div>
+                  </div>
+                  <div className="pt-2 border-t border-blue-200">
+                    <InlineFeedback 
+                      assessmentId={assessmentId}
+                      contentType="general"
+                      contentId={`custom_section_${section.type}`}
+                    />
                   </div>
                 </div>
               )}

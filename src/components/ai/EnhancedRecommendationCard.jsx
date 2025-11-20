@@ -3,12 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronUp, Sparkles, TrendingUp, Shield, Plug, Target } from 'lucide-react';
+import InlineFeedback from '../feedback/InlineFeedback';
 
 export default function EnhancedRecommendationCard({ 
   recommendation, 
   rank, 
   assessment,
-  aiJustification 
+  aiJustification,
+  assessmentId 
 }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -60,14 +62,23 @@ export default function EnhancedRecommendationCard({
       <CardContent className="space-y-4">
         {/* AI Justification */}
         {aiJustification && (
-          <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="h-4 w-4 text-purple-600" />
-              <h4 className="font-semibold text-purple-900">AI Analysis</h4>
+          <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg space-y-3">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="h-4 w-4 text-purple-600" />
+                <h4 className="font-semibold text-purple-900">AI Analysis</h4>
+              </div>
+              <p className="text-sm text-purple-800 leading-relaxed">
+                {aiJustification}
+              </p>
             </div>
-            <p className="text-sm text-purple-800 leading-relaxed">
-              {aiJustification}
-            </p>
+            <div className="pt-2 border-t border-purple-200">
+              <InlineFeedback 
+                assessmentId={assessmentId}
+                contentType="platform_recommendation"
+                contentId={recommendation.platform}
+              />
+            </div>
           </div>
         )}
 

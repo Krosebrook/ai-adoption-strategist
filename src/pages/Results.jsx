@@ -263,10 +263,14 @@ export default function Results() {
                   </p>
                 </div>
 
-                <AIInsights insights={aiInsights} />
+                <AIInsights 
+                  insights={aiInsights} 
+                  assessmentId={assessmentId}
+                />
                 <ImplementationRoadmap 
                   roadmap={implementationRoadmap} 
                   platformName={recommendations[0]?.platform_name}
+                  assessmentId={assessmentId}
                 />
               </div>
             ) : (

@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Target, AlertCircle, TrendingUp, Lightbulb } from 'lucide-react';
 
-export default function AIInsights({ insights }) {
+export default function AIInsights({ insights, assessmentId }) {
   if (!insights) return null;
 
   return (

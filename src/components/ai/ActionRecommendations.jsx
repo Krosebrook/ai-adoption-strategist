@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Zap, CheckCircle2, AlertTriangle, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
+import InlineFeedback from '../feedback/InlineFeedback';
 
 export default function ActionRecommendations({ assessment, risks }) {
   const [actions, setActions] = useState(null);
@@ -160,10 +161,12 @@ Be specific with steps, tools, and expected outcomes.`;
       {/* Immediate Actions */}
       <Card className="border-red-200 bg-red-50">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-red-900">
-            <AlertTriangle className="h-5 w-5" />
-            Immediate Actions (This Week)
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-red-900">
+              <AlertTriangle className="h-5 w-5" />
+              Immediate Actions (This Week)
+            </CardTitle>
+          </div>
         </CardHeader>
         <CardContent className="space-y-3">
           {actions.immediate_actions?.map((action, idx) => (

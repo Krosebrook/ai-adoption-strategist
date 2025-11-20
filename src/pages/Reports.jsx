@@ -277,7 +277,11 @@ export default function Reports() {
         )}
 
         {generatedReport && !generating && (
-          <ReportPreview report={generatedReport} reportType={reportType} />
+          <ReportPreview 
+            report={generatedReport} 
+            reportType={reportType}
+            assessmentId={selectedAssessment?.id}
+          />
         )}
 
         {!selectedAssessment && !generating && (
