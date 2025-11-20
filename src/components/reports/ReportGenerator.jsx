@@ -4,7 +4,17 @@ export async function generateExecutiveReport(assessment, insights = null) {
   const topPlatform = assessment.recommended_platforms?.[0];
   const roi = assessment.roi_calculations?.[topPlatform?.platform];
 
+  const aiScoreSection = assessment.ai_assessment_score ? `
+**AI Assessment Score:**
+- Overall Score: ${assessment.ai_assessment_score.overall_score}/100
+- AI Readiness: ${assessment.ai_assessment_score.readiness_score}/100
+- Risk Level: ${assessment.ai_assessment_score.risk_score}/100
+- Maturity Level: ${assessment.ai_assessment_score.maturity_level}
+- Key Risks: ${assessment.ai_assessment_score.key_risks?.map(r => r.area).join(', ')}
+` : '';
+
   const prompt = `Generate a comprehensive EXECUTIVE REPORT for this AI platform assessment:
+${aiScoreSection}
 
 **Organization:** ${assessment.organization_name}
 **Recommended Platform:** ${topPlatform?.platform_name}
@@ -58,7 +68,13 @@ Use clear, business-focused language appropriate for C-suite executives.`;
 export async function generateTechnicalReport(assessment) {
   const topPlatform = assessment.recommended_platforms?.[0];
 
+  const aiScoreSection = assessment.ai_assessment_score ? `
+**AI Maturity Level:** ${assessment.ai_assessment_score.maturity_level}
+**Technical Readiness:** ${assessment.ai_assessment_score.readiness_score}/100
+` : '';
+
   const prompt = `Generate a detailed TECHNICAL REPORT for implementing ${topPlatform?.platform_name}:
+${aiScoreSection}
 
 **Organization:** ${assessment.organization_name}
 **Departments:** ${assessment.departments?.map(d => d.name).join(', ')}
@@ -121,7 +137,13 @@ Use technical language appropriate for IT teams and architects.`;
 export async function generateFinancialReport(assessment) {
   const roiData = Object.values(assessment.roi_calculations || {});
 
+  const aiScoreSection = assessment.ai_assessment_score ? `
+**Overall Assessment Score:** ${assessment.ai_assessment_score.overall_score}/100
+**Risk Score:** ${assessment.ai_assessment_score.risk_score}/100
+` : '';
+
   const prompt = `Generate a comprehensive FINANCIAL ANALYSIS REPORT:
+${aiScoreSection}
 
 **Organization:** ${assessment.organization_name}
 **Total Users:** ${assessment.departments?.reduce((sum, d) => sum + d.user_count, 0)}
