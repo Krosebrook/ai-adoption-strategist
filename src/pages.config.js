@@ -7,6 +7,7 @@ import ExecutiveDashboard from './pages/ExecutiveDashboard';
 import Settings from './pages/Settings';
 import Reports from './pages/Reports';
 import TemplateBuilder from './pages/TemplateBuilder';
+import PlatformComparison from './pages/PlatformComparison';
 import __Layout from './Layout.jsx';
 
 
@@ -20,6 +21,7 @@ export const PAGES = {
     "Settings": Settings,
     "Reports": Reports,
     "TemplateBuilder": TemplateBuilder,
+    "PlatformComparison": PlatformComparison,
 }
 
 export const pagesConfig = {
