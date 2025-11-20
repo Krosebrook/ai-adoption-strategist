@@ -155,7 +155,7 @@ export function assessPainPoints(painPoints) {
   };
 }
 
-export function generateRecommendations(roiData, complianceData, integrationData, painPointData, customWeights = null, refinedWeights = null) {
+export function generateRecommendations(roiData, complianceData, integrationData, painPointData, customWeights = null, refinedWeights = null, assessment = null) {
   const platforms = ['google_gemini', 'microsoft_copilot', 'anthropic_claude', 'openai_chatgpt'];
   const recommendations = [];
 
@@ -187,6 +187,7 @@ export function generateRecommendations(roiData, complianceData, integrationData
       (painScore * weights.pain_point_weight);
 
     const platformName = AI_PLATFORMS.find(p => p.id === platformId)?.name || platformId;
+    const platformInfo = AI_PLATFORMS.find(p => p.id === platformId);
 
     let justification = `${platformName} scores ${totalScore.toFixed(1)}/100. `;
     
@@ -200,6 +201,50 @@ export function generateRecommendations(roiData, complianceData, integrationData
       justification += `Robust integration support. `;
     }
 
+    // Budget fit analysis
+    let budgetFit = 'moderate';
+    if (assessment?.budget_constraints) {
+      const platformCost = roi?.total_cost || 0;
+      const { max_budget, budget_period } = assessment.budget_constraints;
+      const annualMaxBudget = budget_period === 'monthly' ? max_budget * 12 : max_budget;
+      
+      if (platformCost <= annualMaxBudget * 0.7) budgetFit = 'excellent';
+      else if (platformCost <= annualMaxBudget) budgetFit = 'good';
+      else if (platformCost <= annualMaxBudget * 1.2) budgetFit = 'moderate';
+      else budgetFit = 'exceeds';
+    }
+
+    // Generate pros and cons
+    const pros = [];
+    const cons = [];
+    
+    if (roi && roi.one_year_roi > 150) pros.push(`Exceptional ROI: ${roi.one_year_roi.toFixed(0)}% in year 1`);
+    if (compliance && compliance.compliance_score > 80) pros.push(`Strong compliance coverage`);
+    if (integration && integration.integration_score > 80) pros.push(`Excellent integration support`);
+    if (platformInfo?.features?.includes('enterprise_ready')) pros.push(`Enterprise-grade security and scalability`);
+    
+    if (roi && roi.one_year_roi < 100) cons.push(`Lower ROI compared to alternatives`);
+    if (compliance && compliance.compliance_score < 60) cons.push(`Limited compliance certifications`);
+    if (integration && integration.integration_score < 50) cons.push(`May require custom integration work`);
+    if (budgetFit === 'exceeds') cons.push(`Exceeds stated budget constraints`);
+
+    // Best suited for
+    const bestFor = [];
+    if (assessment?.business_goals) {
+      assessment.business_goals.forEach(goal => {
+        if (goal.toLowerCase().includes('customer') && platformId === 'openai_chatgpt') {
+          bestFor.push('Customer-facing AI applications');
+        }
+        if (goal.toLowerCase().includes('productivity') && platformId === 'microsoft_copilot') {
+          bestFor.push('Enterprise productivity enhancement');
+        }
+        if (goal.toLowerCase().includes('research') && platformId === 'anthropic_claude') {
+          bestFor.push('Research and analysis tasks');
+        }
+      });
+    }
+    if (bestFor.length === 0) bestFor.push(`${platformInfo?.ideal_for || 'General purpose AI tasks'}`);
+
     recommendations.push({
       platform: platformId,
       platform_name: platformName,
@@ -208,7 +253,11 @@ export function generateRecommendations(roiData, complianceData, integrationData
       roi_score: roiScore,
       compliance_score: complianceScore,
       integration_score: integrationScore,
-      pain_point_score: painScore
+      pain_point_score: painScore,
+      pros: pros.length > 0 ? pros : ['Solid overall performance', 'Proven enterprise platform'],
+      cons: cons.length > 0 ? cons : ['Consider specific use case requirements'],
+      best_for: bestFor,
+      budget_fit: budgetFit
     });
   });
 

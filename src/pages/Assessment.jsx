@@ -12,6 +12,7 @@ import WizardStep1 from '../components/assessment/WizardStep1';
 import WizardStep2 from '../components/assessment/WizardStep2';
 import WizardStep3 from '../components/assessment/WizardStep3';
 import WizardStep4 from '../components/assessment/WizardStep4';
+import WizardStep5 from '../components/assessment/WizardStep5';
 
 import {
   calculateAllROI,
@@ -32,10 +33,13 @@ export default function Assessment() {
     departments: [],
     compliance_requirements: [],
     desired_integrations: [],
-    pain_points: []
+    pain_points: [],
+    business_goals: [],
+    technical_constraints: {},
+    budget_constraints: {}
   });
 
-  const totalSteps = 4;
+  const totalSteps = 5;
 
   const createAssessmentMutation = useMutation({
     mutationFn: async (data) => {
@@ -105,7 +109,9 @@ export default function Assessment() {
       complianceData, 
       integrationData, 
       painPointData,
-      customWeights
+      customWeights,
+      null,
+      formData
     );
 
     const assessmentData = {
@@ -139,6 +145,8 @@ export default function Assessment() {
         return <WizardStep3 formData={formData} setFormData={setFormData} />;
       case 4:
         return <WizardStep4 formData={formData} setFormData={setFormData} />;
+      case 5:
+        return <WizardStep5 formData={formData} setFormData={setFormData} />;
       default:
         return null;
     }
@@ -168,7 +176,7 @@ export default function Assessment() {
           <Progress value={progress} className="h-2" />
           
           <div className="flex justify-between mt-3">
-            {['Organization', 'Departments', 'Requirements', 'Pain Points'].map((label, index) => (
+            {['Organization', 'Departments', 'Requirements', 'Pain Points', 'Goals & Budget'].map((label, index) => (
               <div
                 key={index}
                 className={`text-xs ${
