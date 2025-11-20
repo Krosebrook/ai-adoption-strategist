@@ -8,7 +8,7 @@ import { Users, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { formatDate } from '../utils/formatters';
-import { EmptyState } from '../ui/EmptyState';
+import EmptyState from '../ui/EmptyState';
 
 export default function SharedResourcesList() {
   const { data: user } = useQuery({
