@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Download, Loader2, Sparkles, Settings } from 'lucide-react';
+import { FileText, Download, Loader2, Sparkles, Settings, Calendar, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
@@ -16,13 +16,18 @@ import {
   generateFinancialReport 
 } from '../components/reports/ReportGenerator';
 import { generateCustomReport } from '../components/reports/CustomReportGenerator';
+import EnhancedReportGenerator from '../components/reports/EnhancedReportGenerator';
+import ScheduleReportModal from '../components/reports/ScheduleReportModal';
+import ScheduledReportsList from '../components/reports/ScheduledReportsList';
 
 export default function Reports() {
   const [selectedAssessment, setSelectedAssessment] = useState(null);
-  const [reportType, setReportType] = useState('executive');
+  const [reportType, setReportType] = useState('ai-generated');
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const [generatedReport, setGeneratedReport] = useState(null);
   const [generating, setGenerating] = useState(false);
+  const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('generate');
 
   const { data: assessments, isLoading } = useQuery({
     queryKey: ['assessments'],
@@ -95,6 +100,11 @@ export default function Reports() {
     toast.success('Report downloaded!');
   };
 
+  const handleReportGenerated = (report, type) => {
+    setGeneratedReport(report);
+    setReportType(type);
+  };
+
   return (
     <div className="min-h-screen py-8" style={{ background: 'var(--color-background)' }}>
       <div className="max-w-7xl mx-auto px-4">
@@ -106,7 +116,7 @@ export default function Reports() {
               <h1 className="text-3xl font-bold" style={{ color: 'var(--color-text)' }}>AI Report Generator</h1>
             </div>
             <p style={{ color: 'var(--color-text-secondary)' }}>
-              Generate comprehensive reports with AI-powered insights
+              Generate and schedule comprehensive reports with AI-powered insights
             </p>
           </div>
           <Link to={createPageUrl('TemplateBuilder')}>
@@ -117,12 +127,26 @@ export default function Reports() {
           </Link>
         </div>
 
-        {/* Configuration */}
-        <Card className="mb-6" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-card-border)' }}>
-          <CardHeader>
-            <CardTitle style={{ color: 'var(--color-text)' }}>Report Configuration</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        {/* Main Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+          <TabsList>
+            <TabsTrigger value="generate">
+              <Sparkles className="h-4 w-4 mr-2" />
+              Generate Reports
+            </TabsTrigger>
+            <TabsTrigger value="scheduled">
+              <Clock className="h-4 w-4 mr-2" />
+              Scheduled Reports
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="generate">
+            {/* Configuration */}
+            <Card className="mb-6" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-card-border)' }}>
+              <CardHeader>
+                <CardTitle style={{ color: 'var(--color-text)' }}>Report Configuration</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text)' }}>
                 Select Assessment
@@ -153,15 +177,30 @@ export default function Reports() {
                 Report Type
               </label>
               <Tabs value={reportType} onValueChange={setReportType}>
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-5">
+                  <TabsTrigger value="ai-generated">
+                    <Sparkles className="h-3 w-3 mr-1" />
+                    AI Enhanced
+                  </TabsTrigger>
                   <TabsTrigger value="executive">Executive</TabsTrigger>
                   <TabsTrigger value="technical">Technical</TabsTrigger>
                   <TabsTrigger value="financial">Financial</TabsTrigger>
-                  <TabsTrigger value="custom">
-                    <Sparkles className="h-3 w-3 mr-1" />
-                    Custom
-                  </TabsTrigger>
+                  <TabsTrigger value="custom">Custom</TabsTrigger>
                 </TabsList>
+
+                <TabsContent value="ai-generated" className="mt-3">
+                  <div className="p-3 rounded-lg" style={{ background: 'rgba(33, 128, 141, 0.05)' }}>
+                    <p className="text-sm mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                      <strong>AI-Powered Report Generation</strong> - Select your preferred format and let AI generate comprehensive reports with narratives, charts, and actionable recommendations.
+                    </p>
+                    <ul className="text-xs space-y-1 pl-5 list-disc" style={{ color: 'var(--color-text-secondary)' }}>
+                      <li>Executive summaries with strategic insights</li>
+                      <li>Technical deep-dives with implementation details</li>
+                      <li>Financial analyses with ROI projections</li>
+                      <li>Comprehensive reports combining all perspectives</li>
+                    </ul>
+                  </div>
+                </TabsContent>
                 
                 <TabsContent value="executive" className="mt-3">
                   <div className="p-3 rounded-lg" style={{ background: 'rgba(33, 128, 141, 0.05)' }}>
@@ -228,40 +267,60 @@ export default function Reports() {
             </div>
 
             <div className="flex gap-3">
-              <Button
-                onClick={handleGenerateReport}
-                disabled={!selectedAssessment || generating || (reportType === 'custom' && !selectedTemplate)}
-                className="text-white flex-1"
-                style={{ 
-                  background: 'linear-gradient(135deg, var(--color-teal-500), var(--color-teal-600))',
-                  border: 'none'
-                }}
-              >
-                {generating ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Generate Report
-                  </>
-                )}
-              </Button>
-              {generatedReport && (
+              {reportType === 'ai-generated' ? null : (
                 <Button
-                  onClick={handleDownloadReport}
-                  variant="outline"
-                  style={{ borderColor: 'var(--color-border)' }}
+                  onClick={handleGenerateReport}
+                  disabled={!selectedAssessment || generating || (reportType === 'custom' && !selectedTemplate)}
+                  className="text-white flex-1"
+                  style={{ 
+                    background: 'linear-gradient(135deg, var(--color-teal-500), var(--color-teal-600))',
+                    border: 'none'
+                  }}
                 >
-                  <Download className="h-4 w-4 mr-2" />
-                  Download
+                  {generating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Generate Report
+                    </>
+                  )}
                 </Button>
+              )}
+              {generatedReport && (
+                <>
+                  <Button
+                    onClick={() => setScheduleModalOpen(true)}
+                    variant="outline"
+                    style={{ borderColor: 'var(--color-border)' }}
+                  >
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Schedule
+                  </Button>
+                  <Button
+                    onClick={handleDownloadReport}
+                    variant="outline"
+                    style={{ borderColor: 'var(--color-border)' }}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Download
+                  </Button>
+                </>
               )}
             </div>
           </CardContent>
         </Card>
+
+        {/* AI-Generated Report Section */}
+        {reportType === 'ai-generated' && selectedAssessment && (
+          <EnhancedReportGenerator 
+            assessment={selectedAssessment}
+            onReportGenerated={handleReportGenerated}
+          />
+        )}
 
         {/* Report Preview */}
         {generating && (
@@ -284,7 +343,7 @@ export default function Reports() {
           />
         )}
 
-        {!selectedAssessment && !generating && (
+        {!selectedAssessment && !generating && reportType !== 'ai-generated' && (
           <Card style={{ background: 'var(--color-surface)', borderColor: 'var(--color-card-border)' }}>
             <CardContent className="py-12 text-center">
               <FileText className="h-12 w-12 mx-auto mb-4 opacity-20" style={{ color: 'var(--color-text)' }} />
@@ -293,6 +352,22 @@ export default function Reports() {
               </p>
             </CardContent>
           </Card>
+        )}
+          </TabsContent>
+
+          <TabsContent value="scheduled">
+            <ScheduledReportsList />
+          </TabsContent>
+        </Tabs>
+
+        {/* Schedule Modal */}
+        {selectedAssessment && (
+          <ScheduleReportModal
+            isOpen={scheduleModalOpen}
+            onClose={() => setScheduleModalOpen(false)}
+            assessment={selectedAssessment}
+            reportType={reportType}
+          />
         )}
       </div>
     </div>
