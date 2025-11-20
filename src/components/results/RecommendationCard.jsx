@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Award, TrendingUp, Shield, Plug, Target } from 'lucide-react';
+import { Award, TrendingUp, Shield, Plug, Target, CheckCircle2, AlertCircle, DollarSign } from 'lucide-react';
 import { AI_PLATFORMS } from '../assessment/AssessmentData';
 
 export default function RecommendationCard({ recommendation, rank }) {
@@ -80,6 +80,74 @@ export default function RecommendationCard({ recommendation, rank }) {
             <div className="text-lg font-bold text-amber-700">{recommendation.pain_point_score.toFixed(0)}%</div>
           </div>
         </div>
+
+        {/* Budget Fit */}
+        {recommendation.budget_fit && (
+          <div className="pt-3 border-t border-slate-200">
+            <div className="flex items-center gap-2 mb-2">
+              <DollarSign className="h-4 w-4 text-slate-600" />
+              <span className="text-xs font-semibold text-slate-700">Budget Alignment:</span>
+              <Badge className={
+                recommendation.budget_fit === 'excellent' ? 'bg-green-100 text-green-800' :
+                recommendation.budget_fit === 'good' ? 'bg-blue-100 text-blue-800' :
+                recommendation.budget_fit === 'moderate' ? 'bg-yellow-100 text-yellow-800' :
+                'bg-red-100 text-red-800'
+              }>
+                {recommendation.budget_fit}
+              </Badge>
+            </div>
+          </div>
+        )}
+
+        {/* Pros */}
+        {recommendation.pros?.length > 0 && (
+          <div className="pt-3 border-t border-slate-200">
+            <h4 className="text-xs font-semibold text-green-900 mb-2 flex items-center gap-1">
+              <CheckCircle2 className="h-4 w-4" />
+              Key Advantages
+            </h4>
+            <ul className="space-y-1">
+              {recommendation.pros.map((pro, idx) => (
+                <li key={idx} className="text-xs text-slate-700 flex items-start gap-2">
+                  <span className="text-green-600 mt-0.5">•</span>
+                  <span>{pro}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Cons */}
+        {recommendation.cons?.length > 0 && (
+          <div className="pt-3 border-t border-slate-200">
+            <h4 className="text-xs font-semibold text-amber-900 mb-2 flex items-center gap-1">
+              <AlertCircle className="h-4 w-4" />
+              Considerations
+            </h4>
+            <ul className="space-y-1">
+              {recommendation.cons.map((con, idx) => (
+                <li key={idx} className="text-xs text-slate-700 flex items-start gap-2">
+                  <span className="text-amber-600 mt-0.5">•</span>
+                  <span>{con}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Best For */}
+        {recommendation.best_for?.length > 0 && (
+          <div className="pt-3 border-t border-slate-200">
+            <h4 className="text-xs font-semibold text-blue-900 mb-2">Best Suited For:</h4>
+            <div className="flex flex-wrap gap-1.5">
+              {recommendation.best_for.map((use, idx) => (
+                <Badge key={idx} variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                  {use}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
