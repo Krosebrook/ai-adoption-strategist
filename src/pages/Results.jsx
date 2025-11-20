@@ -24,12 +24,15 @@ import { formatDate } from '../components/utils/formatters';
 import ShareModal from '../components/collaboration/ShareModal';
 import CommentsPanel from '../components/collaboration/CommentsPanel';
 import AccessControlBadge from '../components/collaboration/AccessControlBadge';
+import AIScoreCard from '../components/results/AIScoreCard';
+import { generateAIAssessmentScore } from '../components/assessment/AIScorer';
 
 export default function Results() {
   const [assessmentId, setAssessmentId] = useState(null);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [showComments, setShowComments] = useState(false);
+  const [generatingScore, setGeneratingScore] = useState(false);
   const { insights: aiInsights, roadmap: implementationRoadmap, loading: loadingAI, loadInsights } = useAIInsights();
 
   useEffect(() => {
@@ -105,6 +108,26 @@ export default function Results() {
     }
   });
 
+  const handleGenerateAIScore = async () => {
+    if (!assessment) return;
+    
+    setGeneratingScore(true);
+    try {
+      const aiScore = await generateAIAssessmentScore(assessment);
+      await base44.entities.Assessment.update(assessment.id, {
+        ai_assessment_score: aiScore
+      });
+      // Refresh assessment data
+      queryClient.invalidateQueries(['assessment', assessmentId]);
+      toast.success('AI assessment score generated!');
+    } catch (error) {
+      console.error('Failed to generate AI score:', error);
+      toast.error('Failed to generate AI score');
+    } finally {
+      setGeneratingScore(false);
+    }
+  };
+
   const handleExportPDF = () => {
     if (!assessmentId) {
       toast.error('No assessment selected');
@@ -145,6 +168,8 @@ export default function Results() {
 
   const roiData = Object.values(assessment.roi_calculations || {});
   const recommendations = assessment.recommended_platforms || [];
+
+  const queryClient = useQueryClient();
 
   const handleLoadAIInsights = () => {
     if (!recommendations[0]) return;
@@ -241,6 +266,10 @@ export default function Results() {
         {/* Detailed Analysis */}
         <Tabs defaultValue="executive" className="space-y-6">
           <TabsList className="bg-white border border-slate-200">
+            <TabsTrigger value="ai-score" onClick={!assessment?.ai_assessment_score ? handleGenerateAIScore : undefined}>
+              <Sparkles className="h-4 w-4 mr-1" />
+              AI Score
+            </TabsTrigger>
             <TabsTrigger value="executive">Executive Summary</TabsTrigger>
             <TabsTrigger value="insights-engine">
               <Sparkles className="h-4 w-4 mr-1" />
@@ -259,6 +288,37 @@ export default function Results() {
             <TabsTrigger value="scenarios">Scenario Planning</TabsTrigger>
             <TabsTrigger value="details">Full Details</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="ai-score">
+            {generatingScore ? (
+              <BrandCard>
+                <BrandCardContent className="py-12 text-center">
+                  <Loader2 className="h-12 w-12 animate-spin text-purple-500 mx-auto mb-4" />
+                  <p className="text-slate-600 mb-2">Analyzing assessment with AI...</p>
+                  <p className="text-sm text-slate-500">This may take 15-20 seconds</p>
+                </BrandCardContent>
+              </BrandCard>
+            ) : assessment?.ai_assessment_score ? (
+              <AIScoreCard aiScore={assessment.ai_assessment_score} />
+            ) : (
+              <BrandCard>
+                <BrandCardContent className="py-12 text-center">
+                  <Sparkles className="h-12 w-12 text-purple-300 mx-auto mb-4" />
+                  <p className="text-slate-600 mb-3">AI assessment score not generated yet</p>
+                  <p className="text-sm text-slate-500 mb-4">
+                    Get a comprehensive AI-driven score with risk analysis and improvement recommendations
+                  </p>
+                  <Button 
+                    onClick={handleGenerateAIScore}
+                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Generate AI Score
+                  </Button>
+                </BrandCardContent>
+              </BrandCard>
+            )}
+          </TabsContent>
 
           <TabsContent value="insights-engine">
             <InsightsPanel assessment={assessment} />
