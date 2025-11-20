@@ -11,6 +11,7 @@ import { BrandCard, BrandCardContent, BrandCardHeader, BrandCardTitle } from '..
 import TrendAnalysis from '../components/dashboard/TrendAnalysis';
 import InsightsSummary from '../components/dashboard/InsightsSummary';
 import InteractiveFilters from '../components/dashboard/InteractiveFilters';
+import TrendsSummary from '../components/dashboard/TrendsSummary';
 import PlatformTrendsChart from '../components/dashboard/PlatformTrendsChart';
 import RiskComplianceAnalytics from '../components/dashboard/RiskComplianceAnalytics';
 import AIInsightsPerformance from '../components/dashboard/AIInsightsPerformance';
@@ -315,8 +316,11 @@ export default function Dashboard() {
             <AIInsightsPerformance assessments={completedAssessments} />
           </TabsContent>
 
-          <TabsContent value="insights">
-            <InsightsSummary assessments={completedAssessments} />
+          <TabsContent value="insights" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <TrendsSummary assessments={completedAssessments} />
+              <InsightsSummary assessments={completedAssessments} />
+            </div>
           </TabsContent>
 
           <TabsContent value="shared">
