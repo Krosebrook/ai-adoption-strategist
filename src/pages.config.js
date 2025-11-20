@@ -6,6 +6,7 @@ import FeedbackDashboard from './pages/FeedbackDashboard';
 import ExecutiveDashboard from './pages/ExecutiveDashboard';
 import Settings from './pages/Settings';
 import Reports from './pages/Reports';
+import TemplateBuilder from './pages/TemplateBuilder';
 import __Layout from './Layout.jsx';
 
 
@@ -18,6 +19,7 @@ export const PAGES = {
     "ExecutiveDashboard": ExecutiveDashboard,
     "Settings": Settings,
     "Reports": Reports,
+    "TemplateBuilder": TemplateBuilder,
 }
 
 export const pagesConfig = {

@@ -4,6 +4,68 @@ import ReactMarkdown from 'react-markdown';
 
 export default function ReportPreview({ report, reportType }) {
   if (!report) return null;
+  
+  // Handle custom reports
+  if (reportType === 'custom') {
+    return (
+      <Card className="border-slate-200">
+        <CardHeader>
+          <CardTitle className="text-slate-900">{report.title}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {report.sections?.sort((a, b) => a.order - b.order).map((section, idx) => (
+            <div key={idx} className="space-y-3">
+              <h3 className="text-lg font-semibold text-slate-900 border-b pb-2">
+                {section.title}
+              </h3>
+              
+              {section.content.ai_insights && (
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-4">
+                  <h4 className="text-sm font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                    <span className="inline-block w-2 h-2 bg-blue-600 rounded-full"></span>
+                    AI-Enhanced Insights
+                  </h4>
+                  <div className="text-sm text-blue-800 space-y-2">
+                    {section.content.ai_insights.key_highlights && (
+                      <div>
+                        <strong>Key Highlights:</strong>
+                        <ul className="list-disc ml-5 mt-1">
+                          {section.content.ai_insights.key_highlights.map((h, i) => (
+                            <li key={i}>{h}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {section.content.ai_insights.insights && (
+                      <div>
+                        <strong>Insights:</strong>
+                        <ul className="list-disc ml-5 mt-1">
+                          {section.content.ai_insights.insights.map((h, i) => (
+                            <li key={i}>{h}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {section.content.ai_insights.recommendations && (
+                      <p className="mt-2">
+                        <strong>Recommendation:</strong> {section.content.ai_insights.recommendations}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              <div className="prose prose-slate max-w-none text-sm">
+                <pre className="bg-slate-50 p-4 rounded text-xs overflow-auto">
+                  {JSON.stringify(section.content, null, 2)}
+                </pre>
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    );
+  }
 
   const renderExecutiveReport = () => (
     <div className="space-y-6">

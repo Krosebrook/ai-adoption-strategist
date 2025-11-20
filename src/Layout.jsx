@@ -10,7 +10,8 @@ export default function Layout({ children, currentPageName }) {
     { name: 'Assessment', icon: FileText, page: 'Assessment' },
     { name: 'Reports', icon: FileText, page: 'Reports' },
     { name: 'Dashboard', icon: LayoutDashboard, page: 'Dashboard' },
-    { name: 'Settings', icon: Settings, page: 'Settings' }
+    { name: 'Settings', icon: Settings, page: 'Settings' },
+    { name: 'Templates', icon: Star, page: 'TemplateBuilder', hideLabel: true }
   ];
 
   return (
