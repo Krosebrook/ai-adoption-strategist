@@ -83,7 +83,7 @@ Provide:
   if (loading) {
     return (
       <BrandCard>
-        <CardContent className="py-12 text-center">
+        <BrandCardContent className="py-12 text-center">
           <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4" style={{ color: 'var(--color-primary)' }} />
           <p style={{ color: 'var(--color-text)' }}>Analyzing patterns across assessments...</p>
         </BrandCardContent>
@@ -94,7 +94,7 @@ Provide:
   if (!insights) {
     return (
       <BrandCard>
-        <CardContent className="py-12 text-center">
+        <BrandCardContent className="py-12 text-center">
           <Sparkles className="h-12 w-12 mx-auto mb-4" style={{ color: 'var(--color-primary)' }} />
           <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--color-text)' }}>
             AI Insights Available
