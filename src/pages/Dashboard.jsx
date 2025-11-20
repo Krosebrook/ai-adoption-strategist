@@ -314,7 +314,15 @@ export default function Dashboard() {
             <InsightsSummary assessments={completedAssessments} />
           </TabsContent>
         </Tabs>
+        )}
       </div>
+
+      {/* Dashboard Builder Modal */}
+      <DashboardBuilder
+        isOpen={builderOpen}
+        onClose={() => setBuilderOpen(false)}
+        currentDashboard={customDashboard}
+      />
     </div>
   );
 }
