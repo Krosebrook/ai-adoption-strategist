@@ -11,6 +11,9 @@ import { BrandCard, BrandCardContent, BrandCardHeader, BrandCardTitle } from '..
 import TrendAnalysis from '../components/dashboard/TrendAnalysis';
 import InsightsSummary from '../components/dashboard/InsightsSummary';
 import InteractiveFilters from '../components/dashboard/InteractiveFilters';
+import PlatformTrendsChart from '../components/dashboard/PlatformTrendsChart';
+import RiskComplianceAnalytics from '../components/dashboard/RiskComplianceAnalytics';
+import AIInsightsPerformance from '../components/dashboard/AIInsightsPerformance';
 import { useAssessmentFilters } from '../components/utils/hooks';
 import { getStatusStyle, formatDate } from '../components/utils/formatters';
 
@@ -102,7 +105,9 @@ export default function Dashboard() {
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="trends">Trends</TabsTrigger>
+            <TabsTrigger value="trends">Platform Trends</TabsTrigger>
+            <TabsTrigger value="risks">Risks & Compliance</TabsTrigger>
+            <TabsTrigger value="performance">AI Performance</TabsTrigger>
             <TabsTrigger value="insights">AI Insights</TabsTrigger>
           </TabsList>
 
@@ -184,7 +189,15 @@ export default function Dashboard() {
           </TabsContent>
 
           <TabsContent value="trends">
-            <TrendAnalysis assessments={completedAssessments} />
+            <PlatformTrendsChart assessments={completedAssessments} />
+          </TabsContent>
+
+          <TabsContent value="risks">
+            <RiskComplianceAnalytics assessments={completedAssessments} />
+          </TabsContent>
+
+          <TabsContent value="performance">
+            <AIInsightsPerformance assessments={completedAssessments} />
           </TabsContent>
 
           <TabsContent value="insights">
