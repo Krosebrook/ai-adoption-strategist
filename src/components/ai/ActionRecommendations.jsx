@@ -6,6 +6,9 @@ import { Zap, CheckCircle2, AlertTriangle, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import InlineFeedback from '../feedback/InlineFeedback';
+import { getPriorityStyle } from '../utils/formatters';
+import { LoadingCard } from '../ui/LoadingState';
+import EmptyState from '../ui/EmptyState';
 
 export default function ActionRecommendations({ assessment, risks }) {
   const [actions, setActions] = useState(null);
@@ -117,44 +120,20 @@ Be specific with steps, tools, and expected outcomes.`;
   };
 
   if (loading) {
-    return (
-      <Card className="border-slate-200">
-        <CardContent className="py-12 text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-purple-600 mx-auto mb-4" />
-          <p className="text-slate-600">Generating personalized action plan...</p>
-        </CardContent>
-      </Card>
-    );
+    return <LoadingCard message="Generating personalized action plan..." />;
   }
 
   if (!actions) {
     return (
-      <Card className="border-slate-200">
-        <CardContent className="py-12 text-center">
-          <Zap className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-slate-900 mb-2">
-            AI Action Recommendations
-          </h3>
-          <p className="text-slate-600 mb-4">
-            Get specific, actionable recommendations tailored to your assessment
-          </p>
-          <Button onClick={generateActions} className="bg-purple-600 hover:bg-purple-700 text-white">
-            <Zap className="h-4 w-4 mr-2" />
-            Generate Action Plan
-          </Button>
-        </CardContent>
-      </Card>
+      <EmptyState
+        icon={Zap}
+        title="AI Action Recommendations"
+        description="Get specific, actionable recommendations tailored to your assessment"
+        actionLabel="Generate Action Plan"
+        onAction={generateActions}
+      />
     );
   }
-
-  const getPriorityColor = (priority) => {
-    const colors = {
-      high: 'bg-red-100 text-red-800 border-red-300',
-      medium: 'bg-amber-100 text-amber-800 border-amber-300',
-      low: 'bg-blue-100 text-blue-800 border-blue-300'
-    };
-    return colors[priority] || colors.medium;
-  };
 
   return (
     <div className="space-y-6">
@@ -173,7 +152,7 @@ Be specific with steps, tools, and expected outcomes.`;
             <div key={idx} className="p-4 bg-white rounded-lg border border-red-200">
               <div className="flex items-start justify-between mb-2">
                 <h4 className="font-semibold text-slate-900">{action.action}</h4>
-                <Badge className={getPriorityColor(action.priority)}>{action.priority}</Badge>
+                <Badge className={getPriorityStyle(action.priority)}>{action.priority}</Badge>
               </div>
               <p className="text-sm text-slate-600 mb-2">{action.rationale}</p>
               <div className="flex items-start gap-2 text-sm">

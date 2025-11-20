@@ -3,6 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { AlertTriangle, Shield, TrendingDown } from 'lucide-react';
+import { SEVERITY_LEVELS, CHART_COLORS } from '../utils/constants';
+import { getSeverityStyle } from '../utils/formatters';
+import EmptyState from '../ui/EmptyState';
 
 export default function RiskComplianceAnalytics({ assessments }) {
   // Aggregate compliance gaps across all assessments
@@ -89,15 +92,6 @@ export default function RiskComplianceAnalytics({ assessments }) {
   const integrationChallenges = getIntegrationChallenges();
   const painPointData = getPainPointFrequency();
 
-  const getSeverityColor = (severity) => {
-    const colors = {
-      high: 'bg-red-100 text-red-800 border-red-300',
-      medium: 'bg-amber-100 text-amber-800 border-amber-300',
-      low: 'bg-blue-100 text-blue-800 border-blue-300'
-    };
-    return colors[severity] || colors.medium;
-  };
-
   return (
     <div className="space-y-6">
       {/* Compliance Gaps */}
@@ -110,10 +104,11 @@ export default function RiskComplianceAnalytics({ assessments }) {
         </CardHeader>
         <CardContent>
           {complianceGaps.length === 0 ? (
-            <div className="text-center py-8 text-slate-500">
-              <Shield className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p>No compliance gaps identified</p>
-            </div>
+            <EmptyState 
+              icon={Shield}
+              title="No compliance gaps identified"
+              description="All assessments meet compliance requirements"
+            />
           ) : (
             <div className="space-y-3">
               {complianceGaps.map((gap, idx) => (
@@ -122,7 +117,7 @@ export default function RiskComplianceAnalytics({ assessments }) {
                     <h4 className="font-medium text-slate-900">{gap.requirement}</h4>
                     <p className="text-sm text-slate-600">Found in {gap.count} assessment{gap.count > 1 ? 's' : ''}</p>
                   </div>
-                  <Badge className={getSeverityColor(gap.severity)}>{gap.severity}</Badge>
+                  <Badge className={getSeverityStyle(gap.severity)}>{gap.severity}</Badge>
                 </div>
               ))}
             </div>
@@ -151,7 +146,7 @@ export default function RiskComplianceAnalytics({ assessments }) {
                 <XAxis type="number" stroke="#64748b" />
                 <YAxis dataKey="integration" type="category" stroke="#64748b" width={150} />
                 <Tooltip />
-                <Bar dataKey="count" fill="#F59E0B" name="Occurrences" />
+                <Bar dataKey="count" fill={CHART_COLORS.WARNING} name="Occurrences" />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -179,7 +174,7 @@ export default function RiskComplianceAnalytics({ assessments }) {
                 <XAxis dataKey="name" stroke="#64748b" angle={-45} textAnchor="end" height={100} />
                 <YAxis stroke="#64748b" />
                 <Tooltip />
-                <Bar dataKey="count" fill="#8B5CF6" name="Frequency" />
+                <Bar dataKey="count" fill={CHART_COLORS.TERTIARY} name="Frequency" />
               </BarChart>
             </ResponsiveContainer>
           )}

@@ -3,38 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { TrendingUp, Calendar } from 'lucide-react';
+import { CHART_COLORS, PLATFORM_COLORS, TIME_RANGES, TIME_RANGE_LABELS } from '../utils/constants';
+import { filterByTimeRange } from '../utils/dataTransformers';
+import EmptyState from '../ui/EmptyState';
 
 export default function PlatformTrendsChart({ assessments }) {
-  const [timeRange, setTimeRange] = useState('all');
+  const [timeRange, setTimeRange] = useState(TIME_RANGES.ALL);
   const [viewType, setViewType] = useState('timeline');
 
-  const filterByTimeRange = (assessments) => {
-    if (timeRange === 'all') return assessments;
-    
-    const now = new Date();
-    const cutoffDate = new Date();
-    
-    switch (timeRange) {
-      case '30d':
-        cutoffDate.setDate(now.getDate() - 30);
-        break;
-      case '90d':
-        cutoffDate.setDate(now.getDate() - 90);
-        break;
-      case '6m':
-        cutoffDate.setMonth(now.getMonth() - 6);
-        break;
-      case '1y':
-        cutoffDate.setFullYear(now.getFullYear() - 1);
-        break;
-      default:
-        return assessments;
-    }
-    
-    return assessments.filter(a => new Date(a.created_date) >= cutoffDate);
-  };
-
-  const filteredAssessments = filterByTimeRange(assessments);
+  const filteredAssessments = filterByTimeRange(assessments, timeRange);
 
   // Timeline data - platform recommendations over time
   const getTimelineData = () => {
@@ -117,7 +94,12 @@ export default function PlatformTrendsChart({ assessments }) {
   const distributionData = getDistributionData();
   const scoreData = getScoreData();
 
-  const COLORS = ['#21808D', '#2974FF', '#8B5CF6', '#F59E0B'];
+  const COLORS = [
+    CHART_COLORS.PRIMARY,
+    CHART_COLORS.SECONDARY,
+    CHART_COLORS.TERTIARY,
+    CHART_COLORS.QUATERNARY
+  ];
 
   return (
     <Card className="border-slate-200">
@@ -143,11 +125,9 @@ export default function PlatformTrendsChart({ assessments }) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Time</SelectItem>
-                <SelectItem value="30d">Last 30 Days</SelectItem>
-                <SelectItem value="90d">Last 90 Days</SelectItem>
-                <SelectItem value="6m">Last 6 Months</SelectItem>
-                <SelectItem value="1y">Last Year</SelectItem>
+                {Object.entries(TIME_RANGE_LABELS).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>{label}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -155,10 +135,11 @@ export default function PlatformTrendsChart({ assessments }) {
       </CardHeader>
       <CardContent>
         {filteredAssessments.length === 0 ? (
-          <div className="text-center py-12 text-slate-500">
-            <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
-            <p>No assessments in selected time range</p>
-          </div>
+          <EmptyState 
+            icon={Calendar}
+            title="No assessments in selected time range"
+            description="Try selecting a different time period"
+          />
         ) : (
           <>
             {viewType === 'timeline' && (
@@ -169,10 +150,10 @@ export default function PlatformTrendsChart({ assessments }) {
                   <YAxis stroke="#64748b" />
                   <Tooltip />
                   <Legend />
-                  <Line type="monotone" dataKey="Google Gemini" stroke="#21808D" strokeWidth={2} />
-                  <Line type="monotone" dataKey="Microsoft Copilot" stroke="#2974FF" strokeWidth={2} />
-                  <Line type="monotone" dataKey="Anthropic Claude" stroke="#8B5CF6" strokeWidth={2} />
-                  <Line type="monotone" dataKey="OpenAI ChatGPT" stroke="#F59E0B" strokeWidth={2} />
+                  <Line type="monotone" dataKey="Google Gemini" stroke={PLATFORM_COLORS['Google Gemini']} strokeWidth={2} />
+                  <Line type="monotone" dataKey="Microsoft Copilot" stroke={PLATFORM_COLORS['Microsoft Copilot']} strokeWidth={2} />
+                  <Line type="monotone" dataKey="Anthropic Claude" stroke={PLATFORM_COLORS['Anthropic Claude']} strokeWidth={2} />
+                  <Line type="monotone" dataKey="OpenAI ChatGPT" stroke={PLATFORM_COLORS['OpenAI ChatGPT']} strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
             )}

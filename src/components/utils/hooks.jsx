@@ -73,5 +73,37 @@ export function useAssessmentFilters(assessments) {
     });
   }, [assessments, filters]);
 
-  return { filters, setFilters, filteredAssessments };
+  return { filters, setFilters, filteredAssessments: filtered };
+}
+
+// Hook for fetching assessments with common logic
+export function useAssessments(status = null, limit = 100) {
+  return useQuery({
+    queryKey: ['assessments', status],
+    queryFn: async () => {
+      if (status) {
+        return await base44.entities.Assessment.filter({ status }, '-created_date', limit);
+      }
+      return await base44.entities.Assessment.list('-created_date', limit);
+    },
+    initialData: []
+  });
+}
+
+// Hook for loading user settings
+export function useUserSettings() {
+  const [user, setUser] = useState(null);
+  
+  const { data: settings, isLoading } = useQuery({
+    queryKey: ['userSettings', user?.email],
+    queryFn: async () => {
+      const currentUser = await base44.auth.me();
+      setUser(currentUser);
+      const result = await base44.entities.UserSettings.filter({ user_email: currentUser.email });
+      return result[0] || null;
+    },
+    enabled: false
+  });
+
+  return { settings, isLoading, user };
 }
