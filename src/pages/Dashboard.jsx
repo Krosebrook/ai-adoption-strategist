@@ -315,14 +315,14 @@ export default function Dashboard() {
           </TabsContent>
         </Tabs>
         )}
-      </div>
 
-      {/* Dashboard Builder Modal */}
-      <DashboardBuilder
-        isOpen={builderOpen}
-        onClose={() => setBuilderOpen(false)}
-        currentDashboard={customDashboard}
-      />
+        {/* Dashboard Builder Modal */}
+        <DashboardBuilder
+          isOpen={builderOpen}
+          onClose={() => setBuilderOpen(false)}
+          currentDashboard={customDashboard}
+        />
+      </div>
     </div>
   );
 }
