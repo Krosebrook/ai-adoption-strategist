@@ -8,6 +8,7 @@ import Settings from './pages/Settings';
 import Reports from './pages/Reports';
 import TemplateBuilder from './pages/TemplateBuilder';
 import PlatformComparison from './pages/PlatformComparison';
+import Trends from './pages/Trends';
 import __Layout from './Layout.jsx';
 
 
@@ -22,6 +23,7 @@ export const PAGES = {
     "Reports": Reports,
     "TemplateBuilder": TemplateBuilder,
     "PlatformComparison": PlatformComparison,
+    "Trends": Trends,
 }
 
 export const pagesConfig = {
