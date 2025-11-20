@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createPageUrl } from '@/utils';
-import { FileText, Plus, Calendar, Building2, Loader2, TrendingUp } from 'lucide-react';
+import { FileText, Plus, Calendar, Building2, Loader2, TrendingUp, LayoutGrid, Settings } from 'lucide-react';
 import { BrandCard, BrandCardContent, BrandCardHeader, BrandCardTitle } from '../components/ui/BrandCard';
 import TrendAnalysis from '../components/dashboard/TrendAnalysis';
 import InsightsSummary from '../components/dashboard/InsightsSummary';
@@ -14,18 +14,59 @@ import InteractiveFilters from '../components/dashboard/InteractiveFilters';
 import PlatformTrendsChart from '../components/dashboard/PlatformTrendsChart';
 import RiskComplianceAnalytics from '../components/dashboard/RiskComplianceAnalytics';
 import AIInsightsPerformance from '../components/dashboard/AIInsightsPerformance';
+import DashboardBuilder from '../components/dashboard/DashboardBuilder';
 import { useAssessmentFilters } from '../components/utils/hooks';
 import { getStatusStyle, formatDate } from '../components/utils/formatters';
+import { detectAnomalies } from '../components/dashboard/AnomalyDetector';
+import {
+  ROIOverviewWidget,
+  AnomalyAlertsWidget,
+  PlatformTrendsWidget,
+  ComplianceMatrixWidget,
+  RiskIndicatorsWidget,
+  RecentAssessmentsWidget,
+  CostComparisonWidget,
+  AdoptionRateWidget,
+  TimeToValueWidget
+} from '../components/dashboard/widgets';
 
 export default function Dashboard() {
+  const [builderOpen, setBuilderOpen] = useState(false);
+  const [viewMode, setViewMode] = useState('default');
+
   const { data: allAssessments, isLoading } = useQuery({
     queryKey: ['assessments'],
     queryFn: () => base44.entities.Assessment.list('-created_date', 100),
     initialData: []
   });
 
+  const { data: user } = useQuery({
+    queryKey: ['current-user'],
+    queryFn: () => base44.auth.me()
+  });
+
+  const { data: customDashboard } = useQuery({
+    queryKey: ['custom-dashboard', user?.email],
+    queryFn: async () => {
+      if (!user) return null;
+      const dashboards = await base44.entities.CustomDashboard.filter({ 
+        user_email: user.email, 
+        is_default: true 
+      });
+      return dashboards[0] || null;
+    },
+    enabled: !!user
+  });
+
   const { filters, setFilters, filteredAssessments: assessments } = useAssessmentFilters(allAssessments);
   const completedAssessments = allAssessments.filter(a => a.status === 'completed');
+
+  // Run anomaly detection on mount and when assessments change
+  useEffect(() => {
+    if (completedAssessments.length >= 5 && user) {
+      detectAnomalies(completedAssessments, user.email);
+    }
+  }, [completedAssessments.length, user]);
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-background)' }}>
@@ -37,6 +78,14 @@ export default function Dashboard() {
             <p style={{ color: 'var(--color-text-secondary)' }}>View, analyze, and manage all assessments</p>
           </div>
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setBuilderOpen(true)}
+              style={{ borderColor: 'var(--color-border)' }}
+            >
+              <LayoutGrid className="h-4 w-4 mr-2" />
+              Customize
+            </Button>
             <Link to={createPageUrl('Reports')}>
               <Button variant="outline" style={{ borderColor: 'var(--color-border)' }}>
                 <FileText className="h-4 w-4 mr-2" />
@@ -101,17 +150,78 @@ export default function Dashboard() {
           </BrandCard>
         </div>
 
-        {/* Interactive Dashboard */}
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="trends">Platform Trends</TabsTrigger>
-            <TabsTrigger value="risks">Risks & Compliance</TabsTrigger>
-            <TabsTrigger value="performance">AI Performance</TabsTrigger>
-            <TabsTrigger value="insights">AI Insights</TabsTrigger>
-          </TabsList>
+        {/* View Mode Toggle */}
+        <div className="mb-4 flex gap-2">
+          <Button
+            variant={viewMode === 'default' ? 'default' : 'outline'}
+            onClick={() => setViewMode('default')}
+            size="sm"
+          >
+            Standard View
+          </Button>
+          <Button
+            variant={viewMode === 'widgets' ? 'default' : 'outline'}
+            onClick={() => setViewMode('widgets')}
+            size="sm"
+          >
+            <LayoutGrid className="h-4 w-4 mr-2" />
+            Widget View
+          </Button>
+        </div>
 
-          <TabsContent value="overview" className="space-y-6">
+        {/* Custom Widget Dashboard */}
+        {viewMode === 'widgets' && customDashboard?.layout ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <AnomalyAlertsWidget />
+            {customDashboard.layout.map((widget, idx) => {
+              const props = { assessments: completedAssessments };
+              switch (widget.widget_type) {
+                case 'roi_overview':
+                  return <ROIOverviewWidget key={idx} {...props} />;
+                case 'platform_trends':
+                  return <PlatformTrendsWidget key={idx} {...props} />;
+                case 'compliance_matrix':
+                  return <ComplianceMatrixWidget key={idx} {...props} />;
+                case 'risk_indicators':
+                  return <RiskIndicatorsWidget key={idx} {...props} />;
+                case 'recent_assessments':
+                  return <RecentAssessmentsWidget key={idx} {...props} />;
+                case 'cost_comparison':
+                  return <CostComparisonWidget key={idx} {...props} />;
+                case 'adoption_rate':
+                  return <AdoptionRateWidget key={idx} {...props} />;
+                case 'time_to_value':
+                  return <TimeToValueWidget key={idx} {...props} />;
+                default:
+                  return null;
+              }
+            })}
+          </div>
+        ) : viewMode === 'widgets' ? (
+          <BrandCard className="mb-8">
+            <BrandCardContent className="py-12 text-center">
+              <LayoutGrid className="h-12 w-12 mx-auto mb-4 opacity-20" />
+              <p className="text-slate-600 mb-4">No custom dashboard configured</p>
+              <Button onClick={() => setBuilderOpen(true)}>
+                <Settings className="h-4 w-4 mr-2" />
+                Create Custom Dashboard
+              </Button>
+            </BrandCardContent>
+          </BrandCard>
+        ) : null}
+
+        {/* Interactive Dashboard */}
+        {viewMode === 'default' && (
+          <Tabs defaultValue="overview" className="space-y-6">
+            <TabsList>
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="trends">Platform Trends</TabsTrigger>
+              <TabsTrigger value="risks">Risks & Compliance</TabsTrigger>
+              <TabsTrigger value="performance">AI Performance</TabsTrigger>
+              <TabsTrigger value="insights">AI Insights</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview" className="space-y-6">
             <InteractiveFilters 
               filters={filters} 
               onFilterChange={setFilters}
