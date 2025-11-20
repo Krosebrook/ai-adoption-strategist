@@ -3,7 +3,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Loader2, FileDown, Presentation, Star, Sparkles } from 'lucide-react';
+import { FileText, Loader2, FileDown, Presentation, Star, Sparkles, Share2, MessageSquare } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
 
@@ -21,10 +21,15 @@ import ImplementationRoadmap from '../components/results/ImplementationRoadmap';
 import InsightsPanel from '../components/insights/InsightsPanel';
 import { useAIInsights } from '../components/utils/hooks';
 import { formatDate } from '../components/utils/formatters';
+import ShareModal from '../components/collaboration/ShareModal';
+import CommentsPanel from '../components/collaboration/CommentsPanel';
+import AccessControlBadge from '../components/collaboration/AccessControlBadge';
 
 export default function Results() {
   const [assessmentId, setAssessmentId] = useState(null);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [showComments, setShowComments] = useState(false);
   const { insights: aiInsights, roadmap: implementationRoadmap, loading: loadingAI, loadInsights } = useAIInsights();
 
   useEffect(() => {
@@ -165,41 +170,58 @@ export default function Results() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              className="border-slate-300"
-              onClick={handleExportPDF}
-              disabled={exportPDFMutation.isPending}
-            >
-              {exportPDFMutation.isPending ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <FileDown className="h-4 w-4 mr-2" />
-              )}
-              Export PDF
-            </Button>
-            <Button 
-              variant="outline" 
-              className="border-slate-300"
-              onClick={handleExportPowerPoint}
-              disabled={exportPowerPointMutation.isPending}
-            >
-              {exportPowerPointMutation.isPending ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Presentation className="h-4 w-4 mr-2" />
-              )}
-              Export Report
-            </Button>
-            <Button 
-              className="bg-amber-500 hover:bg-amber-600 text-white"
-              onClick={() => setFeedbackModalOpen(true)}
-            >
-              <Star className="h-4 w-4 mr-2" />
-              Share Feedback
-            </Button>
-          </div>
+              <AccessControlBadge 
+                resourceType="assessment" 
+                resourceId={assessmentId} 
+              />
+              <Button 
+                variant="outline" 
+                className="border-blue-300 text-blue-700"
+                onClick={() => setShareModalOpen(true)}
+              >
+                <Share2 className="h-4 w-4 mr-2" />
+                Share
+              </Button>
+              <Button 
+                variant="outline" 
+                className="border-purple-300 text-purple-700"
+                onClick={() => setShowComments(!showComments)}
+              >
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Comments
+              </Button>
+              <Button 
+                variant="outline" 
+                className="border-slate-300"
+                onClick={handleExportPDF}
+                disabled={exportPDFMutation.isPending}
+              >
+                {exportPDFMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <FileDown className="h-4 w-4 mr-2" />
+                )}
+                Export PDF
+              </Button>
+              <Button 
+                className="bg-amber-500 hover:bg-amber-600 text-white"
+                onClick={() => setFeedbackModalOpen(true)}
+              >
+                <Star className="h-4 w-4 mr-2" />
+                Feedback
+              </Button>
+            </div>
         </div>
+
+        {/* Comments Panel */}
+        {showComments && (
+          <div className="mb-8">
+            <CommentsPanel 
+              resourceType="assessment" 
+              resourceId={assessmentId}
+            />
+          </div>
+        )}
 
         {/* Recommendations */}
         <div className="mb-8">
@@ -478,6 +500,14 @@ export default function Results() {
         onClose={() => setFeedbackModalOpen(false)}
         assessmentId={assessmentId}
       />
-    </div>
-  );
-}
+
+      <ShareModal
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        resourceType="assessment"
+        resourceId={assessmentId}
+        resourceName={assessment?.organization_name}
+      />
+      </div>
+      );
+      }

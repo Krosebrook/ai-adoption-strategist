@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createPageUrl } from '@/utils';
-import { FileText, Plus, Calendar, Building2, Loader2, TrendingUp, LayoutGrid, Settings } from 'lucide-react';
+import { FileText, Plus, Calendar, Building2, Loader2, TrendingUp, LayoutGrid, Settings, Users } from 'lucide-react';
 import { BrandCard, BrandCardContent, BrandCardHeader, BrandCardTitle } from '../components/ui/BrandCard';
 import TrendAnalysis from '../components/dashboard/TrendAnalysis';
 import InsightsSummary from '../components/dashboard/InsightsSummary';
@@ -29,6 +29,7 @@ import {
   AdoptionRateWidget,
   TimeToValueWidget
 } from '../components/dashboard/widgets';
+import SharedResourcesList from '../components/collaboration/SharedResourcesList';
 
 export default function Dashboard() {
   const [builderOpen, setBuilderOpen] = useState(false);
@@ -219,6 +220,10 @@ export default function Dashboard() {
               <TabsTrigger value="risks">Risks & Compliance</TabsTrigger>
               <TabsTrigger value="performance">AI Performance</TabsTrigger>
               <TabsTrigger value="insights">AI Insights</TabsTrigger>
+              <TabsTrigger value="shared">
+                <Users className="h-4 w-4 mr-1" />
+                Shared
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
@@ -312,6 +317,10 @@ export default function Dashboard() {
 
           <TabsContent value="insights">
             <InsightsSummary assessments={completedAssessments} />
+          </TabsContent>
+
+          <TabsContent value="shared">
+            <SharedResourcesList />
           </TabsContent>
         </Tabs>
         )}

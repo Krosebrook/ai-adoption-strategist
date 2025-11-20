@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Download, Loader2, Sparkles, Settings, Calendar, Clock } from 'lucide-react';
+import { FileText, Download, Loader2, Sparkles, Settings, Calendar, Clock, Share2, MessageSquare } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
@@ -19,6 +19,8 @@ import { generateCustomReport } from '../components/reports/CustomReportGenerato
 import EnhancedReportGenerator from '../components/reports/EnhancedReportGenerator';
 import ScheduleReportModal from '../components/reports/ScheduleReportModal';
 import ScheduledReportsList from '../components/reports/ScheduledReportsList';
+import ShareModal from '../components/collaboration/ShareModal';
+import CommentsPanel from '../components/collaboration/CommentsPanel';
 
 export default function Reports() {
   const [selectedAssessment, setSelectedAssessment] = useState(null);
@@ -27,6 +29,8 @@ export default function Reports() {
   const [generatedReport, setGeneratedReport] = useState(null);
   const [generating, setGenerating] = useState(false);
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [showComments, setShowComments] = useState(false);
   const [activeTab, setActiveTab] = useState('generate');
 
   const { data: assessments, isLoading } = useQuery({
@@ -293,6 +297,22 @@ export default function Reports() {
               {generatedReport && (
                 <>
                   <Button
+                    onClick={() => setShareModalOpen(true)}
+                    variant="outline"
+                    style={{ borderColor: 'var(--color-border)' }}
+                  >
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Share
+                  </Button>
+                  <Button
+                    onClick={() => setShowComments(!showComments)}
+                    variant="outline"
+                    style={{ borderColor: 'var(--color-border)' }}
+                  >
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Comments
+                  </Button>
+                  <Button
                     onClick={() => setScheduleModalOpen(true)}
                     variant="outline"
                     style={{ borderColor: 'var(--color-border)' }}
@@ -335,6 +355,16 @@ export default function Reports() {
           </Card>
         )}
 
+        {showComments && selectedAssessment && (
+          <div className="mb-6">
+            <CommentsPanel 
+              resourceType="report" 
+              resourceId={selectedAssessment.id}
+              section={reportType}
+            />
+          </div>
+        )}
+
         {generatedReport && !generating && (
           <ReportPreview 
             report={generatedReport} 
@@ -360,16 +390,25 @@ export default function Reports() {
           </TabsContent>
         </Tabs>
 
-        {/* Schedule Modal */}
+        {/* Modals */}
         {selectedAssessment && (
-          <ScheduleReportModal
-            isOpen={scheduleModalOpen}
-            onClose={() => setScheduleModalOpen(false)}
-            assessment={selectedAssessment}
-            reportType={reportType}
-          />
+          <>
+            <ScheduleReportModal
+              isOpen={scheduleModalOpen}
+              onClose={() => setScheduleModalOpen(false)}
+              assessment={selectedAssessment}
+              reportType={reportType}
+            />
+            <ShareModal
+              isOpen={shareModalOpen}
+              onClose={() => setShareModalOpen(false)}
+              resourceType="report"
+              resourceId={selectedAssessment.id}
+              resourceName={`${reportType} Report - ${selectedAssessment.organization_name}`}
+            />
+          </>
         )}
-      </div>
-    </div>
-  );
-}
+        </div>
+        </div>
+        );
+        }
