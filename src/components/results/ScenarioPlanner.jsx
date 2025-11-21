@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Sparkles, Loader2, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, ArrowRight } from 'lucide-react';
+import { simulateMarketTrendImpact, simulateComplianceChangeImpact, simulatePlatformChangeImpact, runMultiScenarioAnalysis } from '../scenarios/ScenarioSimulationEngine';
+import { toast } from 'sonner';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +20,22 @@ import ScenarioComparison from './ScenarioComparison';
 
 export default function ScenarioPlanner({ baseAssessment }) {
   const [scenarios, setScenarios] = useState([]);
+  const [activeSimulation, setActiveSimulation] = useState(null);
+  const [loadingSimulation, setLoadingSimulation] = useState(false);
+  const [scenarioType, setScenarioType] = useState('market_trend');
+  const [scenarioConfig, setScenarioConfig] = useState({
+    trendType: '',
+    description: '',
+    timeline: '',
+    severity: 'medium',
+    regulation: '',
+    changeType: '',
+    effectiveDate: '',
+    alternativePlatform: '',
+    reason: '',
+    priorityFactors: []
+  });
+  const [multiScenarioResults, setMultiScenarioResults] = useState(null);
   const [editingScenario, setEditingScenario] = useState(null);
 
   const baseROI = Object.values(baseAssessment.roi_calculations || {});
