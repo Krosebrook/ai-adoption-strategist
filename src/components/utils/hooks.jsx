@@ -1,5 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { generatePlatformInsights, generateImplementationRoadmap } from '../assessment/AIEnhancer';
+import { generateEnhancedRoadmap } from '../assessment/EnhancedRoadmapGenerator';
+import { fetchMarketTrends } from '../analytics/MarketTrendsEngine';
 import { toast } from 'sonner';
 
 // AI Insights Hook
@@ -9,20 +11,37 @@ export function useAIInsights() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const loadInsights = useCallback(async (platform, assessment, roiData, complianceScores, integrationScores) => {
+  const loadInsights = useCallback(async (platform, assessment, roiData, complianceScores, integrationScores, useEnhanced = true) => {
     if (!platform || loading || insights) return;
 
     setLoading(true);
     setError(null);
 
     try {
+      // Fetch market trends for enhanced roadmap
+      let marketTrends = null;
+      if (useEnhanced) {
+        try {
+          toast.info('Fetching market intelligence for optimized roadmap...');
+          marketTrends = await fetchMarketTrends();
+        } catch (error) {
+          console.warn('Failed to fetch market trends, using basic roadmap:', error);
+        }
+      }
+
       const [platformInsights, implementationRoadmap] = await Promise.all([
         generatePlatformInsights(platform, assessment, roiData, complianceScores, integrationScores),
-        generateImplementationRoadmap(platform, assessment)
+        useEnhanced && marketTrends 
+          ? generateEnhancedRoadmap(platform, assessment, marketTrends)
+          : generateImplementationRoadmap(platform, assessment)
       ]);
 
       setInsights(platformInsights);
       setRoadmap(implementationRoadmap);
+      
+      if (useEnhanced && marketTrends) {
+        toast.success('Enhanced roadmap generated with market intelligence!');
+      }
     } catch (err) {
       console.error('Failed to load AI insights:', err);
       setError(err.message);

@@ -18,6 +18,7 @@ import ScenarioPlanner from '../components/results/ScenarioPlanner';
 import FeedbackModal from '../components/feedback/FeedbackModal';
 import AIInsights from '../components/results/AIInsights';
 import ImplementationRoadmap from '../components/results/ImplementationRoadmap';
+import EnhancedRoadmapDisplay from '../components/results/EnhancedRoadmapDisplay';
 import InsightsPanel from '../components/insights/InsightsPanel';
 import { useAIInsights } from '../components/utils/hooks';
 import { formatDate } from '../components/utils/formatters';
@@ -349,11 +350,19 @@ export default function Results() {
                   insights={aiInsights} 
                   assessmentId={assessmentId}
                 />
-                <ImplementationRoadmap 
-                  roadmap={implementationRoadmap} 
-                  platformName={recommendations[0]?.platform_name}
-                  assessmentId={assessmentId}
-                />
+                {implementationRoadmap?.phases?.[0]?.resource_requirements ? (
+                  <EnhancedRoadmapDisplay
+                    roadmap={implementationRoadmap} 
+                    platformName={recommendations[0]?.platform_name}
+                    assessmentId={assessmentId}
+                  />
+                ) : (
+                  <ImplementationRoadmap 
+                    roadmap={implementationRoadmap} 
+                    platformName={recommendations[0]?.platform_name}
+                    assessmentId={assessmentId}
+                  />
+                )}
               </div>
             ) : (
               <BrandCard>
