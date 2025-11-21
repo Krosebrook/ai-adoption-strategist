@@ -8,12 +8,11 @@ export default function Layout({ children, currentPageName }) {
     { name: 'Home', icon: Home, page: 'Home' },
     { name: 'Executive', icon: LayoutDashboard, page: 'ExecutiveDashboard' },
     { name: 'Assessment', icon: FileText, page: 'Assessment' },
+    { name: 'Strategy', icon: Sparkles, page: 'StrategyAutomation' },
     { name: 'Compare', icon: Star, page: 'PlatformComparison' },
     { name: 'Trends', icon: TrendingUp, page: 'Trends' },
-    { name: 'Predictive', icon: Sparkles, page: 'PredictiveAnalytics' },
     { name: 'Training', icon: Brain, page: 'Training' },
     { name: 'Reports', icon: FileText, page: 'Reports' },
-    { name: 'Dashboard', icon: LayoutDashboard, page: 'Dashboard' },
     { name: 'Settings', icon: Settings, page: 'Settings' }
   ];
 

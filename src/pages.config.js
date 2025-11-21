@@ -11,6 +11,7 @@ import PlatformComparison from './pages/PlatformComparison';
 import Trends from './pages/Trends';
 import PredictiveAnalytics from './pages/PredictiveAnalytics';
 import Training from './pages/Training';
+import StrategyAutomation from './pages/StrategyAutomation';
 import __Layout from './Layout.jsx';
 
 
@@ -28,6 +29,7 @@ export const PAGES = {
     "Trends": Trends,
     "PredictiveAnalytics": PredictiveAnalytics,
     "Training": Training,
+    "StrategyAutomation": StrategyAutomation,
 }
 
 export const pagesConfig = {
