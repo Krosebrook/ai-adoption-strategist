@@ -27,6 +27,7 @@ import CommentsPanel from '../components/collaboration/CommentsPanel';
 import AccessControlBadge from '../components/collaboration/AccessControlBadge';
 import AIScoreCard from '../components/results/AIScoreCard';
 import { generateAIAssessmentScore } from '../components/assessment/AIScorer';
+import ComplianceAnalysisPanel from '../components/compliance/ComplianceAnalysisPanel';
 
 export default function Results() {
   const [assessmentId, setAssessmentId] = useState(null);
@@ -284,7 +285,10 @@ export default function Results() {
               Action Plan
             </TabsTrigger>
             <TabsTrigger value="roi">ROI Analysis</TabsTrigger>
-            <TabsTrigger value="compliance">Compliance</TabsTrigger>
+            <TabsTrigger value="compliance">
+              <Sparkles className="h-4 w-4 mr-1" />
+              AI Compliance
+            </TabsTrigger>
             <TabsTrigger value="integrations">Integrations</TabsTrigger>
             <TabsTrigger value="scenarios">Scenario Planning</TabsTrigger>
             <TabsTrigger value="details">Full Details</TabsTrigger>
@@ -499,10 +503,7 @@ export default function Results() {
           </TabsContent>
 
           <TabsContent value="compliance">
-            <ComplianceMatrix
-              complianceData={assessment.compliance_scores}
-              requirements={assessment.compliance_requirements}
-            />
+            <ComplianceAnalysisPanel assessment={assessment} />
           </TabsContent>
 
           <TabsContent value="integrations">
