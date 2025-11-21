@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 /**
  * Predict future ROI based on historical data and trends
  */
-export async function predictFutureROI(assessment, historicalAssessments = []) {
+export async function predictFutureROI(assessment, historicalAssessments = [], marketTrends = null) {
   const currentROI = assessment.roi_calculations || {};
   const platform = assessment.recommended_platforms?.[0]?.platform_name || 'Unknown';
   
@@ -37,7 +37,13 @@ Market Context:
 - Average enterprise AI ROI: 150-200% over 3 years
 - Maturity curve: Initial 6-12 months show 20-40% gains, accelerating thereafter
 
-Provide a detailed ROI forecast for Years 1-3 with realistic projections, confidence levels, and key assumptions.`;
+${marketTrends ? `\nReal-time Market Intelligence:
+- Recent Model Releases: ${JSON.stringify(marketTrends.model_releases?.slice(0, 3))}
+- Adoption Trends: ${marketTrends.adoption_trends?.overall_growth_rate}
+- Pricing Changes: ${JSON.stringify(marketTrends.pricing_trends)}
+- Forecast Implications: ${marketTrends.forecast_implications?.join('; ')}` : ''}
+
+Provide a detailed ROI forecast for Years 1-3 with realistic projections, confidence levels, and key assumptions. Factor in the latest market developments.`;
 
   const response = await base44.integrations.Core.InvokeLLM({
     prompt,
@@ -105,7 +111,7 @@ Provide a detailed ROI forecast for Years 1-3 with realistic projections, confid
 /**
  * Predict future risks and compliance challenges
  */
-export async function predictRisksAndCompliance(assessment, historicalAssessments = []) {
+export async function predictRisksAndCompliance(assessment, historicalAssessments = [], marketTrends = null) {
   const currentRisks = assessment.ai_assessment_score?.key_risks || [];
   const complianceReqs = assessment.compliance_requirements || [];
   
@@ -126,7 +132,13 @@ Industry Trends:
 - Growing concern about model security and adversarial attacks
 - Supply chain vulnerabilities in AI systems
 
-Predict risks and compliance challenges for the next 6-24 months with likelihood and severity.`;
+${marketTrends ? `\nLatest Regulatory Updates:
+${JSON.stringify(marketTrends.regulatory_updates, null, 2)}
+
+Current Competitive Dynamics:
+${JSON.stringify(marketTrends.competitive_landscape)}` : ''}
+
+Predict risks and compliance challenges for the next 6-24 months with likelihood and severity, incorporating the latest regulatory developments.`;
 
   const response = await base44.integrations.Core.InvokeLLM({
     prompt,
@@ -189,7 +201,7 @@ Predict risks and compliance challenges for the next 6-24 months with likelihood
 /**
  * Predict AI maturity progression roadmap
  */
-export async function predictMaturityRoadmap(assessment, historicalAssessments = []) {
+export async function predictMaturityRoadmap(assessment, historicalAssessments = [], marketTrends = null) {
   const currentMaturity = assessment.ai_assessment_score?.maturity_level || 'beginner';
   const readiness = assessment.ai_assessment_score?.readiness_score || 0;
   
@@ -225,7 +237,12 @@ Industry Benchmarks:
 - Intermediate → Advanced: 12-18 months
 - Advanced → Expert: 18-24 months
 
-Create a realistic maturity roadmap with milestones, required investments, and success metrics.`;
+${marketTrends ? `\nMarket Dynamics Affecting Timeline:
+- Adoption Trends: ${marketTrends.adoption_trends?.enterprise_adoption}
+- Recent Innovations: ${marketTrends.model_releases?.map(r => r.release).join(', ')}
+- Key Market Statistics: ${marketTrends.adoption_trends?.key_statistics?.join('; ')}` : ''}
+
+Create a realistic maturity roadmap with milestones, required investments, and success metrics, factoring in current market acceleration.`;
 
   const response = await base44.integrations.Core.InvokeLLM({
     prompt,

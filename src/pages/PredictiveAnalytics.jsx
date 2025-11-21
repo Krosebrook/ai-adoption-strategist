@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Sparkles, Loader2, TrendingUp, AlertTriangle, Award } from 'lucide-react';
 import { toast } from 'sonner';
 import { predictFutureROI, predictRisksAndCompliance, predictMaturityRoadmap } from '../components/analytics/PredictiveEngine';
+import { fetchMarketTrends } from '../components/analytics/MarketTrendsEngine';
 import ROIForecastChart from '../components/analytics/ROIForecastChart';
 import RiskPredictionPanel from '../components/analytics/RiskPredictionPanel';
 import MaturityRoadmapViz from '../components/analytics/MaturityRoadmapViz';
@@ -18,6 +19,7 @@ export default function PredictiveAnalytics() {
   const [riskPrediction, setRiskPrediction] = useState(null);
   const [maturityRoadmap, setMaturityRoadmap] = useState(null);
   const [loading, setLoading] = useState({ roi: false, risk: false, maturity: false });
+  const [marketTrends, setMarketTrends] = useState(null);
 
   const { data: assessments = [] } = useQuery({
     queryKey: ['assessments-predictive'],
@@ -34,9 +36,17 @@ export default function PredictiveAnalytics() {
 
     setLoading({ ...loading, roi: true });
     try {
-      const forecast = await predictFutureROI(selectedAssessment, assessments);
+      // Fetch market trends if not already cached
+      let trends = marketTrends;
+      if (!trends) {
+        toast.info('Fetching real-time market data...');
+        trends = await fetchMarketTrends();
+        setMarketTrends(trends);
+      }
+      
+      const forecast = await predictFutureROI(selectedAssessment, assessments, trends);
       setRoiForecast(forecast);
-      toast.success('ROI forecast generated!');
+      toast.success('ROI forecast generated with market intelligence!');
     } catch (error) {
       console.error('ROI prediction failed:', error);
       toast.error('Failed to generate ROI forecast');
@@ -53,9 +63,17 @@ export default function PredictiveAnalytics() {
 
     setLoading({ ...loading, risk: true });
     try {
-      const prediction = await predictRisksAndCompliance(selectedAssessment, assessments);
+      // Fetch market trends if not already cached
+      let trends = marketTrends;
+      if (!trends) {
+        toast.info('Fetching latest regulatory updates...');
+        trends = await fetchMarketTrends();
+        setMarketTrends(trends);
+      }
+      
+      const prediction = await predictRisksAndCompliance(selectedAssessment, assessments, trends);
       setRiskPrediction(prediction);
-      toast.success('Risk prediction complete!');
+      toast.success('Risk prediction complete with regulatory intelligence!');
     } catch (error) {
       console.error('Risk prediction failed:', error);
       toast.error('Failed to predict risks');
@@ -72,9 +90,17 @@ export default function PredictiveAnalytics() {
 
     setLoading({ ...loading, maturity: true });
     try {
-      const roadmap = await predictMaturityRoadmap(selectedAssessment, assessments);
+      // Fetch market trends if not already cached
+      let trends = marketTrends;
+      if (!trends) {
+        toast.info('Fetching market adoption data...');
+        trends = await fetchMarketTrends();
+        setMarketTrends(trends);
+      }
+      
+      const roadmap = await predictMaturityRoadmap(selectedAssessment, assessments, trends);
       setMaturityRoadmap(roadmap);
-      toast.success('Maturity roadmap generated!');
+      toast.success('Maturity roadmap generated with market trends!');
     } catch (error) {
       console.error('Maturity prediction failed:', error);
       toast.error('Failed to generate maturity roadmap');
