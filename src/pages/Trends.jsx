@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingUp, Sparkles, Loader2, BarChart3, Globe } from 'lucide-react';
 import { BrandCard, BrandCardContent } from '../components/ui/BrandCard';
 import { analyzeTrends } from '../components/trends/AITrendAnalyzer';
-import TrendCharts from '../components/trends/TrendCharts';
+import { ReadinessTrendChart, ComplianceTrendChart, MaturityDistributionChart } from '../components/trends/TrendCharts';
 import { fetchMarketTrends, analyzeMarketImpact } from '../components/analytics/MarketTrendsEngine';
 import MarketTrendsPanel from '../components/trends/MarketTrendsPanel';
 import { toast } from 'sonner';
@@ -136,7 +136,13 @@ export default function Trends() {
           </TabsContent>
 
           <TabsContent value="charts">
-            <TrendCharts assessments={assessments} />
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ReadinessTrendChart assessments={assessments} />
+                <ComplianceTrendChart assessments={assessments} />
+              </div>
+              <MaturityDistributionChart assessments={assessments} />
+            </div>
           </TabsContent>
 
           <TabsContent value="market">
