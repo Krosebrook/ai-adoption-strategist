@@ -10,6 +10,7 @@ import TemplateBuilder from './pages/TemplateBuilder';
 import PlatformComparison from './pages/PlatformComparison';
 import Trends from './pages/Trends';
 import PredictiveAnalytics from './pages/PredictiveAnalytics';
+import Training from './pages/Training';
 import __Layout from './Layout.jsx';
 
 
@@ -26,6 +27,7 @@ export const PAGES = {
     "PlatformComparison": PlatformComparison,
     "Trends": Trends,
     "PredictiveAnalytics": PredictiveAnalytics,
+    "Training": Training,
 }
 
 export const pagesConfig = {

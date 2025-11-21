@@ -11,6 +11,7 @@ export default function Layout({ children, currentPageName }) {
     { name: 'Compare', icon: Star, page: 'PlatformComparison' },
     { name: 'Trends', icon: TrendingUp, page: 'Trends' },
     { name: 'Predictive', icon: Sparkles, page: 'PredictiveAnalytics' },
+    { name: 'Training', icon: Brain, page: 'Training' },
     { name: 'Reports', icon: FileText, page: 'Reports' },
     { name: 'Dashboard', icon: LayoutDashboard, page: 'Dashboard' },
     { name: 'Settings', icon: Settings, page: 'Settings' }
