@@ -8,6 +8,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Star, StarOff, TrendingUp, Shield, Puzzle, AlertTriangle, CheckCircle2, Sparkles, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatCurrency, formatPercentage } from '../utils/formatters';
+import { generateAIComparison } from './AIComparisonEngine';
+import AIComparisonView from './AIComparisonView';
 
 export default function SideBySideComparison({ 
   assessment, 
@@ -17,6 +19,8 @@ export default function SideBySideComparison({
 }) {
   const [aiInsights, setAiInsights] = useState({});
   const [loadingInsights, setLoadingInsights] = useState(false);
+  const [aiComparison, setAiComparison] = useState(null);
+  const [loadingComparison, setLoadingComparison] = useState(false);
 
   const { data: user } = useQuery({
     queryKey: ['current-user'],
@@ -119,8 +123,67 @@ Provide:
     }
   };
 
+  const handleGenerateAIComparison = async () => {
+    if (selectedPlatforms.length < 2) {
+      toast.error('Select at least 2 platforms to compare');
+      return;
+    }
+
+    setLoadingComparison(true);
+    try {
+      const comparison = await generateAIComparison(assessment, selectedPlatforms);
+      setAiComparison(comparison);
+      toast.success('AI comparison generated successfully!');
+    } catch (error) {
+      console.error('Failed to generate AI comparison:', error);
+      toast.error('Failed to generate AI comparison');
+    } finally {
+      setLoadingComparison(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {/* Generate AI Comparison Button */}
+      {selectedPlatforms.length >= 2 && (
+        <Card className="bg-gradient-to-r from-purple-50 to-blue-50">
+          <CardContent className="py-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-semibold text-slate-900 mb-1">
+                  AI-Powered Comprehensive Comparison
+                </h4>
+                <p className="text-sm text-slate-600">
+                  Get detailed side-by-side analysis with strengths, weaknesses, pricing, and strategic recommendations
+                </p>
+              </div>
+              <Button
+                onClick={handleGenerateAIComparison}
+                disabled={loadingComparison}
+                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white"
+              >
+                {loadingComparison ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Generate AI Comparison
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* AI Comparison Results */}
+      {aiComparison && (
+        <AIComparisonView comparison={aiComparison} />
+      )}
+
       {/* Platform Selector */}
       <Card>
         <CardHeader>
