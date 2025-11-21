@@ -15,6 +15,7 @@ import ROIChart from '../components/results/ROIChart';
 import ComplianceMatrix from '../components/results/ComplianceMatrix';
 import IntegrationMatrix from '../components/results/IntegrationMatrix';
 import ScenarioPlanner from '../components/results/ScenarioPlanner';
+import AIScenarioPlanner from '../components/results/AIScenarioPlanner';
 import FeedbackModal from '../components/feedback/FeedbackModal';
 import AIInsights from '../components/results/AIInsights';
 import ImplementationRoadmap from '../components/results/ImplementationRoadmap';
@@ -290,7 +291,10 @@ export default function Results() {
               AI Compliance
             </TabsTrigger>
             <TabsTrigger value="integrations">Integrations</TabsTrigger>
-            <TabsTrigger value="scenarios">Scenario Planning</TabsTrigger>
+            <TabsTrigger value="scenarios">
+              <Sparkles className="h-4 w-4 mr-1" />
+              AI Scenarios
+            </TabsTrigger>
             <TabsTrigger value="details">Full Details</TabsTrigger>
           </TabsList>
 
@@ -514,7 +518,7 @@ export default function Results() {
           </TabsContent>
 
           <TabsContent value="scenarios">
-            <ScenarioPlanner baseAssessment={assessment} />
+            <AIScenarioPlanner baseAssessment={assessment} />
           </TabsContent>
 
           <TabsContent value="details">
