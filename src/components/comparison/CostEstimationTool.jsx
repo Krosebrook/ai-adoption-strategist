@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DollarSign, Users, TrendingUp, Calculator, Sparkles, Loader2, Lightbulb, AlertCircle, TrendingDown } from 'lucide-react';
+import { DollarSign, Users, TrendingUp, Calculator, Sparkles, Loader2, Lightbulb, AlertCircle, TrendingDown, Zap } from 'lucide-react';
 import { formatCurrency, formatPercentage } from '../utils/formatters';
 import { generateCostOptimization } from './CostOptimizationEngine';
 import { toast } from 'sonner';

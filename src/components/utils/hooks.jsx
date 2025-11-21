@@ -92,11 +92,16 @@ export function useAssessmentFilters(assessments) {
     });
   }, [assessments, filters]);
 
-  return { filters, setFilters, filteredAssessments: filtered };
+  return { filters, setFilters, filteredAssessments };
 }
 
 // Hook for fetching assessments with common logic
+// Note: This function requires @tanstack/react-query to be available in the calling component
 export function useAssessments(status = null, limit = 100) {
+  // This hook should only be used in components that have proper React Query setup
+  const { useQuery } = require('@tanstack/react-query');
+  const { base44 } = require('@/api/base44Client');
+  
   return useQuery({
     queryKey: ['assessments', status],
     queryFn: async () => {
@@ -110,7 +115,10 @@ export function useAssessments(status = null, limit = 100) {
 }
 
 // Hook for loading user settings
+// Note: This function requires @tanstack/react-query and base44 client to be available
 export function useUserSettings() {
+  const { useQuery } = require('@tanstack/react-query');
+  const { base44 } = require('@/api/base44Client');
   const [user, setUser] = useState(null);
   
   const { data: settings, isLoading } = useQuery({
