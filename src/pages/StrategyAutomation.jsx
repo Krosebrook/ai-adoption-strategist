@@ -6,11 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Sparkles, Map, Shield, Activity, Plus, RefreshCw } from 'lucide-react';
+import { Loader2, Sparkles, Map, Shield, Activity, Plus, RefreshCw, DollarSign } from 'lucide-react';
 import { generateAdoptionStrategy, identifyRisks, monitorAndRecommend, createCheckpoint } from '../components/strategy/StrategyAutomationEngine';
+import { forecastLongTermCosts, identifyCostSavings, simulateBudgetScenario } from '../components/financial/FinancialOptimizationEngine';
 import StrategyRoadmap from '../components/strategy/StrategyRoadmap';
 import RiskManagement from '../components/strategy/RiskManagement';
 import ProgressMonitor from '../components/strategy/ProgressMonitor';
+import FinancialForecast from '../components/financial/FinancialForecast';
+import CostOptimizationPanel from '../components/financial/CostOptimizationPanel';
+import BudgetScenarioSimulator from '../components/financial/BudgetScenarioSimulator';
 import { toast } from 'sonner';
 
 export default function StrategyAutomationPage() {
@@ -19,6 +23,9 @@ export default function StrategyAutomationPage() {
   const [selectedStrategy, setSelectedStrategy] = useState(null);
   const [recommendations, setRecommendations] = useState(null);
   const [checkpoint, setCheckpoint] = useState(null);
+  const [financialForecast, setFinancialForecast] = useState(null);
+  const [costSavings, setCostSavings] = useState(null);
+  const [budgetScenarios, setBudgetScenarios] = useState([]);
 
   const queryClient = useQueryClient();
 
@@ -64,6 +71,14 @@ export default function StrategyAutomationPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['strategyCheckpoints'] });
       toast.success('Checkpoint created!');
+    }
+  });
+
+  const createBudgetScenarioMutation = useMutation({
+    mutationFn: (data) => base44.entities.BudgetScenario.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['budgetScenarios'] });
+      toast.success('Budget scenario saved!');
     }
   });
 
@@ -151,6 +166,59 @@ export default function StrategyAutomationPage() {
     }
   };
 
+  const handleForecastCosts = async () => {
+    if (!selectedStrategy || !selectedAssessment) return;
+
+    setGenerating(true);
+    try {
+      const forecast = await forecastLongTermCosts(selectedStrategy, selectedAssessment, {
+        monthly: 0,
+        annual: 0
+      });
+      setFinancialForecast(forecast);
+      toast.success('Financial forecast complete!');
+    } catch (error) {
+      toast.error('Failed to forecast costs');
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleIdentifySavings = async () => {
+    if (!selectedStrategy || !selectedAssessment || !financialForecast) return;
+
+    setGenerating(true);
+    try {
+      const savings = await identifyCostSavings(selectedStrategy, selectedAssessment, financialForecast);
+      setCostSavings(savings);
+      toast.success('Cost savings identified!');
+    } catch (error) {
+      toast.error('Failed to identify cost savings');
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleSimulateScenario = async (scenarioConfig) => {
+    if (!selectedStrategy || !selectedAssessment) return;
+
+    setGenerating(true);
+    try {
+      const result = await simulateBudgetScenario(selectedStrategy, selectedAssessment, {
+        ...scenarioConfig,
+        strategy_id: selectedStrategy.id
+      });
+      
+      await createBudgetScenarioMutation.mutateAsync(result);
+      setBudgetScenarios([...budgetScenarios, result]);
+      toast.success('Budget scenario simulated!');
+    } catch (error) {
+      toast.error('Failed to simulate scenario');
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   return (
     <div className="min-h-screen p-6" style={{ background: 'var(--color-background)' }}>
       <div className="max-w-7xl mx-auto space-y-6">
@@ -210,6 +278,10 @@ export default function StrategyAutomationPage() {
                     <TabsTrigger value="roadmap">Roadmap</TabsTrigger>
                     <TabsTrigger value="risks">Risk Management</TabsTrigger>
                     <TabsTrigger value="progress">Progress Monitor</TabsTrigger>
+                    <TabsTrigger value="financial">
+                      <DollarSign className="h-4 w-4 mr-1" />
+                      Financial
+                    </TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="roadmap">
@@ -226,6 +298,68 @@ export default function StrategyAutomationPage() {
                       recommendations={recommendations || selectedStrategy.ai_recommendations}
                       checkpoint={checkpoint || checkpoints[0]}
                     />
+                  </TabsContent>
+
+                  <TabsContent value="financial" className="space-y-6">
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={handleForecastCosts}
+                        disabled={generating}
+                        variant="outline"
+                      >
+                        {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                        Forecast Costs
+                      </Button>
+                      <Button
+                        onClick={handleIdentifySavings}
+                        disabled={generating || !financialForecast}
+                        variant="outline"
+                      >
+                        {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                        Identify Savings
+                      </Button>
+                    </div>
+
+                    {financialForecast && <FinancialForecast forecast={financialForecast} />}
+                    
+                    {costSavings && <CostOptimizationPanel costSavings={costSavings} />}
+
+                    <BudgetScenarioSimulator
+                      onSimulate={handleSimulateScenario}
+                      generating={generating}
+                    />
+
+                    {budgetScenarios.length > 0 && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Simulated Scenarios</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            {budgetScenarios.map((scenario, idx) => (
+                              <div key={idx} className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+                                <div className="flex items-start justify-between">
+                                  <div>
+                                    <h4 className="font-semibold text-slate-900">{scenario.scenario_name}</h4>
+                                    <p className="text-sm text-slate-600">
+                                      Budget: ${(scenario.total_budget / 1000).toFixed(0)}K - {scenario.budget_period}
+                                    </p>
+                                  </div>
+                                  <Badge className={
+                                    scenario.scenario_analysis?.feasibility === 'fully_feasible' ? 'bg-green-600' :
+                                    scenario.scenario_analysis?.feasibility === 'feasible_with_adjustments' ? 'bg-blue-600' :
+                                    scenario.scenario_analysis?.feasibility === 'challenging' ? 'bg-yellow-600' :
+                                    'bg-red-600'
+                                  }>
+                                    {scenario.scenario_analysis?.feasibility?.replace(/_/g, ' ')}
+                                  </Badge>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
                   </TabsContent>
                 </Tabs>
               </div>
