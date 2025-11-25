@@ -12,6 +12,7 @@ import Trends from './pages/Trends';
 import PredictiveAnalytics from './pages/PredictiveAnalytics';
 import Training from './pages/Training';
 import StrategyAutomation from './pages/StrategyAutomation';
+import Onboarding from './pages/Onboarding';
 import __Layout from './Layout.jsx';
 
 
@@ -30,6 +31,7 @@ export const PAGES = {
     "PredictiveAnalytics": PredictiveAnalytics,
     "Training": Training,
     "StrategyAutomation": StrategyAutomation,
+    "Onboarding": Onboarding,
 }
 
 export const pagesConfig = {

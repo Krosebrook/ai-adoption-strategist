@@ -20,6 +20,9 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-background)' }}>
+      {/* Onboarding Banner */}
+      <OnboardingBanner />
+      
       {/* Header */}
       <header className="sticky top-0 z-50" style={{ 
         background: 'var(--color-surface)', 
