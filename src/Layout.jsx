@@ -1,20 +1,22 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Brain, Home, FileText, LayoutDashboard, Star, Settings, TrendingUp, Sparkles } from 'lucide-react';
+import { Brain, Home, FileText, LayoutDashboard, Star, Settings, TrendingUp, Sparkles, GraduationCap } from 'lucide-react';
+import OnboardingBanner from './components/onboarding/OnboardingBanner';
 
 export default function Layout({ children, currentPageName }) {
   const navigation = [
-    { name: 'Home', icon: Home, page: 'Home' },
-    { name: 'Executive', icon: LayoutDashboard, page: 'ExecutiveDashboard' },
-    { name: 'Assessment', icon: FileText, page: 'Assessment' },
-    { name: 'Strategy', icon: Sparkles, page: 'StrategyAutomation' },
-    { name: 'Compare', icon: Star, page: 'PlatformComparison' },
-    { name: 'Trends', icon: TrendingUp, page: 'Trends' },
-    { name: 'Training', icon: Brain, page: 'Training' },
-    { name: 'Reports', icon: FileText, page: 'Reports' },
-    { name: 'Settings', icon: Settings, page: 'Settings' }
-  ];
+        { name: 'Home', icon: Home, page: 'Home' },
+        { name: 'Executive', icon: LayoutDashboard, page: 'ExecutiveDashboard' },
+        { name: 'Assessment', icon: FileText, page: 'Assessment' },
+        { name: 'Strategy', icon: Sparkles, page: 'StrategyAutomation' },
+        { name: 'Compare', icon: Star, page: 'PlatformComparison' },
+        { name: 'Trends', icon: TrendingUp, page: 'Trends' },
+        { name: 'Training', icon: Brain, page: 'Training' },
+        { name: 'Onboarding', icon: GraduationCap, page: 'Onboarding' },
+        { name: 'Reports', icon: FileText, page: 'Reports' },
+        { name: 'Settings', icon: Settings, page: 'Settings' }
+      ];
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-background)' }}>
