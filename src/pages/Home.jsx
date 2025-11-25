@@ -16,7 +16,10 @@ import {
   Target,
   Shield,
   BarChart3,
-  CheckCircle
+  CheckCircle,
+  Users,
+  Zap,
+  Globe
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -42,7 +45,6 @@ export default function HomePage() {
       title: 'AI Assessment',
       description: 'Get intelligent platform recommendations based on your needs',
       icon: FileText,
-      color: 'blue',
       link: 'Assessment',
       stats: `${assessments.length} assessments`
     },
@@ -50,7 +52,6 @@ export default function HomePage() {
       title: 'Strategy Automation',
       description: 'Automated roadmap generation with risk management',
       icon: Sparkles,
-      color: 'purple',
       link: 'StrategyAutomation',
       stats: `${strategies.length} active strategies`
     },
@@ -58,58 +59,52 @@ export default function HomePage() {
       title: 'AI Training',
       description: 'Personalized training modules with progress tracking',
       icon: GraduationCap,
-      color: 'green',
       link: 'Training'
     },
     {
       title: 'Financial Optimization',
       description: 'Cost forecasting and budget scenario simulation',
       icon: DollarSign,
-      color: 'emerald',
       link: 'StrategyAutomation'
     },
     {
       title: 'Platform Comparison',
       description: 'Side-by-side analysis of AI platforms',
       icon: BarChart3,
-      color: 'indigo',
       link: 'PlatformComparison'
     },
     {
-      title: 'Predictive Analytics',
-      description: 'ROI forecasting and risk prediction',
-      icon: TrendingUp,
-      color: 'pink',
-      link: 'PredictiveAnalytics'
+      title: 'Collaborative Strategy',
+      description: 'Multi-user co-editing with AI-driven decision support',
+      icon: Users,
+      link: 'StrategyAutomation'
     }
   ];
 
   const quickActions = [
-    { label: 'Start New Assessment', icon: FileText, link: 'Assessment', color: 'blue' },
-    { label: 'Generate Strategy', icon: Sparkles, link: 'StrategyAutomation', color: 'purple' },
-    { label: 'View Training', icon: GraduationCap, link: 'Training', color: 'green' },
-    { label: 'Analyze Trends', icon: TrendingUp, link: 'Trends', color: 'pink' }
+    { label: 'Start Assessment', icon: FileText, link: 'Assessment' },
+    { label: 'Generate Strategy', icon: Sparkles, link: 'StrategyAutomation' },
+    { label: 'View Training', icon: GraduationCap, link: 'Training' },
+    { label: 'Analyze Trends', icon: TrendingUp, link: 'Trends' }
   ];
 
-  const getColorClasses = (color) => ({
-    blue: 'from-blue-500 to-blue-600',
-    purple: 'from-purple-500 to-purple-600',
-    green: 'from-green-500 to-green-600',
-    emerald: 'from-emerald-500 to-emerald-600',
-    indigo: 'from-indigo-500 to-indigo-600',
-    pink: 'from-pink-500 to-pink-600'
-  }[color]);
+  const platforms = [
+    { name: 'Google Gemini', provider: 'Google' },
+    { name: 'Microsoft Copilot', provider: 'Microsoft' },
+    { name: 'Anthropic Claude', provider: 'Anthropic' },
+    { name: 'OpenAI ChatGPT', provider: 'OpenAI' }
+  ];
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--color-background)' }}>
+    <div className="min-h-screen sunrise-gradient">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: 'var(--color-text)' }}>
-            Enterprise AI Decision Platform
+        <div className="text-center mb-16">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
+            INT Inc. Enterprise AI Platform
           </h1>
-          <p className="text-xl mb-8" style={{ color: 'var(--color-text-secondary)' }}>
-            AI-powered assessment, strategy automation, and implementation planning
+          <p className="text-xl mb-8 text-white/95" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.25)' }}>
+            Strategic Assessment & Implementation Planning
           </p>
           
           <div className="flex flex-wrap justify-center gap-3">
@@ -117,8 +112,11 @@ export default function HomePage() {
               const Icon = action.icon;
               return (
                 <Link key={idx} to={createPageUrl(action.link)}>
-                  <Button className={`bg-gradient-to-r ${getColorClasses(action.color)} hover:opacity-90`}>
-                    <Icon className="h-4 w-4 mr-2" />
+                  <Button 
+                    className="bg-white/95 text-slate-900 hover:bg-white border border-orange-300/30 shadow-md hover:shadow-lg transition-all"
+                    style={{ borderRadius: '20px' }}
+                  >
+                    <Icon className="h-4 w-4 mr-2" style={{ color: '#E88A1D' }} />
                     {action.label}
                   </Button>
                 </Link>
@@ -129,58 +127,57 @@ export default function HomePage() {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm text-slate-600 mb-1">Total Assessments</div>
-                  <div className="text-2xl font-bold text-slate-900">{assessments.length}</div>
-                </div>
-                <FileText className="h-8 w-8 text-blue-600" />
-              </div>
-            </CardContent>
-          </Card>
+          {[
+            { label: 'Total Assessments', value: assessments.length, icon: FileText, color: '#E88A1D' },
+            { label: 'Active Strategies', value: strategies.length, icon: Target, color: '#6B5B7A' },
+            { label: 'AI Platforms', value: 4, icon: Globe, color: '#D07612' },
+            { label: 'Welcome', value: user?.full_name?.split(' ')[0] || 'User', icon: CheckCircle, color: '#C4A35A' }
+          ].map((stat, idx) => {
+            const Icon = stat.icon;
+            return (
+              <Card key={idx} className="sunrise-card">
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm mb-1" style={{ color: 'var(--color-text-secondary)' }}>{stat.label}</div>
+                      <div className="text-2xl font-bold" style={{ color: 'var(--color-text)' }}>{stat.value}</div>
+                    </div>
+                    <Icon className="h-8 w-8" style={{ color: stat.color }} />
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
 
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm text-slate-600 mb-1">Active Strategies</div>
-                  <div className="text-2xl font-bold text-slate-900">{strategies.length}</div>
-                </div>
-                <Target className="h-8 w-8 text-purple-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm text-slate-600 mb-1">AI Platforms</div>
-                  <div className="text-2xl font-bold text-slate-900">4</div>
-                </div>
-                <Sparkles className="h-8 w-8 text-green-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm text-slate-600 mb-1">User</div>
-                  <div className="text-lg font-bold text-slate-900 truncate">{user?.full_name}</div>
-                </div>
-                <CheckCircle className="h-8 w-8 text-emerald-600" />
-              </div>
-            </CardContent>
-          </Card>
+        {/* Platform Cards */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold mb-6 text-white" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.25)' }}>
+            Supported AI Platforms
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {platforms.map((platform, idx) => (
+              <Card key={idx} className="sunrise-card cursor-pointer">
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-lg font-semibold" style={{ color: 'var(--color-text)' }}>{platform.name}</span>
+                  </div>
+                  <Badge 
+                    variant="secondary" 
+                    className="text-xs"
+                    style={{ background: 'var(--color-secondary)', color: 'var(--color-text-secondary)' }}
+                  >
+                    {platform.provider}
+                  </Badge>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
 
         {/* Features Grid */}
         <div className="mb-12">
-          <h2 className="text-2xl font-bold mb-6" style={{ color: 'var(--color-text)' }}>
+          <h2 className="text-2xl font-bold mb-6 text-white" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.25)' }}>
             Platform Features
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -188,20 +185,25 @@ export default function HomePage() {
               const Icon = feature.icon;
               return (
                 <Link key={idx} to={createPageUrl(feature.link)}>
-                  <Card className="h-full hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer">
+                  <Card className="sunrise-card h-full">
                     <CardHeader>
-                      <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${getColorClasses(feature.color)} flex items-center justify-center mb-3`}>
+                      <div 
+                        className="w-12 h-12 rounded-lg flex items-center justify-center mb-3"
+                        style={{ background: 'linear-gradient(135deg, #E88A1D, #D07612)' }}
+                      >
                         <Icon className="h-6 w-6 text-white" />
                       </div>
-                      <CardTitle className="text-lg">{feature.title}</CardTitle>
-                      <CardDescription>{feature.description}</CardDescription>
+                      <CardTitle className="text-lg" style={{ color: 'var(--color-text)' }}>{feature.title}</CardTitle>
+                      <CardDescription style={{ color: 'var(--color-text-secondary)' }}>{feature.description}</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-center justify-between">
                         {feature.stats && (
-                          <Badge variant="outline">{feature.stats}</Badge>
+                          <Badge variant="outline" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}>
+                            {feature.stats}
+                          </Badge>
                         )}
-                        <ArrowRight className="h-4 w-4 text-slate-400" />
+                        <ArrowRight className="h-4 w-4" style={{ color: 'var(--color-gray-400)' }} />
                       </div>
                     </CardContent>
                   </Card>
@@ -213,9 +215,9 @@ export default function HomePage() {
 
         {/* Recent Activity */}
         {assessments.length > 0 && (
-          <Card>
+          <Card className="sunrise-card mb-12">
             <CardHeader>
-              <CardTitle>Recent Assessments</CardTitle>
+              <CardTitle style={{ color: 'var(--color-text)' }}>Recent Assessments</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -225,17 +227,18 @@ export default function HomePage() {
                     to={createPageUrl('Results') + `?id=${assessment.id}`}
                     className="block"
                   >
-                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 hover:bg-slate-100 transition-colors">
+                    <div 
+                      className="rounded-lg p-4 transition-colors"
+                      style={{ background: 'var(--color-secondary)', border: '1px solid var(--color-border)' }}
+                    >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h4 className="font-semibold text-slate-900">{assessment.organization_name}</h4>
-                          <p className="text-sm text-slate-600 mt-1">
+                          <h4 className="font-semibold" style={{ color: 'var(--color-text)' }}>{assessment.organization_name}</h4>
+                          <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
                             {assessment.recommended_platforms?.[0]?.platform_name}
                           </p>
                         </div>
-                        <Badge className={
-                          assessment.status === 'completed' ? 'bg-green-600' : 'bg-blue-600'
-                        }>
+                        <Badge style={{ background: assessment.status === 'completed' ? '#E88A1D' : '#6B5B7A', color: 'white' }}>
                           {assessment.status}
                         </Badge>
                       </div>
@@ -246,7 +249,7 @@ export default function HomePage() {
               
               {assessments.length > 3 && (
                 <Link to={createPageUrl('Dashboard')}>
-                  <Button variant="outline" className="w-full mt-4">
+                  <Button variant="outline" className="w-full mt-4" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text)' }}>
                     View All Assessments
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
@@ -257,29 +260,32 @@ export default function HomePage() {
         )}
 
         {/* Key Benefits */}
-        <div className="mt-12 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-8">
+        <div 
+          className="rounded-xl p-8 mb-12"
+          style={{ background: 'rgba(255,255,255,0.95)', border: '1px solid var(--color-border)' }}
+        >
           <h2 className="text-2xl font-bold mb-6 text-center" style={{ color: 'var(--color-text)' }}>
-            Why Use This Platform?
+            Why Choose INT Inc. Platform?
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
-              <Shield className="h-12 w-12 text-purple-600 mx-auto mb-3" />
-              <h3 className="font-semibold text-slate-900 mb-2">Risk-Aware Planning</h3>
-              <p className="text-sm text-slate-600">
+              <Shield className="h-12 w-12 mx-auto mb-3" style={{ color: '#6B5B7A' }} />
+              <h3 className="font-semibold mb-2" style={{ color: 'var(--color-text)' }}>Risk-Aware Planning</h3>
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                 AI identifies potential risks and creates comprehensive mitigation strategies
               </p>
             </div>
             <div className="text-center">
-              <DollarSign className="h-12 w-12 text-green-600 mx-auto mb-3" />
-              <h3 className="font-semibold text-slate-900 mb-2">Cost Optimization</h3>
-              <p className="text-sm text-slate-600">
+              <DollarSign className="h-12 w-12 mx-auto mb-3" style={{ color: '#E88A1D' }} />
+              <h3 className="font-semibold mb-2" style={{ color: 'var(--color-text)' }}>Cost Optimization</h3>
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                 Forecast costs, identify savings, and simulate budget scenarios
               </p>
             </div>
             <div className="text-center">
-              <Target className="h-12 w-12 text-blue-600 mx-auto mb-3" />
-              <h3 className="font-semibold text-slate-900 mb-2">Automated Strategy</h3>
-              <p className="text-sm text-slate-600">
+              <Zap className="h-12 w-12 mx-auto mb-3" style={{ color: '#D07612' }} />
+              <h3 className="font-semibold mb-2" style={{ color: 'var(--color-text)' }}>Automated Strategy</h3>
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                 Generate complete implementation roadmaps with real-time progress monitoring
               </p>
             </div>
@@ -287,25 +293,27 @@ export default function HomePage() {
         </div>
 
         {/* CTA Section */}
-        <div className="mt-12 text-center">
-          <Card className="border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50">
-            <CardContent className="py-8">
-              <h3 className="text-2xl font-bold mb-3" style={{ color: 'var(--color-text)' }}>
-                Ready to Transform Your AI Adoption?
-              </h3>
-              <p className="text-lg mb-6" style={{ color: 'var(--color-text-secondary)' }}>
-                Start with a comprehensive AI assessment and get personalized recommendations
-              </p>
-              <Link to={createPageUrl('Assessment')}>
-                <Button size="lg" className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90">
-                  <FileText className="h-5 w-5 mr-2" />
-                  Start Assessment Now
-                  <ArrowRight className="h-5 w-5 ml-2" />
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="sunrise-card border-2" style={{ borderColor: 'var(--color-primary)' }}>
+          <CardContent className="py-8 text-center">
+            <h3 className="text-2xl font-bold mb-3" style={{ color: 'var(--color-text)' }}>
+              Ready to Transform Your AI Adoption?
+            </h3>
+            <p className="text-lg mb-6" style={{ color: 'var(--color-text-secondary)' }}>
+              Start with a comprehensive AI assessment and get personalized recommendations
+            </p>
+            <Link to={createPageUrl('Assessment')}>
+              <Button 
+                size="lg" 
+                className="text-white shadow-lg hover:shadow-xl transition-all"
+                style={{ background: 'linear-gradient(135deg, #E88A1D, #D07612)' }}
+              >
+                <FileText className="h-5 w-5 mr-2" />
+                Start Assessment Now
+                <ArrowRight className="h-5 w-5 ml-2" />
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

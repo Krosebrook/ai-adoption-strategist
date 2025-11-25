@@ -32,16 +32,16 @@ export default function Layout({ children, currentPageName }) {
           <div className="flex items-center justify-between h-16">
             <Link to={createPageUrl('Home')} className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ 
-                background: 'linear-gradient(135deg, var(--color-teal-500), var(--color-teal-600))' 
+                background: 'linear-gradient(135deg, #E88A1D, #D07612)' 
               }}>
                 <Brain className="h-6 w-6 text-white" />
               </div>
               <div>
                 <h1 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>
-                  Enterprise AI Assessment
+                  INT Inc. AI Platform
                 </h1>
                 <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-                  Platform Comparison Tool
+                  Strategic Assessment & Implementation
                 </p>
               </div>
             </Link>
@@ -57,7 +57,7 @@ export default function Layout({ children, currentPageName }) {
                     className="flex items-center gap-2 px-4 py-2 font-medium transition-all"
                     style={{
                       borderRadius: 'var(--radius-base)',
-                      background: isActive ? 'linear-gradient(135deg, var(--color-teal-500), var(--color-teal-600))' : 'transparent',
+                      background: isActive ? 'linear-gradient(135deg, #E88A1D, #D07612)' : 'transparent',
                       color: isActive ? 'white' : 'var(--color-text-secondary)'
                     }}
                   >
