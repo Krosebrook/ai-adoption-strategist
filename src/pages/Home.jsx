@@ -96,8 +96,27 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen sunrise-gradient">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="min-h-screen relative">
+      {/* Fixed Background */}
+      <div 
+        className="fixed inset-0 z-0"
+        style={{
+          background: `linear-gradient(
+            180deg,
+            #7A8B99 0%,
+            #9A9A8E 15%,
+            #C9B896 30%,
+            #E8C078 45%,
+            #F5A623 60%,
+            #E88A1D 75%,
+            #C4A35A 90%,
+            #D4B896 100%
+          )`
+        }}
+      />
+      
+      {/* Scrollable Content */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
@@ -135,7 +154,7 @@ export default function HomePage() {
           ].map((stat, idx) => {
             const Icon = stat.icon;
             return (
-              <Card key={idx} className="sunrise-card">
+              <Card key={idx} className="bg-white/80 backdrop-blur-sm border border-white/30">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -157,7 +176,7 @@ export default function HomePage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {platforms.map((platform, idx) => (
-              <Card key={idx} className="sunrise-card cursor-pointer">
+              <Card key={idx} className="bg-white/80 backdrop-blur-sm border border-white/30 cursor-pointer hover:bg-white/90 transition-all">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-lg font-semibold" style={{ color: 'var(--color-text)' }}>{platform.name}</span>
@@ -165,7 +184,7 @@ export default function HomePage() {
                   <Badge 
                     variant="secondary" 
                     className="text-xs"
-                    style={{ background: 'var(--color-secondary)', color: 'var(--color-text-secondary)' }}
+                    style={{ background: 'rgba(0,0,0,0.1)', color: 'var(--color-text-secondary)' }}
                   >
                     {platform.provider}
                   </Badge>
@@ -185,7 +204,7 @@ export default function HomePage() {
               const Icon = feature.icon;
               return (
                 <Link key={idx} to={createPageUrl(feature.link)}>
-                  <Card className="sunrise-card h-full">
+                  <Card className="bg-white/80 backdrop-blur-sm border border-white/30 h-full hover:bg-white/90 transition-all">
                     <CardHeader>
                       <div 
                         className="w-12 h-12 rounded-lg flex items-center justify-center mb-3"
@@ -199,7 +218,7 @@ export default function HomePage() {
                     <CardContent>
                       <div className="flex items-center justify-between">
                         {feature.stats && (
-                          <Badge variant="outline" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}>
+                          <Badge variant="outline" style={{ borderColor: 'rgba(0,0,0,0.2)', color: 'var(--color-text-secondary)' }}>
                             {feature.stats}
                           </Badge>
                         )}
@@ -215,7 +234,7 @@ export default function HomePage() {
 
         {/* Recent Activity */}
         {assessments.length > 0 && (
-          <Card className="sunrise-card mb-12">
+          <Card className="bg-white/80 backdrop-blur-sm border border-white/30 mb-12">
             <CardHeader>
               <CardTitle style={{ color: 'var(--color-text)' }}>Recent Assessments</CardTitle>
             </CardHeader>
@@ -228,8 +247,8 @@ export default function HomePage() {
                     className="block"
                   >
                     <div 
-                      className="rounded-lg p-4 transition-colors"
-                      style={{ background: 'var(--color-secondary)', border: '1px solid var(--color-border)' }}
+                      className="rounded-lg p-4 transition-colors bg-white/50 hover:bg-white/70"
+                      style={{ border: '1px solid rgba(0,0,0,0.1)' }}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -249,7 +268,7 @@ export default function HomePage() {
               
               {assessments.length > 3 && (
                 <Link to={createPageUrl('Dashboard')}>
-                  <Button variant="outline" className="w-full mt-4" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text)' }}>
+                  <Button variant="outline" className="w-full mt-4 bg-white/50 hover:bg-white/70" style={{ borderColor: 'rgba(0,0,0,0.2)', color: 'var(--color-text)' }}>
                     View All Assessments
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
@@ -261,8 +280,8 @@ export default function HomePage() {
 
         {/* Key Benefits */}
         <div 
-          className="rounded-xl p-8 mb-12"
-          style={{ background: 'rgba(255,255,255,0.95)', border: '1px solid var(--color-border)' }}
+          className="rounded-xl p-8 mb-12 backdrop-blur-sm"
+          style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.3)' }}
         >
           <h2 className="text-2xl font-bold mb-6 text-center" style={{ color: 'var(--color-text)' }}>
             Why Choose INT Inc. Platform?
@@ -293,7 +312,7 @@ export default function HomePage() {
         </div>
 
         {/* CTA Section */}
-        <Card className="sunrise-card border-2" style={{ borderColor: 'var(--color-primary)' }}>
+        <Card className="bg-white/85 backdrop-blur-sm border-2" style={{ borderColor: '#E88A1D' }}>
           <CardContent className="py-8 text-center">
             <h3 className="text-2xl font-bold mb-3" style={{ color: 'var(--color-text)' }}>
               Ready to Transform Your AI Adoption?
