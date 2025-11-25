@@ -13,6 +13,7 @@ import PredictiveAnalytics from './pages/PredictiveAnalytics';
 import Training from './pages/Training';
 import StrategyAutomation from './pages/StrategyAutomation';
 import Onboarding from './pages/Onboarding';
+import Documentation from './pages/Documentation';
 import __Layout from './Layout.jsx';
 
 
@@ -32,6 +33,7 @@ export const PAGES = {
     "Training": Training,
     "StrategyAutomation": StrategyAutomation,
     "Onboarding": Onboarding,
+    "Documentation": Documentation,
 }
 
 export const pagesConfig = {

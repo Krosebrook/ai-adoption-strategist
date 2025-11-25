@@ -4,6 +4,7 @@ import { createPageUrl } from '@/utils';
 import { Brain, Home, FileText, LayoutDashboard, Star, Settings, TrendingUp, Sparkles, GraduationCap } from 'lucide-react';
 import OnboardingBanner from './components/onboarding/OnboardingBanner';
 import PWAInstallPrompt from './components/pwa/PWAInstallPrompt';
+import ContextualGuidancePanel from './components/guidance/ContextualGuidancePanel';
 
 export default function Layout({ children, currentPageName }) {
   const navigation = [
@@ -12,10 +13,9 @@ export default function Layout({ children, currentPageName }) {
         { name: 'Assessment', icon: FileText, page: 'Assessment' },
         { name: 'Strategy', icon: Sparkles, page: 'StrategyAutomation' },
         { name: 'Compare', icon: Star, page: 'PlatformComparison' },
-        { name: 'Trends', icon: TrendingUp, page: 'Trends' },
         { name: 'Training', icon: Brain, page: 'Training' },
-        { name: 'Onboarding', icon: GraduationCap, page: 'Onboarding' },
         { name: 'Reports', icon: FileText, page: 'Reports' },
+        { name: 'Docs', icon: GraduationCap, page: 'Documentation' },
         { name: 'Settings', icon: Settings, page: 'Settings' }
       ];
 
@@ -77,6 +77,9 @@ export default function Layout({ children, currentPageName }) {
       
       {/* PWA Install Prompt */}
       <PWAInstallPrompt />
+      
+      {/* AI Contextual Guidance */}
+      <ContextualGuidancePanel currentPage={currentPageName} minimized={true} />
 
       {/* Footer */}
       <footer className="mt-16" style={{ 
