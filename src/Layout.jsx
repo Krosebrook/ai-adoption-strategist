@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Brain, Home, FileText, LayoutDashboard, Star, Settings, TrendingUp, Sparkles, GraduationCap } from 'lucide-react';
 import OnboardingBanner from './components/onboarding/OnboardingBanner';
+import PWAInstallPrompt from './components/pwa/PWAInstallPrompt';
 
 export default function Layout({ children, currentPageName }) {
   const navigation = [
@@ -73,6 +74,9 @@ export default function Layout({ children, currentPageName }) {
 
       {/* Main Content */}
       <main>{children}</main>
+      
+      {/* PWA Install Prompt */}
+      <PWAInstallPrompt />
 
       {/* Footer */}
       <footer className="mt-16" style={{ 
