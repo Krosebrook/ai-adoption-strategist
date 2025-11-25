@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Sparkles, Map, Shield, Activity, Plus, RefreshCw, DollarSign, TrendingUp, FileText } from 'lucide-react';
+import { Loader2, Sparkles, Map, Shield, Activity, Plus, RefreshCw, DollarSign, TrendingUp, FileText, Users } from 'lucide-react';
 import { generateAdoptionStrategy, identifyRisks, monitorAndRecommend, createCheckpoint } from '../components/strategy/StrategyAutomationEngine';
 import { forecastLongTermCosts, identifyCostSavings, simulateBudgetScenario } from '../components/financial/FinancialOptimizationEngine';
 import StrategyRoadmap from '../components/strategy/StrategyRoadmap';
@@ -17,6 +17,7 @@ import CostOptimizationPanel from '../components/financial/CostOptimizationPanel
 import BudgetScenarioSimulator from '../components/financial/BudgetScenarioSimulator';
 import AdvancedScenarioModeler from '../components/scenarios/AdvancedScenarioModeler';
 import CustomComplianceUploader from '../components/compliance/CustomComplianceUploader';
+import StrategySessionPanel from '../components/collaboration/StrategySessionPanel';
 import { toast } from 'sonner';
 
 export default function StrategyAutomationPage() {
@@ -292,6 +293,10 @@ export default function StrategyAutomationPage() {
                       <FileText className="h-4 w-4 mr-1" />
                       Custom Compliance
                     </TabsTrigger>
+                    <TabsTrigger value="collaborate">
+                      <Users className="h-4 w-4 mr-1" />
+                      Collaborate
+                    </TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="roadmap">
@@ -378,6 +383,10 @@ export default function StrategyAutomationPage() {
 
                   <TabsContent value="compliance">
                     <CustomComplianceUploader />
+                  </TabsContent>
+
+                  <TabsContent value="collaborate">
+                    <StrategySessionPanel strategy={selectedStrategy} />
                   </TabsContent>
                 </Tabs>
               </div>
