@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, GraduationCap, Sparkles, BookOpen, BarChart3, Plus } from 'lucide-react';
+import { Loader2, GraduationCap, Sparkles, BookOpen, BarChart3, Plus, Users } from 'lucide-react';
 import { generateTrainingModule, generateProgressFeedback, analyzeSkillGaps } from '../components/training/TrainingContentGenerator';
 import InteractiveTrainingViewer from '../components/training/InteractiveTrainingViewer';
 import ProgressTracker from '../components/training/ProgressTracker';
+import TeamSkillPathViewer from '../components/training/TeamSkillPathViewer';
 import { toast } from 'sonner';
 
 export default function TrainingPage() {
@@ -192,6 +193,10 @@ export default function TrainingPage() {
             <TabsTrigger value="generate">
               <Sparkles className="h-4 w-4 mr-2" />
               Generate New
+            </TabsTrigger>
+            <TabsTrigger value="team-paths">
+              <Users className="h-4 w-4 mr-2" />
+              Team Skill Paths
             </TabsTrigger>
           </TabsList>
 
@@ -391,6 +396,39 @@ export default function TrainingPage() {
                   </div>
                 </CardContent>
               </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="team-paths">
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Select Assessment for Team Analysis</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Select value={selectedAssessment?.id} onValueChange={(id) => {
+                  const assessment = assessments.find(a => a.id === id);
+                  setSelectedAssessment(assessment);
+                  setSelectedPlatform(assessment?.recommended_platforms?.[0]?.platform_name || '');
+                }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose an assessment" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {assessments.map((assessment) => (
+                      <SelectItem key={assessment.id} value={assessment.id}>
+                        {assessment.organization_name} - {assessment.recommended_platforms?.[0]?.platform_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </CardContent>
+            </Card>
+            
+            {selectedAssessment && (
+              <TeamSkillPathViewer
+                assessment={selectedAssessment}
+                platform={selectedPlatform}
+              />
             )}
           </TabsContent>
         </Tabs>
