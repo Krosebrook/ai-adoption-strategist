@@ -15,6 +15,7 @@ import StrategyAutomation from './pages/StrategyAutomation';
 import Onboarding from './pages/Onboarding';
 import Documentation from './pages/Documentation';
 import ImplementationPlan from './pages/ImplementationPlan';
+import AIAgentHub from './pages/AIAgentHub';
 import __Layout from './Layout.jsx';
 
 
@@ -36,6 +37,7 @@ export const PAGES = {
     "Onboarding": Onboarding,
     "Documentation": Documentation,
     "ImplementationPlan": ImplementationPlan,
+    "AIAgentHub": AIAgentHub,
 }
 
 export const pagesConfig = {

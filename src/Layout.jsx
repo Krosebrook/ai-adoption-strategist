@@ -12,10 +12,10 @@ export default function Layout({ children, currentPageName }) {
         { name: 'Executive', icon: LayoutDashboard, page: 'ExecutiveDashboard' },
         { name: 'Assessment', icon: FileText, page: 'Assessment' },
         { name: 'Strategy', icon: Sparkles, page: 'StrategyAutomation' },
+        { name: 'AI Agents', icon: Brain, page: 'AIAgentHub' },
         { name: 'Compare', icon: Star, page: 'PlatformComparison' },
         { name: 'Training', icon: Brain, page: 'Training' },
         { name: 'Reports', icon: FileText, page: 'Reports' },
-        { name: 'Docs', icon: GraduationCap, page: 'Documentation' },
         { name: 'Settings', icon: Settings, page: 'Settings' }
       ];
 
