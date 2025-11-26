@@ -14,6 +14,7 @@ import Training from './pages/Training';
 import StrategyAutomation from './pages/StrategyAutomation';
 import Onboarding from './pages/Onboarding';
 import Documentation from './pages/Documentation';
+import ImplementationPlan from './pages/ImplementationPlan';
 import __Layout from './Layout.jsx';
 
 
@@ -34,6 +35,7 @@ export const PAGES = {
     "StrategyAutomation": StrategyAutomation,
     "Onboarding": Onboarding,
     "Documentation": Documentation,
+    "ImplementationPlan": ImplementationPlan,
 }
 
 export const pagesConfig = {
