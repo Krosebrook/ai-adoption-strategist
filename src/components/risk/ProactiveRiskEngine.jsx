@@ -1,4 +1,9 @@
 import { base44 } from '@/api/base44Client';
+import { 
+  getCached, setCache, generateCacheKey,
+  extractStrategyEssentials, extractAssessmentEssentials,
+  truncateToTokenBudget
+} from '../utils/aiOptimization';
 
 // Risk thresholds configuration
 export const RISK_THRESHOLDS = {
@@ -120,19 +125,26 @@ export async function analyzeAssessmentRisks(assessment) {
 }
 
 export async function generateMitigationPlan(risk, context) {
+  // Check cache first
+  const cacheKey = generateCacheKey('mitigation', { risk, context });
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
+  // Compress context for token efficiency
+  const compressedContext = {
+    strategy: extractStrategyEssentials(context.strategy),
+    assessment: extractAssessmentEssentials(context.assessment)
+  };
+
   const response = await base44.integrations.Core.InvokeLLM({
-    prompt: `You are an expert risk mitigation strategist. Generate a detailed mitigation plan.
+    prompt: truncateToTokenBudget(`Risk mitigation analysis needed.
 
-RISK DETAILS:
-- Category: ${risk.category}
-- Severity: ${risk.severity}
-- Trigger: ${risk.trigger}
-- Details: ${risk.details}
+RISK: ${risk.category} | ${risk.severity} | ${risk.trigger}
+Details: ${risk.details}
 
-CONTEXT:
-${JSON.stringify(context, null, 2)}
+CONTEXT: ${JSON.stringify(compressedContext)}
 
-Provide actionable mitigation steps with clear ownership and timelines.`,
+Provide 3-5 actionable mitigation steps with ownership and timelines.`),
     response_json_schema: {
       type: 'object',
       properties: {
@@ -146,33 +158,34 @@ Provide actionable mitigation steps with clear ownership and timelines.`,
               step: { type: 'string' },
               priority: { type: 'string', enum: ['immediate', 'short-term', 'medium-term'] },
               owner: { type: 'string' },
-              timeline: { type: 'string' },
-              success_criteria: { type: 'string' }
+              timeline: { type: 'string' }
             }
           }
-        },
-        escalation_triggers: { type: 'array', items: { type: 'string' } }
+        }
       }
     }
   });
   
+  setCache(cacheKey, response);
   return response;
 }
 
 export async function generateComplianceDraft(risk, context) {
   if (risk.category !== 'compliance') return null;
   
+  const cacheKey = generateCacheKey('compliance', { risk, context });
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
+  const compressedContext = {
+    strategy: extractStrategyEssentials(context.strategy),
+    assessment: extractAssessmentEssentials(context.assessment)
+  };
+
   const response = await base44.integrations.Core.InvokeLLM({
-    prompt: `You are the Compliance Analyst AI. Generate a compliance documentation draft.
-
-RISK DETAILS:
-- Description: ${risk.details}
-- Severity: ${risk.severity}
-
-CONTEXT:
-${JSON.stringify(context, null, 2)}
-
-Generate appropriate compliance documentation to address this risk.`,
+    prompt: `Compliance documentation needed for: ${risk.details} (${risk.severity})
+Context: ${JSON.stringify(compressedContext)}
+Generate compliance doc with requirements, gaps, and remediation.`,
     response_json_schema: {
       type: 'object',
       properties: {
@@ -183,36 +196,33 @@ Generate appropriate compliance documentation to address this risk.`,
         current_gaps: { type: 'array', items: { type: 'string' } },
         remediation_plan: { type: 'string' },
         timeline: { type: 'string' },
-        responsible_parties: { type: 'array', items: { type: 'string' } },
         verification_steps: { type: 'array', items: { type: 'string' } }
       }
     }
   });
   
-  return {
+  const result = {
     document_type: response.document_type,
     title: response.title,
     content: `# ${response.title}\n\n## Executive Summary\n${response.executive_summary}\n\n## Compliance Requirements\n${response.compliance_requirements?.map(r => `- ${r}`).join('\n')}\n\n## Current Gaps\n${response.current_gaps?.map(g => `- ${g}`).join('\n')}\n\n## Remediation Plan\n${response.remediation_plan}\n\n## Timeline\n${response.timeline}\n\n## Verification Steps\n${response.verification_steps?.map(s => `- ${s}`).join('\n')}`,
     generated_at: new Date().toISOString()
   };
+  
+  setCache(cacheKey, result);
+  return result;
 }
 
 export async function generateStrategyAdjustments(risk, strategy) {
+  const cacheKey = generateCacheKey('adjustments', { risk, strategyId: strategy.id });
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
+  const essentials = extractStrategyEssentials(strategy);
+
   const response = await base44.integrations.Core.InvokeLLM({
-    prompt: `You are the Strategy Advisor AI. Propose strategy adjustments based on identified risks.
-
-RISK DETAILS:
-- Category: ${risk.category}
-- Severity: ${risk.severity}
-- Details: ${risk.details}
-
-CURRENT STRATEGY:
-- Organization: ${strategy.organization_name}
-- Platform: ${strategy.platform}
-- Current Phase: ${strategy.progress_tracking?.current_phase}
-- Progress: ${strategy.progress_tracking?.overall_progress}%
-
-Propose concrete strategy adjustments to mitigate this risk.`,
+    prompt: `Strategy adjustment for ${risk.category} risk (${risk.severity}): ${risk.details}
+Strategy: ${JSON.stringify(essentials)}
+Propose 2-4 concrete adjustments with priority and impact.`,
     response_json_schema: {
       type: 'object',
       properties: {
@@ -224,86 +234,93 @@ Propose concrete strategy adjustments to mitigate this risk.`,
               adjustment: { type: 'string' },
               rationale: { type: 'string' },
               impact: { type: 'string' },
-              priority: { type: 'string', enum: ['critical', 'high', 'medium', 'low'] },
-              effort: { type: 'string' }
+              priority: { type: 'string', enum: ['critical', 'high', 'medium', 'low'] }
             }
           }
-        },
-        timeline_impact: { type: 'string' },
-        resource_implications: { type: 'string' }
+        }
       }
     }
   });
   
-  return response.adjustments || [];
+  const result = response.adjustments || [];
+  setCache(cacheKey, result);
+  return result;
 }
 
 export async function runProactiveRiskScan(strategies, assessments) {
   const alerts = [];
   
-  // Scan strategies
+  // Collect all risks first (no LLM calls yet)
+  const strategyRisks = [];
   for (const strategy of strategies) {
     const assessment = assessments.find(a => a.id === strategy.assessment_id);
     const risks = await analyzeStrategyRisks(strategy, assessment);
-    
-    for (const risk of risks) {
-      const context = { strategy, assessment };
-      
-      // Generate mitigation plan
-      const mitigation = await generateMitigationPlan(risk, context);
-      
-      // Generate compliance draft if needed
-      const complianceDraft = await generateComplianceDraft(risk, context);
-      
-      // Generate strategy adjustments
-      const adjustments = await generateStrategyAdjustments(risk, strategy);
-      
-      alerts.push({
-        source_type: 'strategy',
-        source_id: strategy.id,
-        source_name: strategy.organization_name,
-        risk_category: risk.category,
-        severity: risk.severity,
-        risk_score: risk.severity === 'critical' ? 90 : risk.severity === 'high' ? 70 : 50,
-        trigger_reason: risk.trigger,
-        risk_description: risk.details,
-        potential_impact: mitigation.potential_impact,
-        mitigation_steps: mitigation.mitigation_steps?.map(s => ({ ...s, status: 'pending' })),
-        compliance_draft: complianceDraft,
-        strategy_adjustments: adjustments,
-        status: 'new'
-      });
-    }
+    strategyRisks.push(...risks.map(r => ({ risk: r, strategy, assessment, type: 'strategy' })));
   }
   
-  // Scan assessments without strategies
+  const assessmentRisks = [];
   for (const assessment of assessments) {
     const hasStrategy = strategies.some(s => s.assessment_id === assessment.id);
     if (hasStrategy) continue;
-    
     const risks = await analyzeAssessmentRisks(assessment);
-    
-    for (const risk of risks) {
-      const mitigation = await generateMitigationPlan(risk, { assessment });
-      const complianceDraft = await generateComplianceDraft(risk, { assessment });
-      
-      alerts.push({
-        source_type: 'assessment',
-        source_id: assessment.id,
-        source_name: assessment.organization_name,
-        risk_category: risk.category,
-        severity: risk.severity,
-        risk_score: risk.severity === 'critical' ? 90 : risk.severity === 'high' ? 70 : 50,
-        trigger_reason: risk.trigger,
-        risk_description: risk.details,
-        potential_impact: mitigation.potential_impact,
-        mitigation_steps: mitigation.mitigation_steps?.map(s => ({ ...s, status: 'pending' })),
-        compliance_draft: complianceDraft,
-        strategy_adjustments: [],
-        status: 'new'
-      });
-    }
+    assessmentRisks.push(...risks.map(r => ({ risk: r, assessment, type: 'assessment' })));
   }
   
-  return alerts;
+  // Process strategy risks with parallel LLM calls where possible
+  const strategyAlertPromises = strategyRisks.map(async ({ risk, strategy, assessment }) => {
+    const context = { strategy, assessment };
+    
+    // Run LLM calls in parallel for each risk
+    const [mitigation, complianceDraft, adjustments] = await Promise.all([
+      generateMitigationPlan(risk, context),
+      generateComplianceDraft(risk, context),
+      generateStrategyAdjustments(risk, strategy)
+    ]);
+    
+    return {
+      source_type: 'strategy',
+      source_id: strategy.id,
+      source_name: strategy.organization_name,
+      risk_category: risk.category,
+      severity: risk.severity,
+      risk_score: risk.severity === 'critical' ? 90 : risk.severity === 'high' ? 70 : 50,
+      trigger_reason: risk.trigger,
+      risk_description: risk.details,
+      potential_impact: mitigation.potential_impact,
+      mitigation_steps: mitigation.mitigation_steps?.map(s => ({ ...s, status: 'pending' })),
+      compliance_draft: complianceDraft,
+      strategy_adjustments: adjustments,
+      status: 'new'
+    };
+  });
+  
+  // Process assessment risks
+  const assessmentAlertPromises = assessmentRisks.map(async ({ risk, assessment }) => {
+    const [mitigation, complianceDraft] = await Promise.all([
+      generateMitigationPlan(risk, { assessment }),
+      generateComplianceDraft(risk, { assessment })
+    ]);
+    
+    return {
+      source_type: 'assessment',
+      source_id: assessment.id,
+      source_name: assessment.organization_name,
+      risk_category: risk.category,
+      severity: risk.severity,
+      risk_score: risk.severity === 'critical' ? 90 : risk.severity === 'high' ? 70 : 50,
+      trigger_reason: risk.trigger,
+      risk_description: risk.details,
+      potential_impact: mitigation.potential_impact,
+      mitigation_steps: mitigation.mitigation_steps?.map(s => ({ ...s, status: 'pending' })),
+      compliance_draft: complianceDraft,
+      strategy_adjustments: [],
+      status: 'new'
+    };
+  });
+  
+  // Wait for all alerts to be generated
+  const strategyAlerts = await Promise.all(strategyAlertPromises);
+  const assessmentAlerts = await Promise.all(assessmentAlertPromises);
+  
+  return [...strategyAlerts, ...assessmentAlerts];
 }
