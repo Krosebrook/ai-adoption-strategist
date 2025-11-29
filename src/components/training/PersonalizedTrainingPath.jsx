@@ -9,6 +9,8 @@ import {
   GraduationCap, Brain, Target, Sparkles, Loader2,
   CheckCircle, Clock, ArrowRight, BookOpen, Award
 } from 'lucide-react';
+import { buildTrainingPrompt, SCHEMAS } from '../utils/promptBuilder';
+import { getCached, setCache, generateCacheKey } from '../utils/aiOptimization';
 
 export default function PersonalizedTrainingPath({ userId, userRole, onboardingProgress, assessmentData }) {
   const [generating, setGenerating] = useState(false);
@@ -22,87 +24,29 @@ export default function PersonalizedTrainingPath({ userId, userRole, onboardingP
   });
 
   const generateTrainingPath = async () => {
+    // Check cache first
+    const completedCount = existingProgress.filter(p => p.status === 'completed').length;
+    const cacheKey = generateCacheKey('training', { userId, userRole, completedCount });
+    const cached = getCached(cacheKey);
+    if (cached) {
+      setTrainingPath(cached);
+      return;
+    }
+
     setGenerating(true);
     try {
-      // Build context for Training Coach
-      const context = {
-        userRole,
-        onboardingProgress: onboardingProgress?.progress || {},
-        completedModules: existingProgress.filter(p => p.status === 'completed').length,
-        assessmentInsights: assessmentData ? {
-          maturityLevel: assessmentData.ai_assessment_score?.maturity_level,
-          improvementAreas: assessmentData.ai_assessment_score?.improvement_areas,
-          strengths: assessmentData.ai_assessment_score?.strengths
-        } : null
-      };
+      const assessmentInsights = assessmentData ? {
+        maturityLevel: assessmentData.ai_assessment_score?.maturity_level,
+        improvementAreas: assessmentData.ai_assessment_score?.improvement_areas
+      } : null;
 
       const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are an expert AI Training Coach. Create a personalized training path.
-
-USER PROFILE:
-- Role: ${context.userRole}
-- Onboarding Progress: ${JSON.stringify(context.onboardingProgress)}
-- Completed Training Modules: ${context.completedModules}
-${context.assessmentInsights ? `
-ASSESSMENT INSIGHTS:
-- Maturity Level: ${context.assessmentInsights.maturityLevel}
-- Strengths: ${context.assessmentInsights.strengths?.join(', ')}
-- Improvement Areas: ${context.assessmentInsights.improvementAreas?.map(a => a.area).join(', ')}
-` : ''}
-
-Create a personalized training path with:
-1. Skill gap analysis based on role and progress
-2. Recommended learning modules in priority order
-3. Estimated time for each module
-4. Adaptive recommendations based on their current level
-5. Milestone achievements to unlock`,
-        response_json_schema: {
-          type: 'object',
-          properties: {
-            skill_gap_analysis: {
-              type: 'object',
-              properties: {
-                current_level: { type: 'string' },
-                target_level: { type: 'string' },
-                key_gaps: { type: 'array', items: { type: 'string' } },
-                strengths_to_leverage: { type: 'array', items: { type: 'string' } }
-              }
-            },
-            recommended_path: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  module_id: { type: 'string' },
-                  title: { type: 'string' },
-                  description: { type: 'string' },
-                  skill_focus: { type: 'array', items: { type: 'string' } },
-                  difficulty: { type: 'string' },
-                  estimated_duration: { type: 'string' },
-                  priority: { type: 'string' },
-                  prerequisites: { type: 'array', items: { type: 'string' } }
-                }
-              }
-            },
-            milestones: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  name: { type: 'string' },
-                  description: { type: 'string' },
-                  badge: { type: 'string' },
-                  unlock_criteria: { type: 'string' }
-                }
-              }
-            },
-            adaptive_tips: { type: 'array', items: { type: 'string' } },
-            estimated_completion: { type: 'string' }
-          }
-        }
+        prompt: buildTrainingPrompt(userRole, completedCount, assessmentInsights),
+        response_json_schema: SCHEMAS.trainingPath
       });
 
       setTrainingPath(response);
+      setCache(cacheKey, response, 15 * 60 * 1000); // 15 min cache
     } catch (error) {
       console.error('Failed to generate training path:', error);
     } finally {

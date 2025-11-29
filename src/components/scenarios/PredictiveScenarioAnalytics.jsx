@@ -9,6 +9,8 @@ import {
   DollarSign, Users, Shield, Sparkles, ArrowUp, ArrowDown
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart, Legend } from 'recharts';
+import { buildPredictivePrompt, SCHEMAS } from '../utils/promptBuilder';
+import { getCached, setCache, generateCacheKey } from '../utils/aiOptimization';
 
 export default function PredictiveScenarioAnalytics({ scenarios, strategy, assessment }) {
   const [analyzing, setAnalyzing] = useState(false);
@@ -18,139 +20,27 @@ export default function PredictiveScenarioAnalytics({ scenarios, strategy, asses
   const runPredictiveAnalysis = async () => {
     if (!scenarios || scenarios.length === 0) return;
 
+    // Check cache first
+    const cacheKey = generateCacheKey('predictive', { 
+      scenarios: scenarios.map(s => s.id || s.name), 
+      strategyId: strategy?.id, 
+      timeHorizon 
+    });
+    const cached = getCached(cacheKey);
+    if (cached) {
+      setForecast(cached);
+      return;
+    }
+
     setAnalyzing(true);
     try {
       const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are an expert AI predictive analytics engine. Analyze the following combined scenarios and provide quantitative forecasts.
-
-SCENARIOS:
-${scenarios.map((s, i) => `
-Scenario ${i + 1}: ${s.name || 'Unnamed'}
-Type: ${s.type}
-Parameters: ${JSON.stringify(s.parameters || s.config)}
-`).join('\n')}
-
-STRATEGY CONTEXT:
-${strategy ? `
-- Organization: ${strategy.organization_name}
-- Platform: ${strategy.platform}
-- Current Progress: ${strategy.progress_tracking?.overall_progress}%
-- Current Phase: ${strategy.progress_tracking?.current_phase}
-` : 'No strategy context'}
-
-ASSESSMENT CONTEXT:
-${assessment ? `
-- Maturity Level: ${assessment.ai_assessment_score?.maturity_level}
-- Readiness Score: ${assessment.ai_assessment_score?.readiness_score}
-- Current Risk Score: ${assessment.ai_assessment_score?.risk_score}
-` : 'No assessment context'}
-
-TIME HORIZON: ${timeHorizon} months
-
-Provide detailed quantitative forecasts including:
-1. ROI projections over time with confidence intervals
-2. Adoption rate predictions month by month
-3. Risk reduction trajectory
-4. Cost impact analysis
-5. Optimal strategic adjustments based on forecasts`,
-        response_json_schema: {
-          type: 'object',
-          properties: {
-            roi_forecast: {
-              type: 'object',
-              properties: {
-                monthly_projections: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      month: { type: 'number' },
-                      roi_percent: { type: 'number' },
-                      confidence_lower: { type: 'number' },
-                      confidence_upper: { type: 'number' }
-                    }
-                  }
-                },
-                total_roi: { type: 'number' },
-                breakeven_month: { type: 'number' },
-                confidence_level: { type: 'string' }
-              }
-            },
-            adoption_forecast: {
-              type: 'object',
-              properties: {
-                monthly_rates: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      month: { type: 'number' },
-                      adoption_percent: { type: 'number' },
-                      active_users: { type: 'number' }
-                    }
-                  }
-                },
-                peak_adoption: { type: 'number' },
-                time_to_80_percent: { type: 'number' }
-              }
-            },
-            risk_forecast: {
-              type: 'object',
-              properties: {
-                monthly_risk_scores: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      month: { type: 'number' },
-                      risk_score: { type: 'number' },
-                      mitigated_risks: { type: 'number' }
-                    }
-                  }
-                },
-                risk_reduction_percent: { type: 'number' },
-                key_risk_milestones: { type: 'array', items: { type: 'string' } }
-              }
-            },
-            cost_impact: {
-              type: 'object',
-              properties: {
-                total_investment: { type: 'number' },
-                monthly_costs: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      month: { type: 'number' },
-                      cost: { type: 'number' },
-                      savings: { type: 'number' }
-                    }
-                  }
-                },
-                net_savings_year1: { type: 'number' },
-                cost_per_user: { type: 'number' }
-              }
-            },
-            strategic_adjustments: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  timing: { type: 'string' },
-                  adjustment: { type: 'string' },
-                  expected_impact: { type: 'string' },
-                  confidence: { type: 'string' }
-                }
-              }
-            },
-            overall_confidence: { type: 'string' },
-            key_assumptions: { type: 'array', items: { type: 'string' } },
-            scenario_synergies: { type: 'array', items: { type: 'string' } }
-          }
-        }
+        prompt: buildPredictivePrompt(scenarios, strategy, assessment, timeHorizon),
+        response_json_schema: SCHEMAS.predictive
       });
 
       setForecast(response);
+      setCache(cacheKey, response, 10 * 60 * 1000); // 10 min cache
     } catch (error) {
       console.error('Predictive analysis failed:', error);
     } finally {

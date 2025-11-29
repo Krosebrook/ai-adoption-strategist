@@ -11,6 +11,7 @@ import {
   FileText, GraduationCap, CheckCircle
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { buildAgentPrompt, buildSynthesisPrompt, SCHEMAS } from '../utils/promptBuilder';
 
 export default function CollaborativeTask({ agents, assessments, strategies, sharedContext, onUpdateContext }) {
   const [selectedAgents, setSelectedAgents] = useState([]);
@@ -73,85 +74,26 @@ export default function CollaborativeTask({ agents, assessments, strategies, sha
         sharedContext
       };
 
-      // Get response from each agent
-      const agentResults = [];
-      
-      for (const agentId of selectedAgents) {
+      // PARALLEL: Get responses from all agents simultaneously
+      const agentPromises = selectedAgents.map(async (agentId) => {
         const agent = agents.find(a => a.id === agentId);
+        const prompt = buildAgentPrompt(agent, taskDescription, context);
         
-        const prompt = `You are the ${agent.name}. ${agent.description}
-
-COLLABORATIVE TASK: ${taskDescription}
-
-CONTEXT:
-${context.assessment ? `Assessment: ${context.assessment.organization_name}
-- Recommended Platform: ${context.assessment.recommended_platforms?.[0]?.platform_name}
-- Maturity Level: ${context.assessment.ai_assessment_score?.maturity_level}
-- Key Risks: ${context.assessment.ai_assessment_score?.key_risks?.map(r => r.description).join(', ')}` : ''}
-
-${context.strategy ? `Strategy: ${context.strategy.organization_name}
-- Platform: ${context.strategy.platform}
-- Current Phase: ${context.strategy.progress_tracking?.current_phase}
-- Progress: ${context.strategy.progress_tracking?.overall_progress}%
-- Active Risks: ${context.strategy.risk_analysis?.identified_risks?.filter(r => r.status !== 'resolved').length}` : ''}
-
-${context.sharedContext ? `Shared Context: ${JSON.stringify(context.sharedContext)}` : ''}
-
-Provide your expert analysis and recommendations for this collaborative task. Be specific and actionable.`;
-
         const response = await base44.integrations.Core.InvokeLLM({
           prompt,
-          response_json_schema: {
-            type: 'object',
-            properties: {
-              analysis: { type: 'string' },
-              key_findings: { type: 'array', items: { type: 'string' } },
-              recommendations: { type: 'array', items: { type: 'string' } },
-              risks_identified: { type: 'array', items: { type: 'string' } },
-              collaboration_notes: { type: 'string' }
-            }
-          }
+          response_json_schema: SCHEMAS.agentResponse
         });
 
-        agentResults.push({
-          agent,
-          response
-        });
-        
-        setResults(prev => [...prev, { agent, response }]);
-      }
+        return { agent, response };
+      });
 
-      // Synthesize results
-      const synthesisPrompt = `You are a senior consultant synthesizing insights from multiple AI specialists.
+      const agentResults = await Promise.all(agentPromises);
+      setResults(agentResults);
 
-ORIGINAL TASK: ${taskDescription}
-
-AGENT ANALYSES:
-${agentResults.map(r => `
-=== ${r.agent.name} ===
-Analysis: ${r.response.analysis}
-Key Findings: ${r.response.key_findings?.join(', ')}
-Recommendations: ${r.response.recommendations?.join(', ')}
-`).join('\n')}
-
-Create a unified synthesis that:
-1. Combines the key insights from all agents
-2. Resolves any conflicting recommendations
-3. Provides a prioritized action plan
-4. Highlights areas of consensus and divergence`;
-
+      // Synthesize results with compressed prompt
       const synthesis = await base44.integrations.Core.InvokeLLM({
-        prompt: synthesisPrompt,
-        response_json_schema: {
-          type: 'object',
-          properties: {
-            executive_summary: { type: 'string' },
-            unified_recommendations: { type: 'array', items: { type: 'string' } },
-            priority_actions: { type: 'array', items: { type: 'object', properties: { action: { type: 'string' }, priority: { type: 'string' }, owner: { type: 'string' } } } },
-            consensus_areas: { type: 'array', items: { type: 'string' } },
-            areas_for_further_review: { type: 'array', items: { type: 'string' } }
-          }
-        }
+        prompt: buildSynthesisPrompt(taskDescription, agentResults),
+        response_json_schema: SCHEMAS.synthesis
       });
 
       setSynthesizedResult(synthesis);
