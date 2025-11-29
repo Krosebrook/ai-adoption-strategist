@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { 
   AlertTriangle, Shield, Loader2, RefreshCw, CheckCircle,
   FileText, Target, Clock, ChevronRight, X, Sparkles,
-  Bell, TrendingDown, Eye
+  Bell, TrendingDown, Eye, GraduationCap, BookOpen
 } from 'lucide-react';
 import { runProactiveRiskScan } from './ProactiveRiskEngine';
 import ReactMarkdown from 'react-markdown';
@@ -373,6 +373,55 @@ export default function RiskAlertsDashboard() {
                     </Card>
                   </div>
                 )}
+
+                {/* Recommended Training */}
+                {selectedAlert.recommended_training?.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                      <GraduationCap className="h-4 w-4 text-blue-500" />
+                      Recommended Training Modules
+                    </h4>
+                    <div className="space-y-3">
+                      {selectedAlert.recommended_training.map((module, idx) => (
+                        <div key={idx} className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <BookOpen className="h-4 w-4 text-blue-600" />
+                              <span className="font-medium text-blue-900">{module.module_title}</span>
+                            </div>
+                            <Badge className={
+                              module.priority === 'critical' ? 'bg-red-100 text-red-800' :
+                              module.priority === 'high' ? 'bg-orange-100 text-orange-800' :
+                              'bg-blue-100 text-blue-800'
+                            }>
+                              {module.priority}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-blue-800 mb-2">{module.description}</p>
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            {module.skill_focus?.map((skill, i) => (
+                              <Badge key={i} variant="outline" className="text-xs bg-white">
+                                {skill}
+                              </Badge>
+                            ))}
+                          </div>
+                          <div className="flex items-center justify-between text-xs text-blue-700">
+                            <span>
+                              <strong>Target:</strong> {module.target_role}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {module.estimated_duration}
+                            </span>
+                          </div>
+                          <p className="text-xs text-blue-600 mt-2 italic">
+                            <strong>Why:</strong> {module.relevance_reason}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </>
           )}
@@ -438,6 +487,12 @@ function AlertCard({ alert, onSelect, onAcknowledge, onResolve, onDismiss, getSe
                   <Badge variant="outline" className="text-xs bg-purple-50">
                     <Sparkles className="h-3 w-3 mr-1" />
                     {alert.strategy_adjustments.length} adjustments
+                  </Badge>
+                )}
+                {alert.recommended_training?.length > 0 && (
+                  <Badge variant="outline" className="text-xs bg-blue-50">
+                    <GraduationCap className="h-3 w-3 mr-1" />
+                    {alert.recommended_training.length} training
                   </Badge>
                 )}
               </div>

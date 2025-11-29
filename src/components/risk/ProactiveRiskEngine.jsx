@@ -247,6 +247,68 @@ Propose 2-4 concrete adjustments with priority and impact.`,
   return result;
 }
 
+/**
+ * Generate training recommendations for risk mitigation
+ * Triggered for compliance, organizational, and strategic risks
+ */
+export async function generateRiskTrainingRecommendations(risk, context) {
+  // Only generate training for relevant risk categories
+  const trainingRelevantCategories = ['compliance', 'organizational', 'operational', 'technical'];
+  if (!trainingRelevantCategories.includes(risk.category)) {
+    return [];
+  }
+
+  const cacheKey = generateCacheKey('risk_training', { risk, contextId: context.strategy?.id || context.assessment?.id });
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
+  const compressedContext = {
+    strategy: extractStrategyEssentials(context.strategy),
+    assessment: extractAssessmentEssentials(context.assessment)
+  };
+
+  // Extract owners from mitigation steps if available
+  const potentialOwners = context.mitigationSteps?.map(s => s.owner).filter(Boolean) || [];
+
+  const response = await base44.integrations.Core.InvokeLLM({
+    prompt: truncateToTokenBudget(`AI Training Coach: Recommend training modules to address this risk.
+
+RISK: ${risk.category} | ${risk.severity}
+Details: ${risk.details}
+${potentialOwners.length > 0 ? `Assigned Owners: ${potentialOwners.join(', ')}` : ''}
+
+CONTEXT: ${JSON.stringify(compressedContext)}
+
+Recommend 2-4 training modules that would help team members address this specific risk.
+Focus on practical skills needed to mitigate the identified risk.`),
+    response_json_schema: {
+      type: 'object',
+      properties: {
+        training_modules: {
+          type: 'array',
+          maxItems: 4,
+          items: {
+            type: 'object',
+            properties: {
+              module_title: { type: 'string' },
+              description: { type: 'string' },
+              target_role: { type: 'string' },
+              skill_focus: { type: 'array', items: { type: 'string' }, maxItems: 3 },
+              priority: { type: 'string', enum: ['critical', 'high', 'medium'] },
+              estimated_duration: { type: 'string' },
+              relevance_reason: { type: 'string' }
+            }
+          }
+        }
+      }
+    }
+  });
+
+  const result = response.training_modules || [];
+  setCache(cacheKey, result, 10 * 60 * 1000); // 10 min cache
+  return result;
+}
+
 export async function runProactiveRiskScan(strategies, assessments) {
   const alerts = [];
   
@@ -277,6 +339,10 @@ export async function runProactiveRiskScan(strategies, assessments) {
       generateStrategyAdjustments(risk, strategy)
     ]);
     
+    // Generate training recommendations with mitigation context
+    const trainingContext = { ...context, mitigationSteps: mitigation.mitigation_steps };
+    const recommendedTraining = await generateRiskTrainingRecommendations(risk, trainingContext);
+    
     return {
       source_type: 'strategy',
       source_id: strategy.id,
@@ -290,6 +356,7 @@ export async function runProactiveRiskScan(strategies, assessments) {
       mitigation_steps: mitigation.mitigation_steps?.map(s => ({ ...s, status: 'pending' })),
       compliance_draft: complianceDraft,
       strategy_adjustments: adjustments,
+      recommended_training: recommendedTraining,
       status: 'new'
     };
   });
@@ -300,6 +367,10 @@ export async function runProactiveRiskScan(strategies, assessments) {
       generateMitigationPlan(risk, { assessment }),
       generateComplianceDraft(risk, { assessment })
     ]);
+    
+    // Generate training recommendations
+    const trainingContext = { assessment, mitigationSteps: mitigation.mitigation_steps };
+    const recommendedTraining = await generateRiskTrainingRecommendations(risk, trainingContext);
     
     return {
       source_type: 'assessment',
@@ -314,6 +385,7 @@ export async function runProactiveRiskScan(strategies, assessments) {
       mitigation_steps: mitigation.mitigation_steps?.map(s => ({ ...s, status: 'pending' })),
       compliance_draft: complianceDraft,
       strategy_adjustments: [],
+      recommended_training: recommendedTraining,
       status: 'new'
     };
   });
