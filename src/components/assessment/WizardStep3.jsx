@@ -77,13 +77,13 @@ export default function WizardStep3({ formData, setFormData }) {
           <p className="text-sm text-slate-500">Choose the systems that need to connect with your AI platform</p>
         </CardHeader>
         <CardContent className="space-y-6">
-          {Object.entries(INTEGRATION_CATEGORIES).map(([category, tools]) => (
+          {INTEGRATION_CATEGORIES && typeof INTEGRATION_CATEGORIES === 'object' && Object.entries(INTEGRATION_CATEGORIES).map(([category, tools]) => (
             <div key={category} className="space-y-3">
               <h4 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
                 {category}
               </h4>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                {tools.map(tool => (
+                {Array.isArray(tools) && tools.map(tool => (
                   <div
                     key={tool}
                     className={`flex items-center space-x-2 p-2 rounded-md border transition-all cursor-pointer ${
