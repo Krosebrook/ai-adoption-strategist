@@ -27,7 +27,7 @@ const RUNTIME_CACHE_PATTERNS = [
 // API endpoints to cache with short expiration
 const API_CACHE_PATTERNS = [
   /\/api\//,
-  /base44\.com\/api\//
+  /^https?:\/\/.*base44\.com\/api\//
 ];
 
 // Install event - precache critical assets
