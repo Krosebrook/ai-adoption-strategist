@@ -125,9 +125,13 @@ async function networkFirstStrategy(request, cacheName) {
         headers: headers
       });
       
-      caches.open(cacheName).then((cache) => {
-        cache.put(request, modifiedResponse);
-      });
+      // Properly await cache operation to avoid race conditions
+      try {
+        const cache = await caches.open(cacheName);
+        await cache.put(request, modifiedResponse);
+      } catch (cacheError) {
+        console.warn('[Service Worker] Failed to cache response:', cacheError);
+      }
     }
     
     return networkResponse;
@@ -174,9 +178,14 @@ async function cacheFirstStrategy(request, cacheName) {
     // Only cache successful responses for static assets
     if (networkResponse && networkResponse.status === 200) {
       const responseToCache = networkResponse.clone();
-      caches.open(cacheName).then((cache) => {
-        cache.put(request, responseToCache);
-      });
+      
+      // Properly await cache operation to avoid race conditions
+      try {
+        const cache = await caches.open(cacheName);
+        await cache.put(request, responseToCache);
+      } catch (cacheError) {
+        console.warn('[Service Worker] Failed to cache response:', cacheError);
+      }
     }
     
     return networkResponse;

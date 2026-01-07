@@ -26,14 +26,20 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
       .then((registration) => {
         console.log('Service Worker registered successfully:', registration.scope);
         
-        // Check for updates periodically
+        // Check for updates when user returns to app
+        document.addEventListener('visibilitychange', () => {
+          if (!document.hidden && registration) {
+            registration.update();
+          }
+        });
+        
+        // Also check periodically (every 30 minutes)
         setInterval(() => {
           registration.update();
-        }, 60000); // Check every minute
+        }, 30 * 60 * 1000);
       })
       .catch((error) => {
         console.error('Service Worker registration failed:', error);
       });
   });
 }
-
