@@ -1,0 +1,38 @@
+{
+  "name": "AI Adoption Strategist",
+  "short_name": "AI Strategist",
+  "description": "Enterprise AI adoption assessment and implementation planning platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f97316",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "https://base44.com/logo_v2.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity", "utilities"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "New Assessment",
+      "short_name": "Assess",
+      "description": "Start a new AI platform assessment",
+      "url": "/Assessment",
+      "icons": []
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View your AI adoption dashboard",
+      "url": "/Dashboard",
+      "icons": []
+    }
+  ],
+  "prefer_related_applications": false
+}
