@@ -95,6 +95,19 @@ Run a Lighthouse PWA audit in Chrome DevTools to verify:
 - Performance metrics
 - Best practices compliance
 
+## Documentation
+
+Comprehensive documentation is available in the `/docs` directory:
+
+- **[Documentation Index](./docs/DOCUMENTATION_INDEX.md)** - Complete overview of all documentation
+- **[Architecture](./docs/ARCHITECTURE.md)** - System architecture and design
+- **[Framework](./docs/FRAMEWORK.md)** - Technology stack and patterns
+- **[API Reference](./docs/API_REFERENCE.md)** - API endpoints and usage
+- **[Security](./docs/SECURITY.md)** - Security architecture and compliance
+- **[Product Requirements](./docs/PRD_MASTER.md)** - Product vision and requirements
+
+For additional documentation including setup instructions, access control rules, and versioning policies, see the [complete documentation index](./docs/DOCUMENTATION_INDEX.md).
+
 ## License
 
 Proprietary - All rights reserved
