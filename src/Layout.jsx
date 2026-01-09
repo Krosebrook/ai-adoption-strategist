@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Brain, Home, FileText, LayoutDashboard, Star, Settings, TrendingUp, Sparkles, GraduationCap } from 'lucide-react';
+import { Brain, Home, FileText, LayoutDashboard, Star, Settings, TrendingUp, Sparkles, GraduationCap, Shield } from 'lucide-react';
 import OnboardingBanner from './components/onboarding/OnboardingBanner';
 import PWAInstallPrompt from './components/pwa/PWAInstallPrompt';
 import ContextualGuidancePanel from './components/guidance/ContextualGuidancePanel';
