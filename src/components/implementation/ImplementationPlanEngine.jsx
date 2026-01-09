@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
  * Generates comprehensive implementation plans with steps, roadblocks, and timelines
  */
 
-export async function generateImplementationPlan(assessment, selectedPlatform) {
+export async function generateImplementationPlan(assessment, selectedPlatform, includeAdvancedRisk = true) {
   const platform = selectedPlatform.platform_name;
   const orgName = assessment.organization_name;
   const departments = assessment.departments || [];
@@ -143,6 +143,18 @@ Provide practical, actionable guidance that considers the organization's context
       prompt,
       response_json_schema: schema
     });
+
+    // Add advanced risk analysis if requested
+    if (includeAdvancedRisk) {
+      const { analyzeAdvancedRisks } = await import('../risk/AdvancedRiskAnalysisEngine');
+      try {
+        const advancedRiskAnalysis = await analyzeAdvancedRisks(assessment, selectedPlatform, plan);
+        plan.advanced_risk_analysis = advancedRiskAnalysis;
+      } catch (riskError) {
+        console.error('Advanced risk analysis failed:', riskError);
+        // Continue without advanced risk analysis
+      }
+    }
 
     return plan;
   } catch (error) {

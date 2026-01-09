@@ -10,6 +10,7 @@ import {
   FileText, Download, Share2
 } from 'lucide-react';
 import { generateTimelineData, calculateProjectHealthScore } from './ImplementationPlanEngine';
+import AdvancedRiskAnalysisViewer from '../risk/AdvancedRiskAnalysisViewer';
 
 export default function ImplementationPlanViewer({ plan, assessment, platform }) {
   const [selectedPhase, setSelectedPhase] = useState(0);
@@ -146,6 +147,12 @@ export default function ImplementationPlanViewer({ plan, assessment, platform })
             <FileText className="h-4 w-4 mr-2" />
             Phases
           </TabsTrigger>
+          {plan.advanced_risk_analysis && (
+            <TabsTrigger value="advanced-risks">
+              <Shield className="h-4 w-4 mr-2" />
+              Advanced Risk Analysis
+            </TabsTrigger>
+          )}
           <TabsTrigger value="roadblocks">
             <AlertTriangle className="h-4 w-4 mr-2" />
             Roadblocks ({plan.potential_roadblocks?.length || 0})
@@ -271,6 +278,13 @@ export default function ImplementationPlanViewer({ plan, assessment, platform })
             </Card>
           ))}
         </TabsContent>
+
+        {/* Advanced Risk Analysis Tab */}
+        {plan.advanced_risk_analysis && (
+          <TabsContent value="advanced-risks">
+            <AdvancedRiskAnalysisViewer riskAnalysis={plan.advanced_risk_analysis} />
+          </TabsContent>
+        )}
 
         {/* Roadblocks Tab */}
         <TabsContent value="roadblocks" className="space-y-3">
