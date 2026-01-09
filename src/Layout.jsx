@@ -13,6 +13,7 @@ export default function Layout({ children, currentPageName }) {
         { name: 'Assessment', icon: FileText, page: 'Assessment' },
         { name: 'Strategy', icon: Sparkles, page: 'StrategyAutomation' },
         { name: 'AI Agents', icon: Brain, page: 'AIAgentHub' },
+        { name: 'Risk Monitor', icon: Shield, page: 'RiskMonitoring' },
         { name: 'Compare', icon: Star, page: 'PlatformComparison' },
         { name: 'Training', icon: Brain, page: 'Training' },
         { name: 'Reports', icon: FileText, page: 'Reports' },

@@ -32,6 +32,7 @@ import { generateAIAssessmentScore } from '../components/assessment/AIScorer';
 import ComplianceAnalysisPanel from '../components/compliance/ComplianceAnalysisPanel';
 import ImplementationPlanViewer from '../components/implementation/ImplementationPlanViewer';
 import PlatformFeedbackCollector from '../components/feedback/PlatformFeedbackCollector';
+import EnhancedPlanInputs from '../components/implementation/EnhancedPlanInputs';
 import { generateImplementationPlan } from '../components/implementation/ImplementationPlanEngine';
 import { applyReinforcementLearning } from '../components/feedback/ReinforcementLearningEngine';
 
@@ -43,6 +44,7 @@ export default function Results() {
   const [generatingScore, setGeneratingScore] = useState(false);
   const [implementationPlan, setImplementationPlan] = useState(null);
   const [loadingPlan, setLoadingPlan] = useState(false);
+  const [showPlanInputs, setShowPlanInputs] = useState(false);
   const [selectedPlatformForFeedback, setSelectedPlatformForFeedback] = useState(null);
   const [reinforcementLearning, setReinforcementLearning] = useState(null);
   const { insights: aiInsights, roadmap: implementationRoadmap, loading: loadingAI, loadInsights } = useAIInsights();
@@ -194,15 +196,16 @@ export default function Results() {
     );
   };
 
-  const handleGenerateImplementationPlan = async () => {
+  const handleGenerateImplementationPlan = async (config = {}) => {
     if (!recommendations[0]) {
       toast.error('No platform recommendation available');
       return;
     }
 
     setLoadingPlan(true);
+    setShowPlanInputs(false);
     try {
-      const plan = await generateImplementationPlan(assessment, recommendations[0]);
+      const plan = await generateImplementationPlan(assessment, recommendations[0], config);
       setImplementationPlan(plan);
       toast.success('Implementation plan generated!');
     } catch (error) {
@@ -454,10 +457,27 @@ export default function Results() {
                 </CardContent>
               </Card>
             ) : implementationPlan ? (
-              <ImplementationPlanViewer
-                plan={implementationPlan}
+              <div className="space-y-4">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setImplementationPlan(null);
+                    setShowPlanInputs(false);
+                  }}
+                >
+                  Generate New Plan
+                </Button>
+                <ImplementationPlanViewer
+                  plan={implementationPlan}
+                  assessment={assessment}
+                  platform={recommendations[0]}
+                />
+              </div>
+            ) : showPlanInputs ? (
+              <EnhancedPlanInputs
                 assessment={assessment}
-                platform={recommendations[0]}
+                selectedPlatform={recommendations[0]}
+                onSubmit={handleGenerateImplementationPlan}
               />
             ) : (
               <Card>
@@ -467,13 +487,21 @@ export default function Results() {
                   <p className="text-sm text-slate-500 mb-4">
                     AI will create a comprehensive plan with phases, roadblocks, timelines, and team requirements
                   </p>
-                  <Button 
-                    onClick={handleGenerateImplementationPlan}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Generate Implementation Plan
-                  </Button>
+                  <div className="flex gap-3 justify-center">
+                    <Button 
+                      onClick={() => handleGenerateImplementationPlan()}
+                      variant="outline"
+                    >
+                      Quick Generate
+                    </Button>
+                    <Button 
+                      onClick={() => setShowPlanInputs(true)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Configure & Generate
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             )}
