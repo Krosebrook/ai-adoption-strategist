@@ -5,7 +5,13 @@ import { base44 } from '@/api/base44Client';
  * Generates comprehensive implementation plans with steps, roadblocks, and timelines
  */
 
-export async function generateImplementationPlan(assessment, selectedPlatform, includeAdvancedRisk = true) {
+export async function generateImplementationPlan(assessment, selectedPlatform, config = {}) {
+  const includeAdvancedRisk = config.include_advanced_risk !== false;
+  const methodology = config.methodology || 'agile';
+  const teamRoles = config.team_roles || [];
+  const phaseConstraints = config.phase_constraints || [];
+  const additionalRequirements = config.additional_requirements || '';
+  
   const platform = selectedPlatform.platform_name;
   const orgName = assessment.organization_name;
   const departments = assessment.departments || [];
@@ -17,6 +23,23 @@ export async function generateImplementationPlan(assessment, selectedPlatform, i
   const budgetConstraints = assessment.budget_constraints || {};
 
   const prompt = `You are an expert AI implementation consultant. Generate a comprehensive, high-level implementation plan for ${orgName} to adopt ${platform}.
+
+PROJECT MANAGEMENT METHODOLOGY: ${methodology.toUpperCase()}
+${methodology === 'agile' ? 'Use iterative sprints, continuous feedback, and adaptive planning.' : ''}
+${methodology === 'waterfall' ? 'Use sequential phases with clear gates and deliverables.' : ''}
+${methodology === 'hybrid' ? 'Combine structured planning with iterative execution.' : ''}
+${methodology === 'lean' ? 'Focus on value streams, waste elimination, and continuous improvement.' : ''}
+
+${teamRoles.length > 0 ? `REQUIRED TEAM COMPOSITION:
+${teamRoles.map(r => `- ${r.role}: ${r.count} person(s) ${r.required ? '(Required)' : ''}`).join('\n')}
+Ensure your plan accounts for these specific roles and their responsibilities.` : ''}
+
+${phaseConstraints.length > 0 ? `PHASE BUDGET & TIMELINE CONSTRAINTS:
+${phaseConstraints.map(p => `- ${p.phase}: Budget $${p.budget.toLocaleString()}, Duration ${p.duration}`).join('\n')}
+Your plan must respect these constraints and provide justification if adjustments are needed.` : ''}
+
+${additionalRequirements ? `ADDITIONAL REQUIREMENTS:
+${additionalRequirements}` : ''}
 
 CONTEXT:
 - Total Users: ${totalUsers}
