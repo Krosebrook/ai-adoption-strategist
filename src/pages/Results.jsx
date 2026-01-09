@@ -33,6 +33,8 @@ import ComplianceAnalysisPanel from '../components/compliance/ComplianceAnalysis
 import ImplementationPlanViewer from '../components/implementation/ImplementationPlanViewer';
 import PlatformFeedbackCollector from '../components/feedback/PlatformFeedbackCollector';
 import EnhancedPlanInputs from '../components/implementation/EnhancedPlanInputs';
+import ActivityFeed from '../components/collaboration/ActivityFeed';
+import SecureLinkGenerator from '../components/collaboration/SecureLinkGenerator';
 import { generateImplementationPlan } from '../components/implementation/ImplementationPlanEngine';
 import { applyReinforcementLearning } from '../components/feedback/ReinforcementLearningEngine';
 
@@ -290,14 +292,27 @@ export default function Results() {
             </div>
         </div>
 
-        {/* Comments Panel */}
+        {/* Comments & Activity Panel */}
         {showComments && (
-          <div className="mb-8">
-            <CommentsPanel 
-              resourceType="assessment" 
-              resourceId={assessmentId}
-            />
-          </div>
+        <div className="mb-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+        <CommentsPanel 
+          resourceType="assessment" 
+          resourceId={assessmentId}
+        />
+        </div>
+        <div className="space-y-6">
+        <ActivityFeed 
+          resourceType="assessment" 
+          resourceId={assessmentId}
+        />
+        <SecureLinkGenerator
+          resourceType="assessment"
+          resourceId={assessmentId}
+          resourceName={assessment?.organization_name}
+        />
+        </div>
+        </div>
         )}
 
         {/* Reinforcement Learning Banner */}
