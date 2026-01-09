@@ -3,9 +3,10 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Loader2, FileDown, Presentation, Star, Sparkles, Share2, MessageSquare } from 'lucide-react';
+import { FileText, Loader2, FileDown, Presentation, Star, Sparkles, Share2, MessageSquare, Target } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { BrandCard, BrandCardContent, BrandCardHeader, BrandCardTitle } from '../components/ui/BrandCard';
 import RecommendationCard from '../components/results/RecommendationCard';
@@ -29,6 +30,10 @@ import AccessControlBadge from '../components/collaboration/AccessControlBadge';
 import AIScoreCard from '../components/results/AIScoreCard';
 import { generateAIAssessmentScore } from '../components/assessment/AIScorer';
 import ComplianceAnalysisPanel from '../components/compliance/ComplianceAnalysisPanel';
+import ImplementationPlanViewer from '../components/implementation/ImplementationPlanViewer';
+import PlatformFeedbackCollector from '../components/feedback/PlatformFeedbackCollector';
+import { generateImplementationPlan } from '../components/implementation/ImplementationPlanEngine';
+import { applyReinforcementLearning } from '../components/feedback/ReinforcementLearningEngine';
 
 export default function Results() {
   const [assessmentId, setAssessmentId] = useState(null);
@@ -36,6 +41,10 @@ export default function Results() {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [generatingScore, setGeneratingScore] = useState(false);
+  const [implementationPlan, setImplementationPlan] = useState(null);
+  const [loadingPlan, setLoadingPlan] = useState(false);
+  const [selectedPlatformForFeedback, setSelectedPlatformForFeedback] = useState(null);
+  const [reinforcementLearning, setReinforcementLearning] = useState(null);
   const { insights: aiInsights, roadmap: implementationRoadmap, loading: loadingAI, loadInsights } = useAIInsights();
 
   useEffect(() => {
@@ -185,6 +194,43 @@ export default function Results() {
     );
   };
 
+  const handleGenerateImplementationPlan = async () => {
+    if (!recommendations[0]) {
+      toast.error('No platform recommendation available');
+      return;
+    }
+
+    setLoadingPlan(true);
+    try {
+      const plan = await generateImplementationPlan(assessment, recommendations[0]);
+      setImplementationPlan(plan);
+      toast.success('Implementation plan generated!');
+    } catch (error) {
+      console.error('Failed to generate plan:', error);
+      toast.error('Failed to generate implementation plan');
+    } finally {
+      setLoadingPlan(false);
+    }
+  };
+
+  const handleApplyReinforcementLearning = async () => {
+    if (!assessment || !recommendations) return;
+
+    try {
+      const result = await applyReinforcementLearning(assessment, recommendations);
+      setReinforcementLearning(result);
+      
+      if (result.optimization_applied) {
+        toast.success(`Recommendations optimized using ${result.sample_size} feedback samples!`);
+      } else {
+        toast.info(result.message || 'Reinforcement learning applied');
+      }
+    } catch (error) {
+      console.error('Failed to apply reinforcement learning:', error);
+      toast.error('Failed to optimize recommendations');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -251,20 +297,85 @@ export default function Results() {
           </div>
         )}
 
+        {/* Reinforcement Learning Banner */}
+        {reinforcementLearning?.optimization_applied && (
+          <Card className="mb-6 border-2 border-purple-300 bg-purple-50">
+            <CardContent className="pt-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="font-semibold text-purple-900 flex items-center gap-2 mb-2">
+                    <Sparkles className="h-5 w-5" />
+                    Recommendations Optimized with AI Learning
+                  </h3>
+                  <p className="text-sm text-purple-700 mb-2">
+                    Scoring weights adjusted based on {reinforcementLearning.sample_size} user feedback samples
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {reinforcementLearning.adjustments?.slice(0, 3).map((adj, idx) => (
+                      <Badge key={idx} variant="outline" className="bg-white text-xs">
+                        {adj.weight_name}: {(adj.old_value * 100).toFixed(0)}% → {(adj.new_value * 100).toFixed(0)}%
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                <Badge className="bg-purple-600">
+                  Confidence: {(reinforcementLearning.confidence * 100).toFixed(0)}%
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Recommendations */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4">Platform Recommendations</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-slate-900">Platform Recommendations</h2>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleApplyReinforcementLearning}
+                className="border-purple-300 text-purple-700"
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                Optimize with AI Learning
+              </Button>
+            </div>
+          </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {recommendations.slice(0, 4).map((rec, index) => (
-              <RecommendationCard 
-                key={rec.platform} 
-                recommendation={rec} 
-                rank={index + 1}
-                assessmentId={assessmentId}
-              />
+              <div key={rec.platform} className="space-y-2">
+                <RecommendationCard 
+                  recommendation={rec} 
+                  rank={index + 1}
+                  assessmentId={assessmentId}
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full border-blue-300 text-blue-700"
+                  onClick={() => setSelectedPlatformForFeedback(rec)}
+                >
+                  <Star className="h-4 w-4 mr-2" />
+                  Rate This Recommendation
+                </Button>
+              </div>
             ))}
           </div>
         </div>
+
+        {/* Platform Feedback Modal */}
+        {selectedPlatformForFeedback && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div className="max-w-2xl w-full">
+              <PlatformFeedbackCollector
+                platform={selectedPlatformForFeedback}
+                assessmentId={assessmentId}
+                onClose={() => setSelectedPlatformForFeedback(null)}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Detailed Analysis */}
         <Tabs defaultValue="executive" className="space-y-6">
@@ -272,6 +383,10 @@ export default function Results() {
             <TabsTrigger value="ai-score" onClick={!assessment?.ai_assessment_score ? handleGenerateAIScore : undefined}>
               <Sparkles className="h-4 w-4 mr-1" />
               AI Score
+            </TabsTrigger>
+            <TabsTrigger value="implementation" onClick={!implementationPlan ? handleGenerateImplementationPlan : undefined}>
+              <Target className="h-4 w-4 mr-1" />
+              Implementation Plan
             </TabsTrigger>
             <TabsTrigger value="executive">Executive Summary</TabsTrigger>
             <TabsTrigger value="insights-engine">
@@ -326,6 +441,41 @@ export default function Results() {
                   </Button>
                 </BrandCardContent>
               </BrandCard>
+            )}
+          </TabsContent>
+
+          <TabsContent value="implementation">
+            {loadingPlan ? (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <Loader2 className="h-12 w-12 animate-spin text-blue-500 mx-auto mb-4" />
+                  <p className="text-slate-600 mb-2">Generating comprehensive implementation plan...</p>
+                  <p className="text-sm text-slate-500">This may take 20-30 seconds</p>
+                </CardContent>
+              </Card>
+            ) : implementationPlan ? (
+              <ImplementationPlanViewer
+                plan={implementationPlan}
+                assessment={assessment}
+                platform={recommendations[0]}
+              />
+            ) : (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <Target className="h-12 w-12 text-blue-300 mx-auto mb-4" />
+                  <p className="text-slate-600 mb-3">Generate a detailed implementation plan</p>
+                  <p className="text-sm text-slate-500 mb-4">
+                    AI will create a comprehensive plan with phases, roadblocks, timelines, and team requirements
+                  </p>
+                  <Button 
+                    onClick={handleGenerateImplementationPlan}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Generate Implementation Plan
+                  </Button>
+                </CardContent>
+              </Card>
             )}
           </TabsContent>
 

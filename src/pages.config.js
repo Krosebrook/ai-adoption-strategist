@@ -1,43 +1,43 @@
-import Home from './pages/Home';
-import Assessment from './pages/Assessment';
-import Results from './pages/Results';
-import Dashboard from './pages/Dashboard';
-import FeedbackDashboard from './pages/FeedbackDashboard';
-import ExecutiveDashboard from './pages/ExecutiveDashboard';
-import Settings from './pages/Settings';
-import Reports from './pages/Reports';
-import TemplateBuilder from './pages/TemplateBuilder';
-import PlatformComparison from './pages/PlatformComparison';
-import Trends from './pages/Trends';
-import PredictiveAnalytics from './pages/PredictiveAnalytics';
-import Training from './pages/Training';
-import StrategyAutomation from './pages/StrategyAutomation';
-import Onboarding from './pages/Onboarding';
-import Documentation from './pages/Documentation';
-import ImplementationPlan from './pages/ImplementationPlan';
 import AIAgentHub from './pages/AIAgentHub';
+import Assessment from './pages/Assessment';
+import Dashboard from './pages/Dashboard';
+import Documentation from './pages/Documentation';
+import ExecutiveDashboard from './pages/ExecutiveDashboard';
+import FeedbackDashboard from './pages/FeedbackDashboard';
+import Home from './pages/Home';
+import ImplementationPlan from './pages/ImplementationPlan';
+import Onboarding from './pages/Onboarding';
+import PlatformComparison from './pages/PlatformComparison';
+import PredictiveAnalytics from './pages/PredictiveAnalytics';
+import Reports from './pages/Reports';
+import Results from './pages/Results';
+import Settings from './pages/Settings';
+import StrategyAutomation from './pages/StrategyAutomation';
+import TemplateBuilder from './pages/TemplateBuilder';
+import Training from './pages/Training';
+import Trends from './pages/Trends';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Home": Home,
-    "Assessment": Assessment,
-    "Results": Results,
-    "Dashboard": Dashboard,
-    "FeedbackDashboard": FeedbackDashboard,
-    "ExecutiveDashboard": ExecutiveDashboard,
-    "Settings": Settings,
-    "Reports": Reports,
-    "TemplateBuilder": TemplateBuilder,
-    "PlatformComparison": PlatformComparison,
-    "Trends": Trends,
-    "PredictiveAnalytics": PredictiveAnalytics,
-    "Training": Training,
-    "StrategyAutomation": StrategyAutomation,
-    "Onboarding": Onboarding,
-    "Documentation": Documentation,
-    "ImplementationPlan": ImplementationPlan,
     "AIAgentHub": AIAgentHub,
+    "Assessment": Assessment,
+    "Dashboard": Dashboard,
+    "Documentation": Documentation,
+    "ExecutiveDashboard": ExecutiveDashboard,
+    "FeedbackDashboard": FeedbackDashboard,
+    "Home": Home,
+    "ImplementationPlan": ImplementationPlan,
+    "Onboarding": Onboarding,
+    "PlatformComparison": PlatformComparison,
+    "PredictiveAnalytics": PredictiveAnalytics,
+    "Reports": Reports,
+    "Results": Results,
+    "Settings": Settings,
+    "StrategyAutomation": StrategyAutomation,
+    "TemplateBuilder": TemplateBuilder,
+    "Training": Training,
+    "Trends": Trends,
 }
 
 export const pagesConfig = {
