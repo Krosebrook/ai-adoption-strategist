@@ -5,7 +5,7 @@ import { TrendingUp, FileText, Bell, Settings } from 'lucide-react';
 import AnalyticsDashboard from '../components/analytics/AnalyticsDashboard';
 import AutomatedReportDashboard from '../components/reports/AutomatedReportDashboard';
 import PersonalizationPanel from '../components/personalization/PersonalizationPanel';
-import AnomalyDetector from '../components/dashboard/AnomalyDetector';
+import AnomalyDetectorView from '../components/dashboard/AnomalyDetectorView';
 
 export default function AnalyticsPage() {
   return (
@@ -52,7 +52,7 @@ export default function AnalyticsPage() {
           </TabsContent>
 
           <TabsContent value="alerts">
-            <AnomalyDetector />
+            <AnomalyDetectorView />
           </TabsContent>
 
           <TabsContent value="settings">
