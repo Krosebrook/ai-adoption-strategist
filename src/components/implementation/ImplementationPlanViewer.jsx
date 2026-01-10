@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 import { generateTimelineData, calculateProjectHealthScore } from './ImplementationPlanEngine';
 import AdvancedRiskAnalysisViewer from '../risk/AdvancedRiskAnalysisViewer';
+import TaskBoard from '../collaboration/TaskBoard';
+import VersionHistory from '../collaboration/VersionHistory';
 
 export default function ImplementationPlanViewer({ plan, assessment, platform }) {
   const [selectedPhase, setSelectedPhase] = useState(0);
@@ -168,6 +170,10 @@ export default function ImplementationPlanViewer({ plan, assessment, platform })
           <TabsTrigger value="success-factors">
             <Target className="h-4 w-4 mr-2" />
             Success Factors
+          </TabsTrigger>
+          <TabsTrigger value="tasks">
+            <CheckCircle className="h-4 w-4 mr-2" />
+            Tasks
           </TabsTrigger>
         </TabsList>
 
@@ -412,6 +418,15 @@ export default function ImplementationPlanViewer({ plan, assessment, platform })
               </CardContent>
             </Card>
           ))}
+        </TabsContent>
+
+        {/* Tasks Tab */}
+        <TabsContent value="tasks">
+          <TaskBoard
+            resourceType="implementation_plan"
+            resourceId={`plan_${assessment?.id || 'temp'}`}
+            phases={plan.phases?.map(p => p.phase_name) || []}
+          />
         </TabsContent>
 
         {/* Success Factors Tab */}

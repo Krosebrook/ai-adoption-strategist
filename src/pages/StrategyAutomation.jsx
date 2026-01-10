@@ -424,6 +424,51 @@ export default function StrategyAutomationPage() {
             )}
           </TabsContent>
 
+          <TabsContent value="scenarios" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5 text-purple-600" />
+                  Multi-Scenario Strategic Planning
+                </CardTitle>
+                <p className="text-sm text-slate-600">
+                  Generate and compare conservative, balanced, and aggressive scenarios
+                </p>
+              </CardHeader>
+              <CardContent>
+                <Select value={selectedAssessment?.id} onValueChange={(id) => setSelectedAssessment(assessments.find(a => a.id === id))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select assessment" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {assessments.map(a => (
+                      <SelectItem key={a.id} value={a.id}>{a.organization_name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  onClick={handleGenerateScenarios}
+                  disabled={!selectedAssessment || generatingScenarios}
+                  className="w-full mt-4 bg-purple-600 hover:bg-purple-700"
+                >
+                  {generatingScenarios ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-4 w-4 mr-2" />
+                  )}
+                  Generate Scenario Plans
+                </Button>
+              </CardContent>
+            </Card>
+
+            {scenarioPlans && (
+              <ScenarioComparison 
+                scenarioPlans={scenarioPlans}
+                onSelectScenario={(scenario) => toast.success(`Selected ${scenario.scenario_name} scenario`)}
+              />
+            )}
+          </TabsContent>
+
           <TabsContent value="generate" className="space-y-6">
             <Card>
               <CardHeader>

@@ -1,4 +1,5 @@
 import { base44 } from '@/api/base44Client';
+import { assessComplianceRequirements } from '../compliance/AutomatedComplianceChecker';
 
 /**
  * Automated AI Adoption Strategy Generator
@@ -214,10 +215,21 @@ Create a detailed strategy document that includes:
     response_json_schema: schema
   });
 
+  // Add automated compliance check
+  let complianceAssessment = null;
+  if (assessment.compliance_requirements?.length > 0) {
+    try {
+      complianceAssessment = await assessComplianceRequirements(assessment, primaryPlatform, strategy);
+    } catch (error) {
+      console.error('Compliance assessment failed:', error);
+    }
+  }
+
   return {
     ...strategy,
     assessment_id: assessment.id,
     primary_platform: primaryPlatform.platform_name,
+    compliance_assessment: complianceAssessment,
     generated_date: new Date().toISOString()
   };
 }
