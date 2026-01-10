@@ -17,6 +17,7 @@ import TemplateBuilder from './pages/TemplateBuilder';
 import Training from './pages/Training';
 import Trends from './pages/Trends';
 import RiskMonitoring from './pages/RiskMonitoring';
+import Analytics from './pages/Analytics';
 import __Layout from './Layout.jsx';
 
 
@@ -40,6 +41,7 @@ export const PAGES = {
     "Training": Training,
     "Trends": Trends,
     "RiskMonitoring": RiskMonitoring,
+    "Analytics": Analytics,
 }
 
 export const pagesConfig = {
