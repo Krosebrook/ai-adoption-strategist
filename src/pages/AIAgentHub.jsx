@@ -16,6 +16,7 @@ import AgentCard from '../components/agents/AgentCard';
 import AgentChat from '../components/agents/AgentChat';
 import CollaborativeTask from '../components/agents/CollaborativeTask';
 import SharedContextPanel from '../components/agents/SharedContextPanel';
+import ImplementationPlanInitiator from '../components/agents/ImplementationPlanInitiator';
 
 export default function AIAgentHub() {
   const [selectedAgent, setSelectedAgent] = useState(null);
@@ -200,6 +201,10 @@ export default function AIAgentHub() {
               <MessageSquare className="h-4 w-4 mr-2" />
               Conversations
             </TabsTrigger>
+            <TabsTrigger value="implementation">
+              <Target className="h-4 w-4 mr-2" />
+              Implementation
+            </TabsTrigger>
             <TabsTrigger value="collaborate">
               <Users className="h-4 w-4 mr-2" />
               Collaborate
@@ -234,6 +239,10 @@ export default function AIAgentHub() {
                 strategies={strategies}
               />
             )}
+          </TabsContent>
+
+          <TabsContent value="implementation" className="space-y-6">
+            <ImplementationPlanInitiator />
           </TabsContent>
 
           <TabsContent value="conversations" className="space-y-4">
