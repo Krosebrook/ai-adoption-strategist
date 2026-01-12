@@ -1,4 +1,5 @@
 import AIAgentHub from './pages/AIAgentHub';
+import Analytics from './pages/Analytics';
 import Assessment from './pages/Assessment';
 import Dashboard from './pages/Dashboard';
 import Documentation from './pages/Documentation';
@@ -11,18 +12,18 @@ import PlatformComparison from './pages/PlatformComparison';
 import PredictiveAnalytics from './pages/PredictiveAnalytics';
 import Reports from './pages/Reports';
 import Results from './pages/Results';
+import RiskMonitoring from './pages/RiskMonitoring';
 import Settings from './pages/Settings';
 import StrategyAutomation from './pages/StrategyAutomation';
 import TemplateBuilder from './pages/TemplateBuilder';
 import Training from './pages/Training';
 import Trends from './pages/Trends';
-import RiskMonitoring from './pages/RiskMonitoring';
-import Analytics from './pages/Analytics';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AIAgentHub": AIAgentHub,
+    "Analytics": Analytics,
     "Assessment": Assessment,
     "Dashboard": Dashboard,
     "Documentation": Documentation,
@@ -35,13 +36,12 @@ export const PAGES = {
     "PredictiveAnalytics": PredictiveAnalytics,
     "Reports": Reports,
     "Results": Results,
+    "RiskMonitoring": RiskMonitoring,
     "Settings": Settings,
     "StrategyAutomation": StrategyAutomation,
     "TemplateBuilder": TemplateBuilder,
     "Training": Training,
     "Trends": Trends,
-    "RiskMonitoring": RiskMonitoring,
-    "Analytics": Analytics,
 }
 
 export const pagesConfig = {

@@ -65,7 +65,34 @@ export default function AIAgentHub() {
       icon: Target,
       color: '#E88A1D',
       capabilities: ['Strategy planning', 'Risk assessment', 'Roadmap optimization', 'Best practices'],
-      collaboratesWith: ['ComplianceAnalyst', 'ReportGenerator']
+      collaboratesWith: ['ComplianceAnalyst', 'ReportGenerator', 'SecurityAdvisor']
+    },
+    {
+      id: 'SecurityAdvisor',
+      name: 'Security Advisor',
+      description: 'Security-first guidance on PII concerns, secret leaks, and vulnerability prevention',
+      icon: Shield,
+      color: '#EF4444',
+      capabilities: ['PII scanning', 'Security defaults', 'SAST integration', 'Vulnerability analysis'],
+      collaboratesWith: ['StrategyAdvisor', 'EngineeringManagerAdvisor']
+    },
+    {
+      id: 'EngineeringManagerAdvisor',
+      name: 'Engineering Manager',
+      description: 'Maintainability-focused advice on Day 2 operations and technical health',
+      icon: Brain,
+      color: '#8B5CF6',
+      capabilities: ['Maintainability review', 'Tech debt analysis', 'Audit trails', 'Team velocity'],
+      collaboratesWith: ['SecurityAdvisor', 'UXAdvisor']
+    },
+    {
+      id: 'UXAdvisor',
+      name: 'UX Designer',
+      description: 'User-centered AI experiences with progressive disclosure and confidence scores',
+      icon: Sparkles,
+      color: '#EC4899',
+      capabilities: ['Progressive disclosure', 'Confidence scores', 'Human checkpoints', 'Conversational UX'],
+      collaboratesWith: ['EngineeringManagerAdvisor', 'TrainingCoach']
     },
     {
       id: 'TrainingCoach',
@@ -74,7 +101,7 @@ export default function AIAgentHub() {
       icon: GraduationCap,
       color: '#3B82F6',
       capabilities: ['Skill assessment', 'Learning paths', 'Progress tracking', 'Adaptive content'],
-      collaboratesWith: ['StrategyAdvisor']
+      collaboratesWith: ['StrategyAdvisor', 'UXAdvisor']
     },
     {
       id: 'ComplianceAnalyst',
@@ -83,7 +110,7 @@ export default function AIAgentHub() {
       icon: Shield,
       color: '#22C55E',
       capabilities: ['Compliance audit', 'Gap analysis', 'Policy review', 'Risk mitigation'],
-      collaboratesWith: ['StrategyAdvisor', 'ReportGenerator']
+      collaboratesWith: ['StrategyAdvisor', 'ReportGenerator', 'SecurityAdvisor']
     },
     {
       id: 'ReportGenerator',

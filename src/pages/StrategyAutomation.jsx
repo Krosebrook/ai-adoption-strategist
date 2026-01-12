@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Sparkles, Map, Shield, Activity, Plus, RefreshCw, DollarSign, TrendingUp, FileText, AlertTriangle, Target } from 'lucide-react';
+import { Loader2, Sparkles, Map, Shield, Activity, Plus, RefreshCw, DollarSign, TrendingUp, FileText, AlertTriangle, Target, Users, CheckCircle } from 'lucide-react';
 import { generateAdoptionStrategy, identifyRisks, monitorAndRecommend, createCheckpoint } from '../components/strategy/StrategyAutomationEngine';
 import { forecastLongTermCosts, identifyCostSavings, simulateBudgetScenario } from '../components/financial/FinancialOptimizationEngine';
 import StrategyRoadmap from '../components/strategy/StrategyRoadmap';
@@ -18,6 +18,9 @@ import BudgetScenarioSimulator from '../components/financial/BudgetScenarioSimul
 import AdvancedScenarioModeler from '../components/scenarios/AdvancedScenarioModeler';
 import CustomComplianceUploader from '../components/compliance/CustomComplianceUploader';
 import RiskAlertsDashboard from '../components/risk/RiskAlertsDashboard';
+import StakeholderDashboard from '../components/stakeholder/StakeholderDashboard';
+import TaskBoard from '../components/collaboration/TaskBoard';
+import VersionHistory from '../components/collaboration/VersionHistory';
 import { toast } from 'sonner';
 
 export default function StrategyAutomationPage() {
@@ -327,7 +330,11 @@ export default function StrategyAutomationPage() {
                     <TabsTrigger value="versions">
                       Versions
                     </TabsTrigger>
-                  </TabsList>
+                    <TabsTrigger value="stakeholders">
+                      <Users className="h-4 w-4 mr-1" />
+                      Stakeholders
+                    </TabsTrigger>
+                    </TabsList>
 
                   <TabsContent value="roadmap">
                     <StrategyRoadmap strategy={selectedStrategy} />
@@ -433,9 +440,16 @@ export default function StrategyAutomationPage() {
                       }}
                     />
                   </TabsContent>
-                </Tabs>
-              </div>
-            ) : (
+
+                  <TabsContent value="stakeholders">
+                    <StakeholderDashboard
+                      assessmentId={selectedStrategy.assessment_id}
+                      strategyId={selectedStrategy.id}
+                    />
+                  </TabsContent>
+                  </Tabs>
+                  </div>
+                  ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {strategies.map((strategy) => (
                   <Card key={strategy.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedStrategy(strategy)}>
