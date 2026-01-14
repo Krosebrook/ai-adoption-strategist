@@ -73,7 +73,7 @@ export default function RiskMonitoring() {
 
   if (loadingStrategies) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-background)' }}>
         <div className="text-center">
           <RefreshCw className="h-12 w-12 animate-spin text-slate-400 mx-auto mb-4" />
           <p className="text-slate-600">Loading monitoring dashboard...</p>
@@ -84,7 +84,7 @@ export default function RiskMonitoring() {
 
   if (!strategies || strategies.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-50 p-8">
+      <div className="min-h-screen p-8" style={{ background: 'var(--color-background)' }}>
         <div className="max-w-4xl mx-auto text-center py-12">
           <Shield className="h-16 w-16 text-slate-300 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-slate-900 mb-2">No Active Strategies</h2>
@@ -97,16 +97,16 @@ export default function RiskMonitoring() {
   const assessment = getRelatedAssessment();
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen" style={{ background: 'var(--color-background)' }}>
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8 flex items-start justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2 flex items-center gap-3">
-              <Activity className="h-8 w-8 text-blue-600" />
+            <h1 className="text-3xl font-bold mb-2 flex items-center gap-3" style={{ color: 'var(--color-text)' }}>
+              <Activity className="h-8 w-8" style={{ color: 'var(--color-primary)' }} />
               Risk Monitoring Dashboard
             </h1>
-            <p className="text-slate-600">Real-time tracking of key risk indicators and mitigation progress</p>
+            <p style={{ color: 'var(--color-text-secondary)' }}>Real-time tracking of key risk indicators and mitigation progress</p>
           </div>
           <div className="flex gap-2">
             <Button

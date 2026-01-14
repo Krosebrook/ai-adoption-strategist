@@ -155,12 +155,12 @@ export default function Assessment() {
   const progress = (currentStep / totalSteps) * 100;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen" style={{ background: 'var(--color-background)' }}>
       <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">AI Platform Assessment</h1>
-          <p className="text-slate-600">Complete the assessment to get your personalized recommendation</p>
+          <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-text)' }}>AI Platform Assessment</h1>
+          <p style={{ color: 'var(--color-text-secondary)' }}>Complete the assessment to get your personalized recommendation</p>
         </div>
 
         {/* Progress Bar */}
@@ -212,7 +212,7 @@ export default function Assessment() {
 
           <div className="flex gap-3">
             {currentStep < totalSteps && (
-              <Button onClick={handleNext} className="bg-slate-900 hover:bg-slate-800">
+              <Button onClick={handleNext} style={{ background: 'var(--color-primary)', color: 'white' }} className="hover:opacity-90">
                 Next
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
