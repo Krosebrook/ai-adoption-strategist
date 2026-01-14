@@ -9,14 +9,15 @@ import ContextualGuidancePanel from './components/guidance/ContextualGuidancePan
 export default function Layout({ children, currentPageName }) {
   const navigation = [
         { name: 'Home', icon: Home, page: 'Home' },
-        { name: 'Executive', icon: LayoutDashboard, page: 'ExecutiveDashboard' },
-        { name: 'Analytics', icon: TrendingUp, page: 'Analytics' },
-        { name: 'Assessment', icon: FileText, page: 'Assessment' },
-        { name: 'Strategy', icon: Sparkles, page: 'StrategyAutomation' },
-        { name: 'AI Agents', icon: Brain, page: 'AIAgentHub' },
-        { name: 'Risk Monitor', icon: Shield, page: 'RiskMonitoring' },
-        { name: 'Training', icon: GraduationCap, page: 'Training' },
-        { name: 'Settings', icon: Settings, page: 'Settings' }
+                { name: 'Executive', icon: LayoutDashboard, page: 'ExecutiveDashboard' },
+                { name: 'Analytics', icon: TrendingUp, page: 'Analytics' },
+                { name: 'Assessment', icon: FileText, page: 'Assessment' },
+                { name: 'Strategy', icon: Sparkles, page: 'StrategyAutomation' },
+                { name: 'AI Agents', icon: Brain, page: 'AIAgentHub' },
+                { name: 'Risk Monitor', icon: Shield, page: 'RiskMonitoring' },
+                { name: 'Training', icon: GraduationCap, page: 'Training' },
+                { name: 'Governance', icon: Shield, page: 'AIGovernance' },
+                { name: 'Settings', icon: Settings, page: 'Settings' }
       ];
 
   return (
