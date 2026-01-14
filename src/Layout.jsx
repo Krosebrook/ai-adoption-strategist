@@ -47,7 +47,7 @@ export default function Layout({ children, currentPageName }) {
               </div>
             </Link>
 
-            <nav className="flex items-center gap-2">
+            <nav className="flex items-center gap-2 overflow-x-auto scrollbar-hide" style={{ maxWidth: 'calc(100vw - 400px)' }}>
               {navigation.map((item) => {
                 const Icon = item.icon;
                 const isActive = currentPageName === item.page;
@@ -55,7 +55,7 @@ export default function Layout({ children, currentPageName }) {
                   <Link
                     key={item.name}
                     to={createPageUrl(item.page)}
-                    className="flex items-center gap-2 px-4 py-2 font-medium transition-all"
+                    className="flex items-center gap-2 px-4 py-2 font-medium transition-all whitespace-nowrap flex-shrink-0"
                     style={{
                       borderRadius: 'var(--radius-base)',
                       background: isActive ? 'linear-gradient(135deg, #E88A1D, #D07612)' : 'transparent',
