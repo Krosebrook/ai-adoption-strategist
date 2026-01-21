@@ -97,7 +97,11 @@ Run a Lighthouse PWA audit in Chrome DevTools to verify:
 
 ## Documentation
 
-Comprehensive documentation is available in the `/docs` directory:
+⚠️ **Documentation Status**: Level 2 of 5 (Developing) - See [DOCUMENTATION_AUDIT.md](./DOCUMENTATION_AUDIT.md) for details.
+
+### Complete Documentation
+
+Comprehensive production-ready documentation is available:
 
 - **[Documentation Index](./docs/DOCUMENTATION_INDEX.md)** - Complete overview of all documentation
 - **[Architecture](./docs/ARCHITECTURE.md)** - System architecture and design
@@ -106,7 +110,20 @@ Comprehensive documentation is available in the `/docs` directory:
 - **[Security](./docs/SECURITY.md)** - Security architecture and compliance
 - **[Product Requirements](./docs/PRD_MASTER.md)** - Product vision and requirements
 
-For additional documentation including setup instructions, access control rules, and versioning policies, see the [complete documentation index](./docs/DOCUMENTATION_INDEX.md).
+### Critical Gaps (Production Blockers)
+
+The following documentation is **required before production deployment**:
+
+- **[Testing Strategy](./docs/TESTING_STRATEGY.md)** - [Not Started] - P0 Critical
+- **[Deployment Guide](./docs/DEPLOYMENT.md)** - [Not Started] - P0 Critical
+- **[CI/CD Pipeline](./docs/CI_CD.md)** - [Not Started] - P0 Critical
+- **[Environment Config](./docs/ENVIRONMENT_CONFIG.md)** - [Not Started] - P0 Critical
+- **[Observability](./docs/OBSERVABILITY.md)** - [Not Started] - P0 Critical
+- **[Incident Response](./docs/INCIDENT_RESPONSE.md)** - [Not Started] - P0 Critical
+
+See [DOCUMENTATION_AUDIT.md](./DOCUMENTATION_AUDIT.md) for the complete audit report and remediation plan.
+
+For all documentation including standards, feature docs, and operational guides, see the [docs directory](./docs/README.md).
 
 ## License
 
