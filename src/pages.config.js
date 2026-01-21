@@ -1,4 +1,5 @@
 import AIAgentHub from './pages/AIAgentHub';
+import AIGovernance from './pages/AIGovernance';
 import Analytics from './pages/Analytics';
 import Assessment from './pages/Assessment';
 import Dashboard from './pages/Dashboard';
@@ -18,12 +19,12 @@ import StrategyAutomation from './pages/StrategyAutomation';
 import TemplateBuilder from './pages/TemplateBuilder';
 import Training from './pages/Training';
 import Trends from './pages/Trends';
-import AIGovernance from './pages/AIGovernance';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AIAgentHub": AIAgentHub,
+    "AIGovernance": AIGovernance,
     "Analytics": Analytics,
     "Assessment": Assessment,
     "Dashboard": Dashboard,
@@ -43,7 +44,6 @@ export const PAGES = {
     "TemplateBuilder": TemplateBuilder,
     "Training": Training,
     "Trends": Trends,
-    "AIGovernance": AIGovernance,
 }
 
 export const pagesConfig = {

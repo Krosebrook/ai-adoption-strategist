@@ -14,6 +14,8 @@ import UsageAnalytics from '../components/governance/UsageAnalytics';
 import PolicyManager from '../components/governance/PolicyManager';
 import BiasMonitor from '../components/governance/BiasMonitor';
 import AuditLog from '../components/governance/AuditLog';
+import AutomatedScanConfig from '../components/governance/AutomatedScanConfig';
+import MitigationStrategies from '../components/governance/MitigationStrategies';
 import { toast } from 'sonner';
 
 export default function AIGovernance() {
@@ -226,6 +228,10 @@ Provide bias scores (0-100, where 0 is no bias, 100 is severe bias) and specific
               <Eye className="h-4 w-4 mr-2" />
               Bias Monitoring
             </TabsTrigger>
+            <TabsTrigger value="automation">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Automated Scans
+            </TabsTrigger>
             <TabsTrigger value="audit">
               <Shield className="h-4 w-4 mr-2" />
               Audit Log
@@ -268,12 +274,19 @@ Provide bias scores (0-100, where 0 is no bias, 100 is severe bias) and specific
                     ) : (
                       <RefreshCw className="h-4 w-4 mr-2" />
                     )}
-                    Run Bias Scan
+                    Run Manual Scan
                   </Button>
                 </div>
               </CardContent>
             </Card>
-            <BiasMonitor biasScans={biasScans} />
+            <div className="space-y-4">
+              <BiasMonitor biasScans={biasScans} />
+              <MitigationStrategies biasScans={biasScans} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="automation">
+            <AutomatedScanConfig />
           </TabsContent>
 
           <TabsContent value="audit">
