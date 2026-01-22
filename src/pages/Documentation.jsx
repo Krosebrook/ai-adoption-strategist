@@ -1,297 +1,165 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { 
-  BookOpen, Code, Zap, Shield, Users, FileText, 
-  Target, DollarSign, TrendingUp, Brain, Sparkles
+  FileText, Code, Boxes, Rocket, Brain, 
+  Users, Database, Shield, Download, BookOpen
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
-const documentation = {
-  overview: `
-# INT Inc. Enterprise AI Platform
+// Import documentation content
+import { README } from '../components/docs/README';
+import { ARCHITECTURE } from '../components/docs/ARCHITECTURE';
+import { API_DOCS } from '../components/docs/API_DOCS';
+import { AI_SERVICES } from '../components/docs/AI_SERVICES';
+import { PRODUCT_FEATURES } from '../components/docs/PRODUCT_FEATURES';
+import { DEVELOPER_GUIDE } from '../components/docs/DEVELOPER_GUIDE';
+import { DEPLOYMENT } from '../components/docs/DEPLOYMENT';
+import { GOVERNANCE } from '../components/docs/GOVERNANCE';
 
-## Overview
+export default function Documentation() {
+  const [activeDoc, setActiveDoc] = useState('readme');
 
-The INT Inc. Enterprise AI Platform is a comprehensive solution for strategic AI adoption assessment, implementation planning, and ongoing management. It provides AI-powered tools to help organizations make informed decisions about adopting enterprise AI platforms.
+  const docs = {
+    readme: { title: 'Overview', icon: BookOpen, content: README },
+    architecture: { title: 'Architecture', icon: Boxes, content: ARCHITECTURE },
+    developer: { title: 'Developer Guide', icon: Code, content: DEVELOPER_GUIDE },
+    api: { title: 'API Documentation', icon: Database, content: API_DOCS },
+    ai: { title: 'AI Services', icon: Brain, content: AI_SERVICES },
+    features: { title: 'Product Features', icon: Users, content: PRODUCT_FEATURES },
+    deployment: { title: 'Deployment', icon: Rocket, content: DEPLOYMENT },
+    governance: { title: 'AI Governance', icon: Shield, content: GOVERNANCE }
+  };
 
-## Key Capabilities
+  const handleDownload = () => {
+    const allDocs = Object.entries(docs).map(([key, doc]) => {
+      return `# ${doc.title}\n\n${doc.content}\n\n---\n\n`;
+    }).join('\n');
 
-- **AI-Powered Assessment**: Intelligent evaluation of organizational needs and platform recommendations
-- **Strategy Automation**: Automated roadmap generation with risk management and progress tracking
-- **Financial Optimization**: Cost forecasting, ROI analysis, and budget scenario simulation
-- **Collaborative Planning**: Multi-user strategy co-editing with AI-driven decision support
-- **Training System**: Personalized learning paths with AI-generated content
-- **Compliance Management**: Gap analysis and regulatory compliance tracking
-- **Scenario Modeling**: Combined impact analysis of market, regulatory, and organizational changes
+    const blob = new Blob([allDocs], { type: 'text/markdown' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'INT-Inc-AI-Platform-Documentation.md';
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    a.remove();
+  };
 
-## Supported AI Platforms
-
-1. **Google Gemini** - Google's multimodal AI platform
-2. **Microsoft Copilot** - Microsoft's AI assistant ecosystem
-3. **Anthropic Claude** - Advanced reasoning and analysis
-4. **OpenAI ChatGPT** - Versatile language model platform
-`,
-
-  architecture: `
-# System Architecture
-
-## Frontend Architecture
-
-\`\`\`
-├── pages/                 # Main application pages
-│   ├── Home.jsx          # Landing page with platform overview
-│   ├── Assessment.jsx    # AI assessment wizard
-│   ├── StrategyAutomation.jsx  # Strategy management
-│   ├── Training.jsx      # Training modules
-│   ├── Reports.jsx       # Report generation
-│   └── Documentation.jsx # This documentation
-│
-├── components/           # Reusable components
-│   ├── ai/              # AI-powered components
-│   ├── assessment/      # Assessment wizard steps
-│   ├── collaboration/   # Collaboration features
-│   ├── compliance/      # Compliance analysis
-│   ├── financial/       # Financial optimization
-│   ├── guidance/        # Contextual guidance
-│   ├── onboarding/      # Onboarding system
-│   ├── reports/         # Automated reporting
-│   ├── scenarios/       # Scenario modeling
-│   ├── strategy/        # Strategy components
-│   └── training/        # Training system
-│
-├── entities/            # Data models (JSON Schema)
-├── agents/              # AI agents configuration
-├── functions/           # Backend functions
-└── Layout.js            # App layout
-\`\`\`
-
-## Data Entities
-
-| Entity | Purpose |
-|--------|---------|
-| Assessment | Stores organization assessments and recommendations |
-| AdoptionStrategy | AI adoption strategy with roadmap and risks |
-| TrainingModule | AI-generated training content |
-| TrainingProgress | User progress tracking |
-| StrategySession | Collaborative strategy sessions |
-| BudgetScenario | Financial scenario configurations |
-| AutomatedReport | Scheduled report configurations |
-| OnboardingFlow | User onboarding progress |
-
-## AI Agents
-
-1. **Strategy Advisor** - Strategy planning and risk assessment
-2. **Training Coach** - Personalized learning guidance
-3. **Compliance Analyst** - Regulatory compliance support
-4. **Report Generator** - Automated report creation
-`,
-
-  api: `
-# API Integrations
-
-## Built-in Integrations
-
-### Core AI
-- **InvokeLLM** - AI text generation with structured output
-- **GenerateImage** - AI image generation
-- **ExtractDataFromFile** - Document data extraction
-
-### Communication
-- **SendEmail** - Email notifications
-- **UploadFile** - File management
-
-## External API Functions
-
-### Slack Integration
-\`\`\`javascript
-await base44.functions.invoke('slackNotify', {
-  channel: '#ai-updates',
-  message: 'Strategy milestone completed!'
-});
-\`\`\`
-
-### HubSpot CRM
-\`\`\`javascript
-await base44.functions.invoke('hubspotSync', {
-  action: 'create_contact',
-  contactData: { email, firstname, lastname }
-});
-\`\`\`
-
-### Jira Integration
-\`\`\`javascript
-await base44.functions.invoke('jiraIntegration', {
-  action: 'create_issue',
-  projectKey: 'AI',
-  issueData: { summary, description, issuetype: { name: 'Task' } }
-});
-\`\`\`
-
-### Microsoft Teams
-\`\`\`javascript
-await base44.functions.invoke('microsoftTeams', {
-  webhookUrl: 'https://...',
-  title: 'AI Strategy Update',
-  message: 'New milestone achieved'
-});
-\`\`\`
-
-### Airtable Sync
-\`\`\`javascript
-await base44.functions.invoke('airtableSync', {
-  action: 'create',
-  baseId: 'app...',
-  tableId: 'tbl...',
-  fields: { Name: 'Assessment', Status: 'Complete' }
-});
-\`\`\`
-
-### Stripe Payments
-\`\`\`javascript
-await base44.functions.invoke('stripePayments', {
-  action: 'create_checkout_session',
-  priceId: 'price_...'
-});
-\`\`\`
-
-### Power BI Export
-\`\`\`javascript
-await base44.functions.invoke('powerBIExport', {
-  datasetName: 'AI Adoption Metrics',
-  data: { assessments, strategies }
-});
-\`\`\`
-
-### Twilio SMS
-\`\`\`javascript
-await base44.functions.invoke('twilioSMS', {
-  to: '+1234567890',
-  message: 'Strategy alert: Risk level increased'
-});
-\`\`\`
-
-### Zapier Webhook
-\`\`\`javascript
-await base44.functions.invoke('zapierWebhook', {
-  webhookUrl: 'https://hooks.zapier.com/...',
-  eventType: 'assessment_completed',
-  data: { assessmentId, score }
-});
-\`\`\`
-`,
-
-  deployment: `
-# Deployment & Configuration
-
-## Environment Variables
-
-Required secrets for full functionality:
-
-| Secret | Purpose |
-|--------|---------|
-| OPENAI_API_KEY | OpenAI API access |
-| GOOGLE_API_KEY | Google AI access |
-| ANTHROPIC_API_KEY | Anthropic Claude access |
-| SLACK_WEBHOOK_URL | Slack notifications |
-| SENDGRID_API_KEY | Email delivery |
-| HUBSPOT_API_KEY | CRM integration |
-| JIRA_DOMAIN, JIRA_EMAIL, JIRA_API_TOKEN | Jira integration |
-| AIRTABLE_API_KEY | Airtable sync |
-| STRIPE_API_KEY | Payment processing |
-| TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN | SMS notifications |
-
-## PWA Configuration
-
-The app is configured as a Progressive Web App with:
-- Offline capability (network-first caching)
-- Home screen installation
-- Push notification support (when configured)
-
-## Security Considerations
-
-1. All API keys stored as encrypted secrets
-2. User authentication required for all operations
-3. Role-based access control (admin/user)
-4. Audit logging for sensitive operations
-5. Data encryption at rest and in transit
-
-## Performance Optimization
-
-- Lazy loading of components
-- React Query for data caching
-- Optimistic updates for better UX
-- Image optimization via CDN
-`
-};
-
-export default function DocumentationPage() {
   return (
-    <div className="min-h-screen p-6" style={{ background: 'var(--color-background)' }}>
-      <div className="max-w-5xl mx-auto">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #E88A1D, #D07612)' }}>
-            <BookOpen className="h-6 w-6 text-white" />
-          </div>
+    <div className="min-h-screen" style={{ background: 'var(--color-background)' }}>
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold" style={{ color: 'var(--color-text)' }}>Documentation</h1>
-            <p style={{ color: 'var(--color-text-secondary)' }}>INT Inc. Enterprise AI Platform</p>
+            <h1 className="text-3xl font-bold flex items-center gap-3" style={{ color: 'var(--color-text)' }}>
+              <FileText className="h-8 w-8" style={{ color: 'var(--color-primary)' }} />
+              Technical Documentation
+            </h1>
+            <p style={{ color: 'var(--color-text-secondary)' }}>
+              Complete documentation for developers, product managers, and AI service teams
+            </p>
           </div>
-          <Badge className="ml-auto" style={{ background: '#E88A1D' }}>v2.0 Production</Badge>
+          <Button onClick={handleDownload} className="bg-blue-600 hover:bg-blue-700">
+            <Download className="h-4 w-4 mr-2" />
+            Download All Docs
+          </Button>
         </div>
 
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="bg-white border">
-            <TabsTrigger value="overview">
-              <Target className="h-4 w-4 mr-1" /> Overview
-            </TabsTrigger>
-            <TabsTrigger value="architecture">
-              <Code className="h-4 w-4 mr-1" /> Architecture
-            </TabsTrigger>
-            <TabsTrigger value="api">
-              <Zap className="h-4 w-4 mr-1" /> API Reference
-            </TabsTrigger>
-            <TabsTrigger value="deployment">
-              <Shield className="h-4 w-4 mr-1" /> Deployment
-            </TabsTrigger>
-          </TabsList>
+        {/* Documentation Navigator */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {Object.entries(docs).map(([key, doc]) => {
+                const Icon = doc.icon;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setActiveDoc(key)}
+                    className={`p-4 rounded-lg border-2 transition-all ${
+                      activeDoc === key
+                        ? 'border-orange-500 bg-orange-50'
+                        : 'border-slate-200 hover:border-orange-300'
+                    }`}
+                  >
+                    <Icon className={`h-6 w-6 mb-2 ${
+                      activeDoc === key ? 'text-orange-600' : 'text-slate-600'
+                    }`} />
+                    <p className="text-sm font-medium">{doc.title}</p>
+                  </button>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
 
-          {Object.entries(documentation).map(([key, content]) => (
-            <TabsContent key={key} value={key}>
-              <Card className="sunrise-card">
-                <CardContent className="pt-6">
-                  <div className="prose prose-slate max-w-none">
-                    <ReactMarkdown
-                      components={{
-                        h1: ({ children }) => <h1 className="text-2xl font-bold mb-4" style={{ color: 'var(--color-text)' }}>{children}</h1>,
-                        h2: ({ children }) => <h2 className="text-xl font-semibold mt-6 mb-3" style={{ color: 'var(--color-text)' }}>{children}</h2>,
-                        h3: ({ children }) => <h3 className="text-lg font-medium mt-4 mb-2" style={{ color: 'var(--color-text)' }}>{children}</h3>,
-                        p: ({ children }) => <p className="mb-3" style={{ color: 'var(--color-text-secondary)' }}>{children}</p>,
-                        ul: ({ children }) => <ul className="list-disc pl-6 mb-4 space-y-1">{children}</ul>,
-                        ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 space-y-1">{children}</ol>,
-                        li: ({ children }) => <li style={{ color: 'var(--color-text-secondary)' }}>{children}</li>,
-                        code: ({ inline, children }) => inline ? (
-                          <code className="bg-slate-100 px-1 py-0.5 rounded text-sm">{children}</code>
-                        ) : (
-                          <pre className="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-auto text-sm">
-                            <code>{children}</code>
-                          </pre>
-                        ),
-                        table: ({ children }) => <table className="w-full border-collapse mb-4">{children}</table>,
-                        th: ({ children }) => <th className="border p-2 bg-slate-100 text-left font-semibold">{children}</th>,
-                        td: ({ children }) => <td className="border p-2">{children}</td>,
-                        strong: ({ children }) => <strong className="font-semibold" style={{ color: 'var(--color-text)' }}>{children}</strong>
-                      }}
-                    >
-                      {content}
-                    </ReactMarkdown>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          ))}
-        </Tabs>
+        {/* Documentation Content */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              {React.createElement(docs[activeDoc].icon, { className: "h-5 w-5" })}
+              {docs[activeDoc].title}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="prose prose-slate max-w-none">
+              <ReactMarkdown
+                components={{
+                  h1: ({ children }) => (
+                    <h1 className="text-3xl font-bold mb-4 text-slate-900">{children}</h1>
+                  ),
+                  h2: ({ children }) => (
+                    <h2 className="text-2xl font-semibold mt-8 mb-4 text-slate-800">{children}</h2>
+                  ),
+                  h3: ({ children }) => (
+                    <h3 className="text-xl font-semibold mt-6 mb-3 text-slate-700">{children}</h3>
+                  ),
+                  code: ({ inline, children }) => (
+                    inline ? (
+                      <code className="px-1.5 py-0.5 rounded bg-slate-100 text-sm text-slate-800">
+                        {children}
+                      </code>
+                    ) : (
+                      <pre className="bg-slate-900 text-slate-100 rounded-lg p-4 overflow-x-auto">
+                        <code>{children}</code>
+                      </pre>
+                    )
+                  ),
+                  ul: ({ children }) => (
+                    <ul className="list-disc list-inside space-y-2 my-4">{children}</ul>
+                  ),
+                  ol: ({ children }) => (
+                    <ol className="list-decimal list-inside space-y-2 my-4">{children}</ol>
+                  ),
+                  table: ({ children }) => (
+                    <div className="overflow-x-auto my-4">
+                      <table className="min-w-full border border-slate-300">
+                        {children}
+                      </table>
+                    </div>
+                  ),
+                  th: ({ children }) => (
+                    <th className="border border-slate-300 px-4 py-2 bg-slate-100 font-semibold">
+                      {children}
+                    </th>
+                  ),
+                  td: ({ children }) => (
+                    <td className="border border-slate-300 px-4 py-2">{children}</td>
+                  ),
+                  blockquote: ({ children }) => (
+                    <blockquote className="border-l-4 border-orange-500 pl-4 italic my-4 text-slate-600">
+                      {children}
+                    </blockquote>
+                  )
+                }}
+              >
+                {docs[activeDoc].content}
+              </ReactMarkdown>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
