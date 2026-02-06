@@ -16,6 +16,7 @@ import BiasMonitor from '../components/governance/BiasMonitor';
 import AuditLog from '../components/governance/AuditLog';
 import AutomatedScanConfig from '../components/governance/AutomatedScanConfig';
 import MitigationStrategies from '../components/governance/MitigationStrategies';
+import FeedbackAnalytics from '../components/governance/FeedbackAnalytics';
 import { toast } from 'sonner';
 
 export default function AIGovernance() {
@@ -232,6 +233,10 @@ Provide bias scores (0-100, where 0 is no bias, 100 is severe bias) and specific
               <RefreshCw className="h-4 w-4 mr-2" />
               Automated Scans
             </TabsTrigger>
+            <TabsTrigger value="feedback">
+              <MessageSquare className="h-4 w-4 mr-2" />
+              User Feedback
+            </TabsTrigger>
             <TabsTrigger value="audit">
               <Shield className="h-4 w-4 mr-2" />
               Audit Log
@@ -287,6 +292,10 @@ Provide bias scores (0-100, where 0 is no bias, 100 is severe bias) and specific
 
           <TabsContent value="automation">
             <AutomatedScanConfig />
+          </TabsContent>
+
+          <TabsContent value="feedback">
+            <FeedbackAnalytics />
           </TabsContent>
 
           <TabsContent value="audit">
