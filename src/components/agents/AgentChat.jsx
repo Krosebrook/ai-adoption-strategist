@@ -10,6 +10,7 @@ import {
   Paperclip, Bot, User
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import InlineAIFeedback from '../ai/InlineAIFeedback';
 
 export default function AgentChat({ 
   agent, 
@@ -169,15 +170,25 @@ export default function AgentChat({
                   {msg.content}
                 </ReactMarkdown>
                 {msg.role !== 'user' && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="mt-2 h-6 text-xs"
-                    onClick={() => handleShareToContext(msg)}
-                  >
-                    <Share2 className="h-3 w-3 mr-1" />
-                    Share to Context
-                  </Button>
+                  <div className="mt-2 space-y-2">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-6 text-xs"
+                      onClick={() => handleShareToContext(msg)}
+                    >
+                      <Share2 className="h-3 w-3 mr-1" />
+                      Share to Context
+                    </Button>
+                    <InlineAIFeedback
+                      agentName={agent.id}
+                      prompt={messages[idx - 1]?.content || ''}
+                      response={msg.content}
+                      conversationId={conversation?.id}
+                      interactionType="chat"
+                      compact={true}
+                    />
+                  </div>
                 )}
               </div>
               {msg.role === 'user' && (
