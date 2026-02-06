@@ -43,7 +43,9 @@ export default function FeedbackAnalytics() {
   // Calculate metrics
   const metrics = {
     total: filteredFeedback.length,
-    avgRating: filteredFeedback.reduce((sum, f) => sum + (f.rating || 0), 0) / (filteredFeedback.length || 1),
+    avgRating: filteredFeedback.length > 0 
+      ? filteredFeedback.reduce((sum, f) => sum + (f.rating || 0), 0) / filteredFeedback.length
+      : 0,
     positive: filteredFeedback.filter(f => f.rating >= 4).length,
     negative: filteredFeedback.filter(f => f.rating <= 2).length,
     needsReview: filteredFeedback.filter(f => f.status === 'new').length,
@@ -58,14 +60,16 @@ export default function FeedbackAnalytics() {
 
   // Feedback by agent
   const agentNames = [...new Set(allFeedback.map(f => f.agent_name))];
-  const feedbackByAgent = agentNames.map(agent => ({
-    agent: agent.replace('Advisor', '').replace('Analyst', ''),
-    avgRating: allFeedback
-      .filter(f => f.agent_name === agent)
-      .reduce((sum, f) => sum + (f.rating || 0), 0) / 
-      (allFeedback.filter(f => f.agent_name === agent).length || 1),
-    count: allFeedback.filter(f => f.agent_name === agent).length
-  }));
+  const feedbackByAgent = agentNames.map(agent => {
+    const agentFeedback = allFeedback.filter(f => f.agent_name === agent);
+    return {
+      agent: agent.replace('Advisor', '').replace('Analyst', ''),
+      avgRating: agentFeedback.length > 0
+        ? agentFeedback.reduce((sum, f) => sum + (f.rating || 0), 0) / agentFeedback.length
+        : 0,
+      count: agentFeedback.length
+    };
+  });
 
   // Issues breakdown
   const allIssues = filteredFeedback
