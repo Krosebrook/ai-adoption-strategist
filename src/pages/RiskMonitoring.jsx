@@ -14,6 +14,7 @@ import KRITracker from '../components/risk/KRITracker';
 import MitigationProgressTracker from '../components/risk/MitigationProgressTracker';
 import RiskAlertsPanel from '../components/risk/RiskAlertsPanel';
 import ProjectHealthScorecard from '../components/risk/ProjectHealthScorecard';
+import PredictiveRiskEngine from '../components/risk/PredictiveRiskEngine';
 
 export default function RiskMonitoring() {
   const [selectedStrategy, setSelectedStrategy] = useState(null);
@@ -184,6 +185,10 @@ export default function RiskMonitoring() {
                   <TrendingUp className="h-4 w-4 mr-2" />
                   Trends & Analytics
                 </TabsTrigger>
+                <TabsTrigger value="predictive">
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  Predictive Analysis
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="kri">
@@ -219,6 +224,10 @@ export default function RiskMonitoring() {
                     </p>
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              <TabsContent value="predictive">
+                <PredictiveRiskEngine strategyId={selectedStrategy?.id} />
               </TabsContent>
             </Tabs>
           </>
