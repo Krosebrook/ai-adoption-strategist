@@ -69,6 +69,8 @@ import TemplateBuilder from './pages/TemplateBuilder';
 import Training from './pages/Training';
 import Trends from './pages/Trends';
 import CustomDashboard from './pages/CustomDashboard';
+import AdminPanel from './pages/AdminPanel';
+import AIPerformanceMonitor from './pages/AIPerformanceMonitor';
 import __Layout from './Layout.jsx';
 
 
@@ -95,6 +97,8 @@ export const PAGES = {
     "Training": Training,
     "Trends": Trends,
     "CustomDashboard": CustomDashboard,
+    "AdminPanel": AdminPanel,
+    "AIPerformanceMonitor": AIPerformanceMonitor,
 }
 
 export const pagesConfig = {

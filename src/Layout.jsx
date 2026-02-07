@@ -1,25 +1,38 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Brain, Home, FileText, LayoutDashboard, Star, Settings, TrendingUp, Sparkles, GraduationCap, Shield } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
+import { Brain, Home, FileText, LayoutDashboard, Star, Settings, TrendingUp, Sparkles, GraduationCap, Shield, Activity } from 'lucide-react';
 import OnboardingBanner from './components/onboarding/OnboardingBanner';
 import PWAInstallPrompt from './components/pwa/PWAInstallPrompt';
 import ContextualGuidancePanel from './components/guidance/ContextualGuidancePanel';
 
 export default function Layout({ children, currentPageName }) {
-  const navigation = [
-        { name: 'Home', icon: Home, page: 'Home' },
-                { name: 'Dashboard', icon: LayoutDashboard, page: 'CustomDashboard' },
-                { name: 'Executive', icon: LayoutDashboard, page: 'ExecutiveDashboard' },
-                { name: 'Analytics', icon: TrendingUp, page: 'Analytics' },
-                { name: 'Assessment', icon: FileText, page: 'Assessment' },
-                { name: 'Strategy', icon: Sparkles, page: 'StrategyAutomation' },
-                { name: 'AI Agents', icon: Brain, page: 'AIAgentHub' },
-                { name: 'Risk Monitor', icon: Shield, page: 'RiskMonitoring' },
-                { name: 'Training', icon: GraduationCap, page: 'Training' },
-                { name: 'Governance', icon: Shield, page: 'AIGovernance' },
-                { name: 'Settings', icon: Settings, page: 'Settings' }
+  const [user, setUser] = React.useState(null);
+
+  React.useEffect(() => {
+    base44.auth.me().then(setUser).catch(() => setUser(null));
+  }, []);
+
+  const allNavigation = [
+        { name: 'Home', icon: Home, page: 'Home', roles: ['admin', 'executive', 'product_manager', 'analyst', 'user'] },
+        { name: 'Dashboard', icon: LayoutDashboard, page: 'CustomDashboard', roles: ['admin', 'executive', 'product_manager', 'analyst', 'user'] },
+        { name: 'Executive', icon: LayoutDashboard, page: 'ExecutiveDashboard', roles: ['admin', 'executive'] },
+        { name: 'Analytics', icon: TrendingUp, page: 'Analytics', roles: ['admin', 'executive', 'analyst'] },
+        { name: 'Assessment', icon: FileText, page: 'Assessment', roles: ['admin', 'executive', 'product_manager', 'analyst', 'user'] },
+        { name: 'Strategy', icon: Sparkles, page: 'StrategyAutomation', roles: ['admin', 'executive', 'product_manager'] },
+        { name: 'AI Agents', icon: Brain, page: 'AIAgentHub', roles: ['admin', 'product_manager', 'user'] },
+        { name: 'Risk Monitor', icon: Shield, page: 'RiskMonitoring', roles: ['admin', 'executive', 'product_manager'] },
+        { name: 'Training', icon: GraduationCap, page: 'Training', roles: ['admin', 'product_manager', 'analyst', 'user'] },
+        { name: 'Governance', icon: Shield, page: 'AIGovernance', roles: ['admin', 'executive'] },
+        { name: 'AI Performance', icon: Activity, page: 'AIPerformanceMonitor', roles: ['admin', 'executive'] },
+        { name: 'Admin Panel', icon: Shield, page: 'AdminPanel', roles: ['admin'] },
+        { name: 'Settings', icon: Settings, page: 'Settings', roles: ['admin', 'executive', 'product_manager', 'analyst', 'user'] }
       ];
+
+  const navigation = allNavigation.filter(item => 
+    !item.roles || item.roles.includes(user?.role || 'user')
+  );
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-background)' }}>
