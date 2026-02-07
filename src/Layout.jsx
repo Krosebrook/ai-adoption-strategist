@@ -9,6 +9,7 @@ import ContextualGuidancePanel from './components/guidance/ContextualGuidancePan
 export default function Layout({ children, currentPageName }) {
   const navigation = [
         { name: 'Home', icon: Home, page: 'Home' },
+                { name: 'Dashboard', icon: LayoutDashboard, page: 'CustomDashboard' },
                 { name: 'Executive', icon: LayoutDashboard, page: 'ExecutiveDashboard' },
                 { name: 'Analytics', icon: TrendingUp, page: 'Analytics' },
                 { name: 'Assessment', icon: FileText, page: 'Assessment' },
