@@ -7,7 +7,8 @@ import { FileText, CheckCircle } from 'lucide-react';
 export default function AssessmentStatsWidget({ config = {} }) {
   const { data: assessments = [] } = useQuery({
     queryKey: ['assessments'],
-    queryFn: () => base44.entities.Assessment.list()
+    queryFn: () => base44.entities.Assessment.list(),
+    initialData: []
   });
 
   const completed = assessments.filter(a => a.status === 'completed').length;

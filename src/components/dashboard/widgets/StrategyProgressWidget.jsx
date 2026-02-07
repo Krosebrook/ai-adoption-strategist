@@ -8,7 +8,8 @@ import { Target, TrendingUp } from 'lucide-react';
 export default function StrategyProgressWidget({ config = {} }) {
   const { data: strategies = [] } = useQuery({
     queryKey: ['strategies'],
-    queryFn: () => base44.entities.AdoptionStrategy.list()
+    queryFn: () => base44.entities.AdoptionStrategy.list(),
+    initialData: []
   });
 
   const activeStrategies = strategies.filter(s => s.status === 'active');

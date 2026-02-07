@@ -7,12 +7,14 @@ import { Shield, AlertCircle } from 'lucide-react';
 export default function GovernanceWidget({ config = {} }) {
   const { data: usageLogs = [] } = useQuery({
     queryKey: ['aiUsageLogs'],
-    queryFn: () => base44.entities.AIUsageLog.list('-created_date', 100)
+    queryFn: () => base44.entities.AIUsageLog.list('-created_date', 100),
+    initialData: []
   });
 
   const { data: policies = [] } = useQuery({
     queryKey: ['aiPolicies'],
-    queryFn: () => base44.entities.AIPolicy.list()
+    queryFn: () => base44.entities.AIPolicy.list(),
+    initialData: []
   });
 
   const violations = usageLogs.filter(l => l.policy_compliance?.compliant === false).length;

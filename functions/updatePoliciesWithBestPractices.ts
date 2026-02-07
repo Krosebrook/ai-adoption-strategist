@@ -9,7 +9,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const { scanOnly } = await req.json() || { scanOnly: false };
+    const body = await req.json().catch(() => ({}));
+    const { scanOnly = false } = body;
 
     // Get current policies
     const currentPolicies = await base44.asServiceRole.entities.AIPolicy.list();

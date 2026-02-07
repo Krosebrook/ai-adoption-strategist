@@ -8,7 +8,8 @@ import { AlertTriangle, TrendingDown, TrendingUp } from 'lucide-react';
 export default function RiskSummaryWidget({ config = {} }) {
   const { data: alerts = [] } = useQuery({
     queryKey: ['riskAlerts'],
-    queryFn: () => base44.entities.RiskAlert.list('-created_date', 50)
+    queryFn: () => base44.entities.RiskAlert.list('-created_date', 50),
+    initialData: []
   });
 
   const critical = alerts.filter(a => a.severity === 'critical' && a.status !== 'resolved').length;

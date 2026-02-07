@@ -11,7 +11,9 @@ export default function Layout({ children, currentPageName }) {
   const [user, setUser] = React.useState(null);
 
   React.useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => setUser(null));
+    base44.auth.me()
+      .then(userData => setUser(userData))
+      .catch(() => setUser({ role: 'user' }));
   }, []);
 
   const allNavigation = [
@@ -26,6 +28,7 @@ export default function Layout({ children, currentPageName }) {
         { name: 'Training', icon: GraduationCap, page: 'Training', roles: ['admin', 'product_manager', 'analyst', 'user'] },
         { name: 'Governance', icon: Shield, page: 'AIGovernance', roles: ['admin', 'executive'] },
         { name: 'AI Performance', icon: Activity, page: 'AIPerformanceMonitor', roles: ['admin', 'executive'] },
+        { name: 'Reports', icon: FileText, page: 'Reports', roles: ['admin', 'executive', 'analyst'] },
         { name: 'Admin Panel', icon: Shield, page: 'AdminPanel', roles: ['admin'] },
         { name: 'Settings', icon: Settings, page: 'Settings', roles: ['admin', 'executive', 'product_manager', 'analyst', 'user'] }
       ];

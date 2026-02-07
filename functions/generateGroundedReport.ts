@@ -9,30 +9,42 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { reportType, strategyId, assessmentId, includeExternalData } = await req.json();
+    const body = await req.json();
+    const { reportType = 'executive', strategyId, assessmentId, includeExternalData = false } = body;
 
     // Gather internal data
-    let contextData = {};
+    const contextData = {};
     
     if (strategyId) {
-      const strategy = await base44.entities.AdoptionStrategy.get(strategyId);
-      contextData.strategy = strategy;
-      
-      const risks = await base44.entities.RiskAlert.filter({ source_id: strategyId });
-      contextData.risks = risks;
+      try {
+        const strategy = await base44.entities.AdoptionStrategy.get(strategyId);
+        contextData.strategy = strategy;
+        
+        const risks = await base44.entities.RiskAlert.filter({ source_id: strategyId });
+        contextData.risks = risks;
+      } catch (e) {
+        contextData.strategy_error = 'Strategy not found';
+      }
     }
 
     if (assessmentId) {
-      const assessment = await base44.entities.Assessment.get(assessmentId);
-      contextData.assessment = assessment;
+      try {
+        const assessment = await base44.entities.Assessment.get(assessmentId);
+        contextData.assessment = assessment;
+      } catch (e) {
+        contextData.assessment_error = 'Assessment not found';
+      }
     }
 
-    // Fetch recent AI usage and governance data
-    const usageLogs = await base44.entities.AIUsageLog.list('-created_date', 50);
+    // Fetch recent governance data
+    const usageLogs = await base44.entities.AIUsageLog.list('-created_date', 30);
     const policies = await base44.entities.AIPolicy.filter({ status: 'active' });
-    const biasScans = await base44.entities.BiasMonitoring.list('-created_date', 10);
     
-    contextData.governance = { usageLogs, policies, biasScans };
+    contextData.governance = { 
+      total_interactions: usageLogs.length,
+      active_policies: policies.length,
+      recent_sample: usageLogs.slice(0, 5)
+    };
 
     // Build grounded prompt with external data sources
     const groundingPrompt = includeExternalData 

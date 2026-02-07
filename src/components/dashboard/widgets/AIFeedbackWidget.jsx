@@ -7,7 +7,8 @@ import { Star, MessageSquare } from 'lucide-react';
 export default function AIFeedbackWidget({ config = {} }) {
   const { data: feedback = [] } = useQuery({
     queryKey: ['aiFeedback'],
-    queryFn: () => base44.entities.AIFeedback.list('-created_date', 100)
+    queryFn: () => base44.entities.AIFeedback.list('-created_date', 100),
+    initialData: []
   });
 
   const avgRating = feedback.length > 0

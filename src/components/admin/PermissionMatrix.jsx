@@ -20,14 +20,15 @@ export default function PermissionMatrix() {
 
   const { data: existingPermissions = [] } = useQuery({
     queryKey: ['userPermissions'],
-    queryFn: () => base44.entities.UserPermission.list(),
-    onSuccess: (data) => {
+    queryFn: async () => {
+      const data = await base44.entities.UserPermission.list();
       const permMap = {};
       data.forEach(p => {
         const key = `${p.role}-${p.entity_name}`;
         permMap[key] = p;
       });
       setPermissions(permMap);
+      return data;
     }
   });
 
