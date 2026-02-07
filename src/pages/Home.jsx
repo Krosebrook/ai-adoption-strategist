@@ -17,6 +17,7 @@ import RiskIndicatorsPanel from '../components/dashboard/RiskIndicatorsPanel';
 import StrategyProgressWidget from '../components/dashboard/StrategyProgressWidget';
 import AssessmentFunnel from '../components/dashboard/AssessmentFunnel';
 import RoleBasedWidgets from '../components/dashboard/RoleBasedWidgets';
+import PersonalizedRecommendations from '../components/ai/PersonalizedRecommendations';
 
 export default function HomePage() {
   const [refreshKey, setRefreshKey] = useState(0);
@@ -183,6 +184,11 @@ export default function HomePage() {
           assessments={assessments} 
           strategies={strategies}
         />
+
+        {/* AI Recommendations */}
+        <div className="mt-6">
+          <PersonalizedRecommendations />
+        </div>
       </div>
     </div>
   );
