@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, GraduationCap, Sparkles, BookOpen, BarChart3, Plus, Users } from 'lucide-react';
+import { Loader2, GraduationCap, Sparkles, BookOpen, BarChart3, Plus, Users, Award, Target } from 'lucide-react';
 import { generateTrainingModule, generateProgressFeedback, analyzeSkillGaps } from '../components/training/TrainingContentGenerator';
 import InteractiveTrainingViewer from '../components/training/InteractiveTrainingViewer';
 import ProgressTracker from '../components/training/ProgressTracker';
 import TeamSkillPathViewer from '../components/training/TeamSkillPathViewer';
+import PersonalizedLearningPathViewer from '../components/training/PersonalizedLearningPathViewer';
+import CertificateViewer from '../components/training/CertificateViewer';
 import { toast } from 'sonner';
 
 export default function TrainingPage() {
@@ -182,6 +184,10 @@ export default function TrainingPage() {
 
         <Tabs defaultValue="modules" className="space-y-6">
           <TabsList>
+            <TabsTrigger value="learning-path">
+              <Target className="h-4 w-4 mr-2" />
+              My Learning Path
+            </TabsTrigger>
             <TabsTrigger value="modules">
               <BookOpen className="h-4 w-4 mr-2" />
               Training Modules
@@ -189,6 +195,10 @@ export default function TrainingPage() {
             <TabsTrigger value="progress">
               <BarChart3 className="h-4 w-4 mr-2" />
               My Progress
+            </TabsTrigger>
+            <TabsTrigger value="certificates">
+              <Award className="h-4 w-4 mr-2" />
+              Certificates
             </TabsTrigger>
             <TabsTrigger value="generate">
               <Sparkles className="h-4 w-4 mr-2" />
@@ -199,6 +209,10 @@ export default function TrainingPage() {
               Team Skill Paths
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="learning-path">
+            <PersonalizedLearningPathViewer assessmentId={selectedAssessment?.id} />
+          </TabsContent>
 
           <TabsContent value="modules" className="space-y-6">
             {activeModule ? (
@@ -276,6 +290,10 @@ export default function TrainingPage() {
               progressData={progressData}
               aiFeedback={aiFeedback}
             />
+          </TabsContent>
+
+          <TabsContent value="certificates">
+            <CertificateViewer />
           </TabsContent>
 
           <TabsContent value="generate" className="space-y-6">

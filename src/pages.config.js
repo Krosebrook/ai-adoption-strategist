@@ -49,8 +49,11 @@
  */
 import AIAgentHub from './pages/AIAgentHub';
 import AIGovernance from './pages/AIGovernance';
+import AIPerformanceMonitor from './pages/AIPerformanceMonitor';
+import AdminPanel from './pages/AdminPanel';
 import Analytics from './pages/Analytics';
 import Assessment from './pages/Assessment';
+import CustomDashboard from './pages/CustomDashboard';
 import Dashboard from './pages/Dashboard';
 import Documentation from './pages/Documentation';
 import ExecutiveDashboard from './pages/ExecutiveDashboard';
@@ -68,17 +71,17 @@ import StrategyAutomation from './pages/StrategyAutomation';
 import TemplateBuilder from './pages/TemplateBuilder';
 import Training from './pages/Training';
 import Trends from './pages/Trends';
-import CustomDashboard from './pages/CustomDashboard';
-import AdminPanel from './pages/AdminPanel';
-import AIPerformanceMonitor from './pages/AIPerformanceMonitor';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AIAgentHub": AIAgentHub,
     "AIGovernance": AIGovernance,
+    "AIPerformanceMonitor": AIPerformanceMonitor,
+    "AdminPanel": AdminPanel,
     "Analytics": Analytics,
     "Assessment": Assessment,
+    "CustomDashboard": CustomDashboard,
     "Dashboard": Dashboard,
     "Documentation": Documentation,
     "ExecutiveDashboard": ExecutiveDashboard,
@@ -96,9 +99,6 @@ export const PAGES = {
     "TemplateBuilder": TemplateBuilder,
     "Training": Training,
     "Trends": Trends,
-    "CustomDashboard": CustomDashboard,
-    "AdminPanel": AdminPanel,
-    "AIPerformanceMonitor": AIPerformanceMonitor,
 }
 
 export const pagesConfig = {
