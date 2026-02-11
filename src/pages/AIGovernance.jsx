@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { 
   Shield, Activity, AlertTriangle, FileText, 
   Eye, TrendingUp, Loader2, RefreshCw, Download,
-  CheckCircle, XCircle, Clock, BarChart3
+  CheckCircle, XCircle, Clock, BarChart3, MessageSquare
 } from 'lucide-react';
 import UsageAnalytics from '../components/governance/UsageAnalytics';
 import PolicyManager from '../components/governance/PolicyManager';
@@ -17,6 +17,7 @@ import AuditLog from '../components/governance/AuditLog';
 import AutomatedScanConfig from '../components/governance/AutomatedScanConfig';
 import MitigationStrategies from '../components/governance/MitigationStrategies';
 import FeedbackAnalytics from '../components/governance/FeedbackAnalytics';
+import PerformanceDriftMonitor from '../components/governance/PerformanceDriftMonitor';
 import { toast } from 'sonner';
 
 export default function AIGovernance() {
@@ -237,6 +238,10 @@ Provide bias scores (0-100, where 0 is no bias, 100 is severe bias) and specific
               <MessageSquare className="h-4 w-4 mr-2" />
               User Feedback
             </TabsTrigger>
+            <TabsTrigger value="drift">
+              <Activity className="h-4 w-4 mr-2" />
+              Performance Drift
+            </TabsTrigger>
             <TabsTrigger value="audit">
               <Shield className="h-4 w-4 mr-2" />
               Audit Log
@@ -296,6 +301,10 @@ Provide bias scores (0-100, where 0 is no bias, 100 is severe bias) and specific
 
           <TabsContent value="feedback">
             <FeedbackAnalytics />
+          </TabsContent>
+
+          <TabsContent value="drift">
+            <PerformanceDriftMonitor />
           </TabsContent>
 
           <TabsContent value="audit">

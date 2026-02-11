@@ -60,6 +60,7 @@ import ExecutiveDashboard from './pages/ExecutiveDashboard';
 import FeedbackDashboard from './pages/FeedbackDashboard';
 import Home from './pages/Home';
 import ImplementationPlan from './pages/ImplementationPlan';
+import Landing from './pages/Landing';
 import Onboarding from './pages/Onboarding';
 import PlatformComparison from './pages/PlatformComparison';
 import PredictiveAnalytics from './pages/PredictiveAnalytics';
@@ -71,7 +72,6 @@ import StrategyAutomation from './pages/StrategyAutomation';
 import TemplateBuilder from './pages/TemplateBuilder';
 import Training from './pages/Training';
 import Trends from './pages/Trends';
-import Landing from './pages/Landing';
 import __Layout from './Layout.jsx';
 
 
@@ -89,6 +89,7 @@ export const PAGES = {
     "FeedbackDashboard": FeedbackDashboard,
     "Home": Home,
     "ImplementationPlan": ImplementationPlan,
+    "Landing": Landing,
     "Onboarding": Onboarding,
     "PlatformComparison": PlatformComparison,
     "PredictiveAnalytics": PredictiveAnalytics,
@@ -100,7 +101,6 @@ export const PAGES = {
     "TemplateBuilder": TemplateBuilder,
     "Training": Training,
     "Trends": Trends,
-    "Landing": Landing,
 }
 
 export const pagesConfig = {
