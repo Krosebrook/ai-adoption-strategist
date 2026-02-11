@@ -157,14 +157,15 @@ export default function LandingPage() {
             <motion.h1 
               className="text-6xl lg:text-8xl font-black mb-8" 
               style={{
-                background: 'linear-gradient(135deg, #FFFFFF 0%, #FFF8F0 20%, #FFE5B4 40%, #F5D6AB 60%, #F5A623 80%, #E88A1D 100%)',
+                background: 'linear-gradient(90deg, #7A8B99 0%, #9A9A8E 8%, #C9B896 16%, #E8C078 24%, #F5A623 32%, #E88A1D 40%, #D07612 48%, #C4A35A 56%, #D4B896 64%, #F5A623 72%, #E88A1D 80%, #FFFFFF 88%, #FFF8F0 100%)',
+                backgroundSize: '300% 100%',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
                 letterSpacing: '-0.03em',
                 lineHeight: '1.1',
                 filter: 'drop-shadow(0 4px 24px rgba(255, 255, 255, 0.4)) drop-shadow(0 0 80px rgba(245, 166, 35, 0.3))',
-                textShadow: '0 0 40px rgba(255, 255, 255, 0.5)'
+                animation: 'gradientTextFlow 8s ease-in-out infinite'
               }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -173,10 +174,12 @@ export default function LandingPage() {
               Enterprise AI Adoption
               <br />
               <span style={{
-                background: 'linear-gradient(135deg, #FFE5B4 0%, #F5A623 50%, #E88A1D 100%)',
+                background: 'linear-gradient(90deg, #C9B896 0%, #E8C078 12.5%, #F5A623 25%, #E88A1D 37.5%, #D07612 50%, #E88A1D 62.5%, #F5A623 75%, #FFE5B4 87.5%, #FFFFFF 100%)',
+                backgroundSize: '300% 100%',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
+                animation: 'gradientTextFlow 6s ease-in-out infinite reverse'
               }}>
                 Made Strategic
               </span>

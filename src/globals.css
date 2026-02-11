@@ -153,3 +153,16 @@ body {
     background-position: 100% 50%;
   }
 }
+
+/* Animated gradient text flow with hue transitions */
+@keyframes gradientTextFlow {
+  0% {
+    background-position: 0% center;
+  }
+  50% {
+    background-position: 100% center;
+  }
+  100% {
+    background-position: 0% center;
+  }
+}
