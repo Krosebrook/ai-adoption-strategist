@@ -8,9 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Save, Loader2, Settings as SettingsIcon, Bell, DollarSign, BarChart3, Shield, Plug } from 'lucide-react';
 import { toast } from 'sonner';
 import { COMPLIANCE_STANDARDS, INTEGRATION_CATEGORIES } from '../components/assessment/AssessmentData';
+import NotificationSettings from '../components/settings/NotificationSettings';
 
 export default function Settings() {
   const queryClient = useQueryClient();
@@ -139,8 +141,15 @@ export default function Settings() {
           </p>
         </div>
 
-        {/* ROI Display Settings */}
-        <Card className="mb-6" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-card-border)' }}>
+        <Tabs defaultValue="general" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="general">General</TabsTrigger>
+            <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="general" className="space-y-6">
+            {/* ROI Display Settings */}
+            <Card style={{ background: 'var(--color-surface)', borderColor: 'var(--color-card-border)' }}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
               <DollarSign className="h-5 w-5" style={{ color: 'var(--color-primary)' }} />
@@ -374,31 +383,37 @@ export default function Settings() {
           </CardContent>
         </Card>
 
-        {/* Save Button */}
-        <div className="flex justify-end">
-          <Button
-            onClick={handleSave}
-            disabled={saveSettingsMutation.isPending}
-            size="lg"
-            className="text-white"
-            style={{ 
-              background: 'linear-gradient(135deg, var(--color-teal-500), var(--color-teal-600))',
-              border: 'none'
-            }}
-          >
-            {saveSettingsMutation.isPending ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                Save Settings
-              </>
-            )}
-          </Button>
-        </div>
+            {/* Save Button */}
+            <div className="flex justify-end">
+              <Button
+                onClick={handleSave}
+                disabled={saveSettingsMutation.isPending}
+                size="lg"
+                className="text-white"
+                style={{ 
+                  background: 'linear-gradient(135deg, var(--color-teal-500), var(--color-teal-600))',
+                  border: 'none'
+                }}
+              >
+                {saveSettingsMutation.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Settings
+                  </>
+                )}
+              </Button>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="notifications">
+            <NotificationSettings />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
