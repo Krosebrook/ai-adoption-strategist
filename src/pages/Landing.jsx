@@ -77,10 +77,17 @@ export default function LandingPage() {
               </div>
             </div>
             
-            <h1 className="text-5xl lg:text-7xl font-bold mb-6 text-white drop-shadow-lg">
+            <h1 className="text-5xl lg:text-7xl font-extrabold mb-6 drop-shadow-2xl" style={{
+              background: 'linear-gradient(135deg, #FFFFFF 0%, #FFF8F0 30%, #F5D6AB 60%, #E88A1D 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              textShadow: '0 2px 40px rgba(255, 255, 255, 0.3)',
+              letterSpacing: '-0.02em'
+            }}>
               Enterprise AI Adoption
               <br />
-              <span style={{ color: 'var(--color-cream-50)' }}>Made Strategic</span>
+              Made Strategic
             </h1>
             
             <p className="text-xl lg:text-2xl mb-10 max-w-3xl mx-auto text-white/90 drop-shadow">
