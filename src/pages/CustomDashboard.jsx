@@ -5,9 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   LayoutDashboard, Plus, Settings, Save, Eye, Trash2,
-  Grid3x3, Maximize2, Minimize2, RefreshCw
+  Grid3x3, Maximize2, Minimize2, RefreshCw, BarChart3, GitCompare, Download
 } from 'lucide-react';
 import { toast } from 'sonner';
 import RiskSummaryWidget from '../components/dashboard/widgets/RiskSummaryWidget';
@@ -15,6 +16,10 @@ import GovernanceWidget from '../components/dashboard/widgets/GovernanceWidget';
 import StrategyProgressWidget from '../components/dashboard/widgets/StrategyProgressWidget';
 import AssessmentStatsWidget from '../components/dashboard/widgets/AssessmentStatsWidget';
 import AIFeedbackWidget from '../components/dashboard/widgets/AIFeedbackWidget';
+import DashboardBuilder from '../components/dashboard/DashboardBuilder';
+import DrillDownReport from '../components/reports/DrillDownReport';
+import ExportManager from '../components/reports/ExportManager';
+import ComparisonView from '../components/comparison/ComparisonView';
 
 const AVAILABLE_WIDGETS = [
   { id: 'risk_summary', name: 'Risk Overview', component: RiskSummaryWidget, category: 'risk' },
@@ -45,6 +50,9 @@ export default function CustomDashboard() {
   const [selectedWidgets, setSelectedWidgets] = useState([]);
   const [dashboardName, setDashboardName] = useState('My Dashboard');
   const [selectedRole, setSelectedRole] = useState('custom');
+  const [drillDownData, setDrillDownData] = useState(null);
+  const [exportData, setExportData] = useState(null);
+  const [showExport, setShowExport] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: user } = useQuery({
@@ -59,6 +67,25 @@ export default function CustomDashboard() {
       return await base44.entities.CustomDashboard.filter({ user_email: user.email });
     },
     enabled: !!user
+  });
+
+  const { data: assessments = [] } = useQuery({
+    queryKey: ['assessments'],
+    queryFn: () => base44.entities.Assessment.list('-created_date', 50),
+    initialData: []
+  });
+
+  const { data: trainingProgress = [] } = useQuery({
+    queryKey: ['trainingProgress', user?.email],
+    queryFn: () => user ? base44.entities.TrainingProgress.filter({ user_email: user.email }) : [],
+    enabled: !!user,
+    initialData: []
+  });
+
+  const { data: policies = [] } = useQuery({
+    queryKey: ['aiPolicies'],
+    queryFn: () => base44.entities.AIPolicy.filter({ status: 'active' }),
+    initialData: []
   });
 
   const createDashboardMutation = useMutation({
@@ -139,6 +166,57 @@ export default function CustomDashboard() {
     );
   };
 
+  const handleDrillDown = (dataType) => {
+    let data = null;
+    switch(dataType) {
+      case 'assessments':
+        data = { assessments: assessments };
+        break;
+      case 'readiness':
+        data = assessments[0]?.ai_readiness_score;
+        break;
+      case 'training':
+        data = trainingProgress;
+        break;
+      case 'governance':
+        data = { policies };
+        break;
+    }
+    setDrillDownData({ type: dataType, data });
+  };
+
+  const handleExport = (data, title) => {
+    setExportData({ data, title });
+    setShowExport(true);
+  };
+
+  const widgetData = {
+    assessmentStats: {
+      total: assessments.length,
+      completed: assessments.filter(a => a.status === 'completed').length
+    },
+    readiness: {
+      score: assessments[0]?.ai_readiness_score?.overall_readiness_score || 0,
+      level: assessments[0]?.ai_readiness_score?.readiness_level || 'Not Assessed'
+    },
+    roi: {
+      savings: 150000,
+      investment: 75000
+    },
+    governance: {
+      compliance: 92,
+      activePolicies: policies.length,
+      violations: 2
+    },
+    training: {
+      completed: trainingProgress.filter(p => p.status === 'completed').length,
+      total: trainingProgress.length,
+      avgScore: trainingProgress.length > 0 
+        ? trainingProgress.reduce((sum, p) => sum + (p.best_score || 0), 0) / trainingProgress.length 
+        : 0
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-background)' }}>
@@ -202,8 +280,55 @@ export default function CustomDashboard() {
           </div>
         </div>
 
-        {editMode ? (
-          <div className="space-y-6">
+        <Tabs defaultValue="dashboard" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="dashboard">
+              <LayoutDashboard className="h-4 w-4 mr-2" />
+              Dashboard
+            </TabsTrigger>
+            <TabsTrigger value="customize">
+              <Settings className="h-4 w-4 mr-2" />
+              Customize
+            </TabsTrigger>
+            <TabsTrigger value="reports">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Reports
+            </TabsTrigger>
+            <TabsTrigger value="compare">
+              <GitCompare className="h-4 w-4 mr-2" />
+              Compare
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="dashboard">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {selectedWidgets.map(widgetId => {
+                const widgetDef = AVAILABLE_WIDGETS.find(w => w.id === widgetId);
+                if (!widgetDef) return null;
+                const WidgetComponent = widgetDef.component;
+                return (
+                  <div key={widgetId}>
+                    <WidgetComponent config={{}} />
+                  </div>
+                );
+              })}
+              {selectedWidgets.length === 0 && (
+                <div className="col-span-full text-center py-12">
+                  <Grid3x3 className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-slate-700 mb-2">No Widgets Selected</h3>
+                  <p className="text-slate-500 mb-4">Click "Customize" to add widgets to your dashboard</p>
+                  <Button onClick={() => setEditMode(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Widgets
+                  </Button>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="customize">
+            {editMode ? (
+              <div className="space-y-6">
             {/* Dashboard Configuration */}
             <Card>
               <CardHeader>
@@ -292,32 +417,51 @@ export default function CustomDashboard() {
                 </CardContent>
               </Card>
             )}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {selectedWidgets.map(widgetId => {
-              const widgetDef = AVAILABLE_WIDGETS.find(w => w.id === widgetId);
-              if (!widgetDef) return null;
-              const WidgetComponent = widgetDef.component;
-              return (
-                <div key={widgetId}>
-                  <WidgetComponent config={{}} />
-                </div>
-              );
-            })}
-            {selectedWidgets.length === 0 && (
-              <div className="col-span-full text-center py-12">
-                <Grid3x3 className="h-16 w-16 text-slate-300 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-slate-700 mb-2">No Widgets Selected</h3>
-                <p className="text-slate-500 mb-4">Click "Customize" to add widgets to your dashboard</p>
-                <Button onClick={() => setEditMode(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Widgets
-                </Button>
               </div>
+            ) : (
+              <DashboardBuilder 
+                dashboardConfig={selectedDashboard}
+                onSave={(config) => handleSaveDashboard()}
+                widgetData={widgetData}
+                onDrillDown={handleDrillDown}
+              />
             )}
-          </div>
-        )}
+          </TabsContent>
+
+          <TabsContent value="reports">
+            {drillDownData ? (
+              <DrillDownReport 
+                initialData={drillDownData.data}
+                dataType={drillDownData.type}
+                onExport={(data) => handleExport(data.data, data.label)}
+              />
+            ) : (
+              <Card className="border-dashed">
+                <CardContent className="py-12 text-center">
+                  <BarChart3 className="h-12 w-12 mx-auto mb-4 text-slate-400" />
+                  <p className="text-slate-600 mb-4">Click on any dashboard widget to explore detailed data</p>
+                  <Button onClick={() => handleDrillDown('assessments')}>
+                    View Sample Drill-Down
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="compare">
+            <ComparisonView 
+              items={assessments}
+              itemType="assessments"
+            />
+          </TabsContent>
+        </Tabs>
+
+        <ExportManager 
+          data={exportData?.data}
+          title={exportData?.title}
+          open={showExport}
+          onOpenChange={setShowExport}
+        />
       </div>
     </div>
   );
