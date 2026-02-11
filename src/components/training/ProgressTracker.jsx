@@ -11,6 +11,44 @@ import { Progress } from "@/components/ui/progress";
 import { TrendingUp, Clock, Award, Target, CheckCircle, AlertCircle } from 'lucide-react';
 
 export default function ProgressTracker({ modules, progressData, aiFeedback }) {
+  const [priorityFilter, setPriorityFilter] = useState('all');
+  const [skillFilter, setSkillFilter] = useState('all');
+  const queryClient = useQueryClient();
+
+  const { data: user } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me()
+  });
+
+  const { data: userSettings } = useQuery({
+    queryKey: ['userSettings', user?.email],
+    queryFn: () => base44.entities.UserSettings.filter({ user_email: user.email }),
+    enabled: !!user,
+    initialData: []
+  });
+
+  const updateSettingsMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.UserSettings.update(id, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['userSettings'] })
+  });
+
+  const currentSettings = userSettings?.[0];
+  const trainingPrefs = currentSettings?.training_preferences || {};
+
+  const savePreference = (key, value) => {
+    if (currentSettings) {
+      updateSettingsMutation.mutate({
+        id: currentSettings.id,
+        data: {
+          training_preferences: {
+            ...trainingPrefs,
+            [key]: value
+          }
+        }
+      });
+    }
+  };
+
   const completedModules = progressData?.filter(p => p.status === 'completed').length || 0;
   const inProgressModules = progressData?.filter(p => p.status === 'in_progress').length || 0;
   const totalModules = modules?.length || 0;
@@ -21,6 +59,22 @@ export default function ProgressTracker({ modules, progressData, aiFeedback }) {
     const latestScore = p.quiz_scores?.[p.quiz_scores.length - 1];
     return sum + (latestScore ? (latestScore.score / latestScore.total_questions) * 100 : 0);
   }, 0) / (progressData?.length || 1);
+
+  // Extract unique skills
+  const allSkills = [...new Set(modules?.flatMap(m => m.skills_covered || []))];
+
+  // Filter modules
+  const filteredModules = modules?.filter(module => {
+    const progress = progressData?.find(p => p.module_id === module.id);
+    
+    if (priorityFilter === 'in_progress' && progress?.status !== 'in_progress') return false;
+    if (priorityFilter === 'completed' && progress?.status !== 'completed') return false;
+    if (priorityFilter === 'not_started' && progress) return false;
+    
+    if (skillFilter !== 'all' && !(module.skills_covered || []).includes(skillFilter)) return false;
+    
+    return true;
+  });
 
   return (
     <div className="space-y-6">
@@ -58,11 +112,44 @@ export default function ProgressTracker({ modules, progressData, aiFeedback }) {
       {/* Module Progress Details */}
       <Card>
         <CardHeader>
-          <CardTitle>Module Progress</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Module Progress</CardTitle>
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-gray-500" />
+              <Select value={priorityFilter} onValueChange={(val) => {
+                setPriorityFilter(val);
+                savePreference('priority_filter', val);
+              }}>
+                <SelectTrigger className="w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="in_progress">In Progress</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="not_started">Not Started</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={skillFilter} onValueChange={(val) => {
+                setSkillFilter(val);
+                savePreference('skill_filter', val);
+              }}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Filter by skill" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Skills</SelectItem>
+                  {allSkills.map(skill => (
+                    <SelectItem key={skill} value={skill}>{skill}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {modules?.map((module) => {
+            {filteredModules?.map((module) => {
               const progress = progressData?.find(p => p.module_id === module.id);
               const status = progress?.status || 'not_started';
               const percentage = progress?.progress_percentage || 0;
