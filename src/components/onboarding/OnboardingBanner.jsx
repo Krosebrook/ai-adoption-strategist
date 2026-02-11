@@ -47,7 +47,9 @@ export default function OnboardingBanner() {
   }
 
   return (
-    <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-3">
+    <div className="text-white px-4 py-3" style={{
+      background: 'linear-gradient(135deg, #F5A623 0%, #E88A1D 50%, #D07612 100%)'
+    }}>
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Sparkles className="h-5 w-5" />
