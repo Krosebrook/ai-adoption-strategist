@@ -6,6 +6,8 @@ import { Brain, Home, FileText, LayoutDashboard, Star, Settings, TrendingUp, Spa
 import OnboardingBanner from './components/onboarding/OnboardingBanner';
 import PWAInstallPrompt from './components/pwa/PWAInstallPrompt';
 import ContextualGuidancePanel from './components/guidance/ContextualGuidancePanel';
+import NotificationCenter from './components/notifications/NotificationCenter';
+import CommandPalette from './components/command/CommandPalette';
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = React.useState(null);
@@ -86,9 +88,14 @@ export default function Layout({ children, currentPageName }) {
                 );
               })}
             </nav>
+            
+            <NotificationCenter />
           </div>
         </div>
       </header>
+      
+      {/* Command Palette */}
+      <CommandPalette />
 
       {/* Main Content */}
       <main>{children}</main>
