@@ -47,16 +47,48 @@ export const schemas = {
 
 /**
  * Sanitize HTML to prevent XSS attacks
- * Removes all HTML tags and dangerous characters
+ * 
+ * ⚠️ WARNING: This is a basic sanitization function.
+ * For production use with user-generated HTML content, use DOMPurify library:
+ * npm install dompurify
+ * import DOMPurify from 'dompurify'
+ * const clean = DOMPurify.sanitize(dirty)
+ * 
+ * This function is suitable for text-only content where HTML should be stripped entirely.
  */
 export function sanitizeHtml(input) {
   if (typeof input !== 'string') return ''
   
-  return input
-    .replace(/<[^>]*>/g, '') // Remove HTML tags
-    .replace(/javascript:/gi, '') // Remove javascript: protocol
-    .replace(/on\w+=/gi, '') // Remove event handlers
-    .trim()
+  // Create a temporary div to let the browser parse and strip HTML
+  if (typeof document !== 'undefined') {
+    const temp = document.createElement('div')
+    temp.textContent = input // textContent automatically escapes HTML
+    return temp.innerHTML // Return the escaped version
+  }
+  
+  // Fallback for non-browser environments (Node.js, tests)
+  // Strip script tags with content first (multiple passes to handle nested)
+  let sanitized = input
+  let prevSanitized = ''
+  while (sanitized !== prevSanitized) {
+    prevSanitized = sanitized
+    sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script\s*>/gi, '')
+  }
+  
+  // Strip all remaining HTML tags
+  sanitized = sanitized.replace(/<[^>]*>/g, '')
+  
+  // Remove dangerous protocols (apply multiple times to handle encoding tricks)
+  for (let i = 0; i < 3; i++) {
+    sanitized = sanitized.replace(/javascript:/gi, '')
+    sanitized = sanitized.replace(/data:/gi, '')
+    sanitized = sanitized.replace(/vbscript:/gi, '')
+  }
+  
+  // Remove event handler attributes
+  sanitized = sanitized.replace(/\s*on\w+\s*=/gi, '')
+  
+  return sanitized.trim()
 }
 
 /**
