@@ -18,7 +18,7 @@ export default function LandingPage() {
     {
       icon: Brain,
       title: "AI Platform Assessment",
-      description: "Compare Google Gemini, Microsoft Copilot, Anthropic Claude, and OpenAI ChatGPT with vendor-agnostic analysis"
+      description: "Compare 75+ platforms including Claude, ChatGPT, Gemini, Copilot, Mistral, Perplexity, and more with vendor-agnostic analysis"
     },
     {
       icon: Sparkles,
@@ -57,9 +57,9 @@ export default function LandingPage() {
   ];
 
   const stats = [
-    { value: "4", label: "AI Platforms" },
-    { value: "15+", label: "Compliance Standards" },
-    { value: "50+", label: "Training Modules" },
+    { value: "75+", label: "AI Platforms" },
+    { value: "20+", label: "Compliance Standards" },
+    { value: "100+", label: "Training Modules" },
     { value: "24/7", label: "Risk Monitoring" }
   ];
 
@@ -193,7 +193,7 @@ export default function LandingPage() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.8 }}
             >
-              Compare, assess, and implement the right AI platform for your organization with data-driven insights and automated planning
+              Compare 75+ AI platforms across Foundation, Enterprise, Developer, and Specialized categories. Make data-driven decisions with automated planning and compliance analysis.
             </motion.p>
             
             <motion.div 
