@@ -241,6 +241,74 @@ export default function PlatformComparison() {
                           </td>
                         ))}
                       </tr>
+
+                      {/* Use Cases */}
+                      <tr className="bg-white">
+                        <td className="px-4 py-3 font-semibold text-sm align-top">
+                          Use Cases
+                        </td>
+                        {platforms.map(platform => (
+                          <td key={platform.id} className="px-4 py-3">
+                            <div className="space-y-1">
+                              {platform.use_cases?.map((useCase, idx) => (
+                                <div key={idx} className="text-xs flex items-center gap-1">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+                                  {useCase}
+                                </div>
+                              ))}
+                            </div>
+                          </td>
+                        ))}
+                      </tr>
+
+                      {/* Deployment Options */}
+                      <tr className="bg-slate-50">
+                        <td className="px-4 py-3 font-semibold text-sm align-top">
+                          Deployment Options
+                        </td>
+                        {platforms.map(platform => (
+                          <td key={platform.id} className="px-4 py-3">
+                            <div className="flex flex-wrap gap-1 justify-center">
+                              {platform.deployment_options?.map((option, idx) => (
+                                <Badge 
+                                  key={idx}
+                                  variant="outline"
+                                  className="text-xs bg-blue-50 text-blue-700 border-blue-200"
+                                >
+                                  {option}
+                                </Badge>
+                              ))}
+                            </div>
+                          </td>
+                        ))}
+                      </tr>
+
+                      {/* Integration Options */}
+                      <tr className="bg-white">
+                        <td className="px-4 py-3 font-semibold text-sm align-top">
+                          Integration Options
+                        </td>
+                        {platforms.map(platform => (
+                          <td key={platform.id} className="px-4 py-3">
+                            <div className="flex flex-wrap gap-1 justify-center">
+                              {platform.integration_options?.slice(0, 6).map((integration, idx) => (
+                                <Badge 
+                                  key={idx}
+                                  className="text-xs bg-purple-50 text-purple-700 border-purple-200"
+                                  variant="outline"
+                                >
+                                  {integration}
+                                </Badge>
+                              ))}
+                              {platform.integration_options?.length > 6 && (
+                                <Badge variant="outline" className="text-xs text-slate-500">
+                                  +{platform.integration_options.length - 6}
+                                </Badge>
+                              )}
+                            </div>
+                          </td>
+                        ))}
+                      </tr>
                     </tbody>
                   </table>
                 </div>

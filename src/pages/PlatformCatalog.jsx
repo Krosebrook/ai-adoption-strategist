@@ -211,6 +211,57 @@ export default function PlatformCatalog() {
                     <strong>Target:</strong> {platform.target_users}
                   </div>
 
+                  {platform.use_cases?.length > 0 && (
+                    <div className="space-y-1">
+                      <div className="text-xs font-semibold text-slate-700">Top Use Cases:</div>
+                      {platform.use_cases.slice(0, 3).map((useCase, idx) => (
+                        <div key={idx} className="text-xs text-slate-600 flex items-center gap-1">
+                          <div className="w-1 h-1 rounded-full bg-orange-500" />
+                          {useCase}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {platform.deployment_options?.length > 0 && (
+                    <div>
+                      <div className="text-xs font-semibold text-slate-700 mb-1">Deployment:</div>
+                      <div className="flex flex-wrap gap-1">
+                        {platform.deployment_options.map((option, idx) => (
+                          <Badge 
+                            key={idx}
+                            variant="outline"
+                            className="text-xs bg-blue-50 text-blue-700 border-blue-200"
+                          >
+                            {option}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {platform.integration_options?.length > 0 && (
+                    <div>
+                      <div className="text-xs font-semibold text-slate-700 mb-1">Integrations:</div>
+                      <div className="flex flex-wrap gap-1">
+                        {platform.integration_options.slice(0, 4).map((integration, idx) => (
+                          <Badge 
+                            key={idx}
+                            className="text-xs bg-purple-50 text-purple-700 border-purple-200"
+                            variant="outline"
+                          >
+                            {integration}
+                          </Badge>
+                        ))}
+                        {platform.integration_options.length > 4 && (
+                          <Badge variant="outline" className="text-xs text-slate-500">
+                            +{platform.integration_options.length - 4} more
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {platform.compliance_certifications?.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {platform.compliance_certifications.map((cert, idx) => (
