@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RotateCcw } from 'lucide-react';
 import { Save, Loader2, Settings as SettingsIcon, Bell, DollarSign, BarChart3, Shield, Plug } from 'lucide-react';
 import { toast } from 'sonner';
 import { COMPLIANCE_STANDARDS, INTEGRATION_CATEGORIES } from '../components/assessment/AssessmentData';
@@ -145,6 +146,7 @@ export default function Settings() {
           <TabsList>
             <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
+            <TabsTrigger value="onboarding">Onboarding</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general" className="space-y-6">

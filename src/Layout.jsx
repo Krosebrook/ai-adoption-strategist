@@ -4,6 +4,7 @@ import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import { Brain, Home, FileText, LayoutDashboard, Star, Settings, TrendingUp, Sparkles, GraduationCap, Shield, Activity } from 'lucide-react';
 import OnboardingBanner from './components/onboarding/OnboardingBanner';
+import InteractiveOnboardingGuide from './components/onboarding/InteractiveOnboardingGuide';
 import PWAInstallPrompt from './components/pwa/PWAInstallPrompt';
 import ContextualGuidancePanel from './components/guidance/ContextualGuidancePanel';
 import NotificationCenter from './components/notifications/NotificationCenter';
@@ -44,6 +45,9 @@ export default function Layout({ children, currentPageName }) {
     <div className="min-h-screen" style={{ background: 'var(--color-background)' }}>
       {/* Onboarding Banner */}
       <OnboardingBanner />
+      
+      {/* Interactive Onboarding Guide */}
+      <InteractiveOnboardingGuide />
       
       {/* Header */}
       <header className="sticky top-0 z-50" style={{ 
