@@ -53,7 +53,7 @@ export default function PlatformCatalog() {
       return;
     }
     const ids = selectedPlatforms.join(',');
-    navigate(createPageUrl(`PlatformComparison?ids=${ids}`));
+    navigate(`${createPageUrl('PlatformComparison')}?ids=${ids}`);
   };
 
   const getComplianceBadgeColor = (cert) => {
