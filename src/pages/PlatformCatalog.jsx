@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, GitCompare, Check, ExternalLink, Filter } from 'lucide-react';
+import { Search, GitCompare, Check, ExternalLink, Filter, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import QuickAssessmentPanel from '../components/catalog/QuickAssessmentPanel';
+import ROISimulator from '../components/catalog/ROISimulator';
 
 export default function PlatformCatalog() {
   const navigate = useNavigate();
@@ -18,6 +20,7 @@ export default function PlatformCatalog() {
   const [tierFilter, setTierFilter] = useState('All');
   const [ecosystemFilter, setEcosystemFilter] = useState('All');
   const [selectedPlatforms, setSelectedPlatforms] = useState([]);
+  const [aiRecommendations, setAiRecommendations] = useState(null);
 
   const { data: platforms = [], isLoading } = useQuery({
     queryKey: ['aiPlatforms'],
@@ -75,12 +78,47 @@ export default function PlatformCatalog() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-text)' }}>
-            AI Platform Catalog
-          </h1>
-          <p style={{ color: 'var(--color-text-secondary)' }}>
-            Explore and compare {platforms.length} AI platforms across categories, tiers, and ecosystems
-          </p>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-text)' }}>
+                AI Platform Catalog
+              </h1>
+              <p style={{ color: 'var(--color-text-secondary)' }}>
+                Explore and compare {platforms.length} AI platforms across categories, tiers, and ecosystems
+              </p>
+            </div>
+            <QuickAssessmentPanel onRecommendationsGenerated={setAiRecommendations} />
+          </div>
+          
+          {/* AI Recommendations Banner */}
+          {aiRecommendations && (
+            <Card className="bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200 mb-4">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-purple-900 mb-2 flex items-center gap-2">
+                      <Star className="h-5 w-5 text-purple-600" />
+                      AI-Powered Recommendations for You
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {aiRecommendations.recommended_platforms?.slice(0, 3).map((rec, idx) => (
+                        <Badge key={idx} className="bg-purple-600 text-white">
+                          {rec.platform_name} ({rec.fit_score}% match)
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setAiRecommendations(null)}
+                  >
+                    Dismiss
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Filters & Search */}
@@ -275,20 +313,23 @@ export default function PlatformCatalog() {
                     </div>
                   )}
 
-                  <Button 
-                    variant={selectedPlatforms.includes(platform.id) ? "default" : "outline"}
-                    className="w-full"
-                    onClick={() => togglePlatformSelection(platform.id)}
-                  >
-                    {selectedPlatforms.includes(platform.id) ? (
-                      <>
-                        <Check className="h-4 w-4 mr-2" />
-                        Selected
-                      </>
-                    ) : (
-                      'Add to Compare'
-                    )}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant={selectedPlatforms.includes(platform.id) ? "default" : "outline"}
+                      className="flex-1"
+                      onClick={() => togglePlatformSelection(platform.id)}
+                    >
+                      {selectedPlatforms.includes(platform.id) ? (
+                        <>
+                          <Check className="h-4 w-4 mr-2" />
+                          Selected
+                        </>
+                      ) : (
+                        'Add to Compare'
+                      )}
+                    </Button>
+                    <ROISimulator platform={platform} />
+                  </div>
                 </CardContent>
               </Card>
             ))}
