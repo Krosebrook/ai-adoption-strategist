@@ -37,6 +37,9 @@ import ActivityFeed from '../components/collaboration/ActivityFeed';
 import SecureLinkGenerator from '../components/collaboration/SecureLinkGenerator';
 import { generateImplementationPlan } from '../components/implementation/ImplementationPlanEngine';
 import { applyReinforcementLearning } from '../components/feedback/ReinforcementLearningEngine';
+import DynamicScoringEngine from '../components/assessment/DynamicScoringEngine';
+import RiskAnalysisEngine from '../components/assessment/RiskAnalysisEngine';
+import ExecutiveSummaryGenerator from '../components/assessment/ExecutiveSummaryGenerator';
 
 export default function Results() {
   const [assessmentId, setAssessmentId] = useState(null);
@@ -49,6 +52,8 @@ export default function Results() {
   const [showPlanInputs, setShowPlanInputs] = useState(false);
   const [selectedPlatformForFeedback, setSelectedPlatformForFeedback] = useState(null);
   const [reinforcementLearning, setReinforcementLearning] = useState(null);
+  const [scoringWeights, setScoringWeights] = useState(null);
+  const [riskAnalysis, setRiskAnalysis] = useState(null);
   const { insights: aiInsights, roadmap: implementationRoadmap, loading: loadingAI, loadInsights } = useAIInsights();
 
   useEffect(() => {
@@ -394,6 +399,28 @@ export default function Results() {
             </div>
           </div>
         )}
+
+        {/* Advanced AI Assessment Tools */}
+        <div className="mb-8 space-y-6">
+          <h2 className="text-2xl font-bold text-slate-900">Advanced AI Analysis</h2>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            <DynamicScoringEngine
+              initialWeights={assessment.custom_weights}
+              onWeightsChange={setScoringWeights}
+            />
+            <ExecutiveSummaryGenerator
+              assessmentData={assessment}
+              scoringWeights={scoringWeights || assessment.custom_weights}
+              riskAnalysis={riskAnalysis}
+            />
+          </div>
+
+          <RiskAnalysisEngine
+            assessmentData={assessment}
+            onRisksIdentified={setRiskAnalysis}
+          />
+        </div>
 
         {/* Detailed Analysis */}
         <Tabs defaultValue="executive" className="space-y-6">
