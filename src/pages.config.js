@@ -62,6 +62,7 @@ import Home from './pages/Home';
 import ImplementationPlan from './pages/ImplementationPlan';
 import Landing from './pages/Landing';
 import Onboarding from './pages/Onboarding';
+import PlatformCatalog from './pages/PlatformCatalog';
 import PlatformComparison from './pages/PlatformComparison';
 import PredictiveAnalytics from './pages/PredictiveAnalytics';
 import Reports from './pages/Reports';
@@ -72,7 +73,6 @@ import StrategyAutomation from './pages/StrategyAutomation';
 import TemplateBuilder from './pages/TemplateBuilder';
 import Training from './pages/Training';
 import Trends from './pages/Trends';
-import PlatformCatalog from './pages/PlatformCatalog';
 import __Layout from './Layout.jsx';
 
 
@@ -92,6 +92,7 @@ export const PAGES = {
     "ImplementationPlan": ImplementationPlan,
     "Landing": Landing,
     "Onboarding": Onboarding,
+    "PlatformCatalog": PlatformCatalog,
     "PlatformComparison": PlatformComparison,
     "PredictiveAnalytics": PredictiveAnalytics,
     "Reports": Reports,
@@ -102,7 +103,6 @@ export const PAGES = {
     "TemplateBuilder": TemplateBuilder,
     "Training": Training,
     "Trends": Trends,
-    "PlatformCatalog": PlatformCatalog,
 }
 
 export const pagesConfig = {

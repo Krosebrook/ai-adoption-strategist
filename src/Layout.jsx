@@ -118,7 +118,7 @@ export default function Layout({ children, currentPageName }) {
               Enterprise AI Adoption Assessment & Implementation Planning Tool
             </p>
             <p>
-              Vendor-agnostic comparison of Google Gemini, Microsoft Copilot, Anthropic Claude, and OpenAI ChatGPT
+              Comprehensive AI platform comparison: Claude, ChatGPT, Gemini, Copilot, Mistral, and 70+ providers across all ecosystems
             </p>
           </div>
         </div>
