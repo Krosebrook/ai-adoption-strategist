@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import QuickAssessmentPanel from '../components/catalog/QuickAssessmentPanel';
 import ROISimulator from '../components/catalog/ROISimulator';
+import SemanticSearch from '../components/catalog/SemanticSearch';
 
 export default function PlatformCatalog() {
   const navigate = useNavigate();
@@ -21,6 +22,8 @@ export default function PlatformCatalog() {
   const [ecosystemFilter, setEcosystemFilter] = useState('All');
   const [selectedPlatforms, setSelectedPlatforms] = useState([]);
   const [aiRecommendations, setAiRecommendations] = useState(null);
+  const [semanticResults, setSemanticResults] = useState(null);
+  const [semanticAnalysis, setSemanticAnalysis] = useState(null);
 
   const { data: platforms = [], isLoading } = useQuery({
     queryKey: ['aiPlatforms'],
@@ -313,22 +316,58 @@ export default function PlatformCatalog() {
                     </div>
                   )}
 
-                  <div className="flex gap-2">
-                    <Button 
-                      variant={selectedPlatforms.includes(platform.id) ? "default" : "outline"}
-                      className="flex-1"
-                      onClick={() => togglePlatformSelection(platform.id)}
-                    >
-                      {selectedPlatforms.includes(platform.id) ? (
-                        <>
-                          <Check className="h-4 w-4 mr-2" />
-                          Selected
-                        </>
-                      ) : (
-                        'Add to Compare'
-                      )}
-                    </Button>
-                    <ROISimulator platform={platform} />
+                  <div className="space-y-2">
+                    {/* Semantic Match Score */}
+                    {platform.semanticScore && (
+                      <div className="flex items-center justify-between px-3 py-2 bg-purple-50 border border-purple-200 rounded">
+                        <span className="text-xs font-semibold text-purple-900">AI Match Score</span>
+                        <Badge className="bg-purple-600">
+                          {platform.semanticScore}%
+                        </Badge>
+                      </div>
+                    )}
+                    
+                    {/* Match Reasons */}
+                    {platform.matchReasons?.length > 0 && (
+                      <div className="px-3 py-2 bg-green-50 border border-green-200 rounded">
+                        <p className="text-xs font-semibold text-green-900 mb-1">Why it matches:</p>
+                        <ul className="text-xs text-green-800 space-y-0.5">
+                          {platform.matchReasons.slice(0, 3).map((reason, idx) => (
+                            <li key={idx}>• {reason}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {/* Concerns */}
+                    {platform.concerns?.length > 0 && (
+                      <div className="px-3 py-2 bg-yellow-50 border border-yellow-200 rounded">
+                        <p className="text-xs font-semibold text-yellow-900 mb-1">Considerations:</p>
+                        <ul className="text-xs text-yellow-800 space-y-0.5">
+                          {platform.concerns.slice(0, 2).map((concern, idx) => (
+                            <li key={idx}>• {concern}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    <div className="flex gap-2">
+                      <Button 
+                        variant={selectedPlatforms.includes(platform.id) ? "default" : "outline"}
+                        className="flex-1"
+                        onClick={() => togglePlatformSelection(platform.id)}
+                      >
+                        {selectedPlatforms.includes(platform.id) ? (
+                          <>
+                            <Check className="h-4 w-4 mr-2" />
+                            Selected
+                          </>
+                        ) : (
+                          'Add to Compare'
+                        )}
+                      </Button>
+                      <ROISimulator platform={platform} />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
