@@ -31,7 +31,12 @@ export default function PlatformCatalog() {
     initialData: []
   });
 
-  const filteredPlatforms = platforms.filter(platform => {
+  const handleSemanticSearch = (results, analysis) => {
+    setSemanticResults(results);
+    setSemanticAnalysis(analysis);
+  };
+
+  const filteredPlatforms = (semanticResults || platforms).filter(platform => {
     const matchesSearch = !searchTerm || 
       platform.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       platform.description?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -122,6 +127,14 @@ export default function PlatformCatalog() {
               </CardContent>
             </Card>
           )}
+        </div>
+
+        {/* Semantic Search */}
+        <div className="mb-6">
+          <SemanticSearch
+            platforms={platforms}
+            onFilterResults={handleSemanticSearch}
+          />
         </div>
 
         {/* Filters & Search */}
