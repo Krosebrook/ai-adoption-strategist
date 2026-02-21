@@ -21,6 +21,7 @@ export default function Layout({ children, currentPageName }) {
   const allNavigation = [
         { name: 'Home', icon: Home, page: 'Home', roles: ['admin', 'executive', 'product_manager', 'analyst', 'user'] },
         { name: 'Dashboard', icon: LayoutDashboard, page: 'CustomDashboard', roles: ['admin', 'executive', 'product_manager', 'analyst', 'user'] },
+        { name: 'Platforms', icon: Star, page: 'PlatformCatalog', roles: ['admin', 'executive', 'product_manager', 'analyst', 'user'] },
         { name: 'Executive', icon: LayoutDashboard, page: 'ExecutiveDashboard', roles: ['admin', 'executive'] },
         { name: 'Analytics', icon: TrendingUp, page: 'Analytics', roles: ['admin', 'executive', 'analyst'] },
         { name: 'Assessment', icon: FileText, page: 'Assessment', roles: ['admin', 'executive', 'product_manager', 'analyst', 'user'] },

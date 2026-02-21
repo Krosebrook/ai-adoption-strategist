@@ -1,173 +1,260 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { GitCompare, Sparkles, DollarSign } from 'lucide-react';
-import { BrandCard, BrandCardContent, BrandCardHeader, BrandCardTitle } from '../components/ui/BrandCard';
-import { LoadingPage } from '../components/ui/LoadingState';
-import EmptyState from '../components/ui/EmptyState';
-import SideBySideComparison from '../components/comparison/SideBySideComparison';
-import CostEstimationTool from '../components/comparison/CostEstimationTool';
-import FavoritePlatforms from '../components/comparison/FavoritePlatforms';
+import { ArrowLeft, Download, Check, X, Minus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import ExportManager from '../components/reports/ExportManager';
 
 export default function PlatformComparison() {
-  const [assessmentId, setAssessmentId] = useState(null);
-  const [selectedPlatforms, setSelectedPlatforms] = useState([]);
+  const navigate = useNavigate();
+  const [platformIds, setPlatformIds] = useState([]);
+  const [showExport, setShowExport] = useState(false);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get('id');
-    if (id) setAssessmentId(id);
+    const urlParams = new URLSearchParams(window.location.search);
+    const ids = urlParams.get('ids');
+    if (ids) {
+      setPlatformIds(ids.split(','));
+    }
   }, []);
 
-  const { data: assessment, isLoading } = useQuery({
-    queryKey: ['assessment', assessmentId],
-    queryFn: async () => {
-      const assessments = await base44.entities.Assessment.filter({ id: assessmentId });
-      return assessments[0];
-    },
-    enabled: !!assessmentId
-  });
-
-  const { data: allAssessments } = useQuery({
-    queryKey: ['assessments-completed'],
-    queryFn: () => base44.entities.Assessment.filter({ status: 'completed' }, '-created_date', 50),
+  const { data: allPlatforms = [] } = useQuery({
+    queryKey: ['aiPlatforms'],
+    queryFn: () => base44.entities.AIPlatform.list(),
     initialData: []
   });
 
-  useEffect(() => {
-    if (assessment?.recommended_platforms) {
-      // Auto-select top 3 platforms for comparison
-      const top3 = assessment.recommended_platforms.slice(0, 3).map(p => p.platform_name);
-      setSelectedPlatforms(top3);
+  const platforms = allPlatforms.filter(p => platformIds.includes(p.id));
+
+  const comparisonMetrics = [
+    { label: 'Category', key: 'category' },
+    { label: 'Tier', key: 'tier' },
+    { label: 'Ecosystem', key: 'ecosystem' },
+    { label: 'Pricing', key: 'pricing' },
+    { label: 'Overall Score', key: 'overall_score' },
+    { label: 'Market Share', key: 'market_share', suffix: '%' },
+    { label: 'Context Window', key: 'context_window' },
+    { label: 'Target Users', key: 'target_users' },
+    { label: 'API Available', key: 'api_availability', type: 'boolean' },
+    { label: 'Custom Training', key: 'custom_model_training', type: 'boolean' },
+    { label: 'Support Level', key: 'support_level' }
+  ];
+
+  const renderValue = (platform, metric) => {
+    const value = platform[metric.key];
+    
+    if (metric.type === 'boolean') {
+      return value ? <Check className="h-5 w-5 text-green-600" /> : <X className="h-5 w-5 text-red-500" />;
     }
-  }, [assessment]);
+    
+    if (value === undefined || value === null) {
+      return <Minus className="h-5 w-5 text-slate-400" />;
+    }
+    
+    return <span>{value}{metric.suffix || ''}</span>;
+  };
 
-  if (isLoading && assessmentId) {
-    return <LoadingPage message="Loading comparison data..." />;
-  }
+  const getBestValue = (metric) => {
+    if (metric.key === 'overall_score' || metric.key === 'market_share') {
+      return Math.max(...platforms.map(p => p[metric.key] || 0));
+    }
+    return null;
+  };
 
-  if (!assessment && assessmentId) {
-    return (
-      <div className="min-h-screen" style={{ background: 'var(--color-background)' }}>
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <EmptyState
-            icon={GitCompare}
-            title="Assessment not found"
-            description="Please select a valid assessment to compare platforms"
-          />
-        </div>
-      </div>
-    );
-  }
+  const isBestValue = (platform, metric) => {
+    const best = getBestValue(metric);
+    return best !== null && platform[metric.key] === best;
+  };
 
-  // If no assessment selected, show assessment selector
-  if (!assessment) {
-    return (
-      <div className="min-h-screen" style={{ background: 'var(--color-background)' }}>
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-text)' }}>
-              Platform Comparison
-            </h1>
-            <p style={{ color: 'var(--color-text-secondary)' }}>
-              Select an assessment to compare AI platforms side-by-side
-            </p>
-          </div>
-
-          <BrandCard>
-            <BrandCardHeader>
-              <BrandCardTitle>Select Assessment</BrandCardTitle>
-            </BrandCardHeader>
-            <BrandCardContent>
-              {allAssessments.length === 0 ? (
-                <EmptyState
-                  icon={GitCompare}
-                  title="No completed assessments"
-                  description="Complete an assessment first to compare platforms"
-                />
-              ) : (
-                <div className="space-y-3">
-                  {allAssessments.map(a => (
-                    <a
-                      key={a.id}
-                      href={`?id=${a.id}`}
-                      className="block p-4 border rounded-lg hover:shadow-md transition-all"
-                      style={{ borderColor: 'var(--color-border)' }}
-                    >
-                      <h3 className="font-semibold" style={{ color: 'var(--color-text)' }}>
-                        {a.organization_name}
-                      </h3>
-                      <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                        {a.recommended_platforms?.length || 0} platforms evaluated
-                      </p>
-                    </a>
-                  ))}
-                </div>
-              )}
-            </BrandCardContent>
-          </BrandCard>
-        </div>
-      </div>
-    );
-  }
-
-  const availablePlatforms = assessment.recommended_platforms?.map(p => p.platform_name) || [];
+  const exportData = {
+    comparison: platforms.map(p => ({
+      name: p.name,
+      ...comparisonMetrics.reduce((acc, m) => ({
+        ...acc,
+        [m.label]: p[m.key]
+      }), {})
+    }))
+  };
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-background)' }}>
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <GitCompare className="h-8 w-8" style={{ color: 'var(--color-primary)' }} />
-            <h1 className="text-3xl font-bold" style={{ color: 'var(--color-text)' }}>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <Button 
+              variant="outline" 
+              onClick={() => navigate(createPageUrl('PlatformCatalog'))}
+              className="mb-4"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Catalog
+            </Button>
+            <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-text)' }}>
               Platform Comparison
             </h1>
+            <p style={{ color: 'var(--color-text-secondary)' }}>
+              Side-by-side comparison of {platforms.length} AI platforms
+            </p>
           </div>
-          <p style={{ color: 'var(--color-text-secondary)' }}>
-            {assessment.organization_name} - Comparing {selectedPlatforms.length} platforms
-          </p>
+          <Button 
+            variant="outline"
+            onClick={() => setShowExport(true)}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
         </div>
 
-        <Tabs defaultValue="comparison" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="comparison">
-              <GitCompare className="h-4 w-4 mr-2" />
-              Side-by-Side
-            </TabsTrigger>
-            <TabsTrigger value="cost">
-              <DollarSign className="h-4 w-4 mr-2" />
-              Cost Estimator
-            </TabsTrigger>
-            <TabsTrigger value="favorites">
-              <Sparkles className="h-4 w-4 mr-2" />
-              My Favorites
-            </TabsTrigger>
-          </TabsList>
+        {platforms.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <p className="text-slate-600 mb-4">No platforms selected for comparison</p>
+              <Button onClick={() => navigate(createPageUrl('PlatformCatalog'))}>
+                Go to Catalog
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-6">
+            {/* Platform Headers */}
+            <div className="grid gap-4" style={{ gridTemplateColumns: `200px repeat(${platforms.length}, 1fr)` }}>
+              <div></div>
+              {platforms.map(platform => (
+                <Card key={platform.id}>
+                  <CardHeader className="text-center pb-4">
+                    <div 
+                      className="w-12 h-12 rounded-lg flex items-center justify-center font-bold text-white mx-auto mb-2"
+                      style={{ background: 'linear-gradient(135deg, #E88A1D, #D07612)' }}
+                    >
+                      {platform.short_name || platform.name.charAt(0)}
+                    </div>
+                    <CardTitle className="text-lg">{platform.name}</CardTitle>
+                    <p className="text-sm text-slate-600">{platform.provider}</p>
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
 
-          <TabsContent value="comparison">
-            <SideBySideComparison
-              assessment={assessment}
-              selectedPlatforms={selectedPlatforms}
-              availablePlatforms={availablePlatforms}
-              onPlatformSelectionChange={setSelectedPlatforms}
-            />
-          </TabsContent>
+            {/* Comparison Matrix */}
+            <Card>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <tbody>
+                      {comparisonMetrics.map((metric, idx) => (
+                        <tr 
+                          key={metric.key}
+                          className={idx % 2 === 0 ? 'bg-slate-50' : 'bg-white'}
+                        >
+                          <td className="px-4 py-3 font-semibold text-sm w-48">
+                            {metric.label}
+                          </td>
+                          {platforms.map(platform => (
+                            <td 
+                              key={platform.id}
+                              className={`px-4 py-3 text-sm text-center ${
+                                isBestValue(platform, metric) ? 'bg-green-50 font-semibold' : ''
+                              }`}
+                            >
+                              {renderValue(platform, metric)}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
 
-          <TabsContent value="cost">
-            <CostEstimationTool
-              assessment={assessment}
-              platforms={availablePlatforms}
-            />
-          </TabsContent>
+                      {/* Capabilities */}
+                      <tr className="bg-white">
+                        <td className="px-4 py-3 font-semibold text-sm align-top">
+                          Capabilities
+                        </td>
+                        {platforms.map(platform => (
+                          <td key={platform.id} className="px-4 py-3 text-sm">
+                            <div className="space-y-1">
+                              {platform.capabilities?.map((cap, idx) => (
+                                <div key={idx} className="flex items-center gap-1 text-xs">
+                                  <Check className="h-3 w-3 text-green-600" />
+                                  {cap}
+                                </div>
+                              ))}
+                            </div>
+                          </td>
+                        ))}
+                      </tr>
 
-          <TabsContent value="favorites">
-            <FavoritePlatforms assessmentId={assessment.id} />
-          </TabsContent>
-        </Tabs>
+                      {/* Compliance */}
+                      <tr className="bg-slate-50">
+                        <td className="px-4 py-3 font-semibold text-sm align-top">
+                          Compliance
+                        </td>
+                        {platforms.map(platform => (
+                          <td key={platform.id} className="px-4 py-3">
+                            <div className="flex flex-wrap gap-1 justify-center">
+                              {platform.compliance_certifications?.map((cert, idx) => (
+                                <Badge key={idx} className="text-xs">
+                                  {cert}
+                                </Badge>
+                              ))}
+                            </div>
+                          </td>
+                        ))}
+                      </tr>
+
+                      {/* Strengths */}
+                      <tr className="bg-white">
+                        <td className="px-4 py-3 font-semibold text-sm align-top">
+                          Strengths
+                        </td>
+                        {platforms.map(platform => (
+                          <td key={platform.id} className="px-4 py-3">
+                            <ul className="text-xs space-y-1">
+                              {platform.strengths?.map((str, idx) => (
+                                <li key={idx} className="flex items-start gap-1">
+                                  <span className="text-green-600">+</span>
+                                  {str}
+                                </li>
+                              ))}
+                            </ul>
+                          </td>
+                        ))}
+                      </tr>
+
+                      {/* Limitations */}
+                      <tr className="bg-slate-50">
+                        <td className="px-4 py-3 font-semibold text-sm align-top">
+                          Limitations
+                        </td>
+                        {platforms.map(platform => (
+                          <td key={platform.id} className="px-4 py-3">
+                            <ul className="text-xs space-y-1">
+                              {platform.limitations?.map((lim, idx) => (
+                                <li key={idx} className="flex items-start gap-1">
+                                  <span className="text-red-600">-</span>
+                                  {lim}
+                                </li>
+                              ))}
+                            </ul>
+                          </td>
+                        ))}
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        <ExportManager 
+          data={exportData}
+          title="Platform_Comparison"
+          open={showExport}
+          onOpenChange={setShowExport}
+        />
       </div>
     </div>
   );
