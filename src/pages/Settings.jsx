@@ -415,6 +415,45 @@ export default function Settings() {
           <TabsContent value="notifications">
             <NotificationSettings />
           </TabsContent>
+
+          {/* Onboarding Tab */}
+          <TabsContent value="onboarding" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Onboarding Guide</CardTitle>
+                <CardDescription>
+                  Restart the interactive onboarding guide to learn about platform features
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-sm text-blue-900 mb-3">
+                    The onboarding guide introduces you to:
+                  </p>
+                  <ul className="text-sm text-blue-800 space-y-1 ml-4">
+                    <li>• Platform Catalog exploration</li>
+                    <li>• Running AI assessments</li>
+                    <li>• Comparing platforms side-by-side</li>
+                    <li>• Dashboard features and analytics</li>
+                  </ul>
+                </div>
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    if (user?.email) {
+                      localStorage.removeItem(`onboarding_completed_${user.email}`);
+                      toast.success('Onboarding reset! Refresh the page to start the guide.');
+                      setTimeout(() => window.location.reload(), 1500);
+                    }
+                  }}
+                  className="w-full"
+                >
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Restart Onboarding Guide
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
     </div>
