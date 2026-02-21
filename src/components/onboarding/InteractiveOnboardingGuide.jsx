@@ -17,6 +17,9 @@ export default function InteractiveOnboardingGuide() {
   const [currentStep, setCurrentStep] = useState(0);
   const [user, setUser] = useState(null);
   const [completedSteps, setCompletedSteps] = useState([]);
+  const [videoOverview, setVideoOverview] = useState(null);
+  const [loadingVideo, setLoadingVideo] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);
 
   useEffect(() => {
     const checkOnboarding = async () => {
@@ -39,6 +42,29 @@ export default function InteractiveOnboardingGuide() {
     checkOnboarding();
   }, []);
 
+  const generateVideoOverview = async () => {
+    setLoadingVideo(true);
+    try {
+      const response = await base44.functions.invoke('generateVideoOverview', {
+        topic: 'INT Inc. AI Platform - Comprehensive AI Adoption Assessment and Planning Tool',
+        duration: 120
+      });
+
+      if (response.data?.success) {
+        setVideoOverview(response.data.overview);
+        setShowVideoModal(true);
+        toast.success('Video overview generated!');
+      } else {
+        throw new Error(response.data?.error || 'Failed to generate overview');
+      }
+    } catch (error) {
+      console.error('Error generating video overview:', error);
+      toast.error('Failed to generate video overview. Please try again.');
+    } finally {
+      setLoadingVideo(false);
+    }
+  };
+
   const steps = [
     {
       title: "Welcome to INT Inc. AI Platform",
@@ -48,11 +74,28 @@ export default function InteractiveOnboardingGuide() {
           <div className="aspect-video bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg flex items-center justify-center">
             <div className="text-center">
               <Sparkles className="h-16 w-16 mx-auto mb-4 text-orange-600" />
-              <p className="text-sm text-slate-600">Welcome Video Tutorial</p>
-              <Button variant="outline" className="mt-2">
-                <Play className="h-4 w-4 mr-2" />
-                Watch 2-min Overview
+              <p className="text-sm text-slate-600 mb-3">AI-Generated Welcome Video Tutorial</p>
+              <Button 
+                variant="outline" 
+                className="mt-2"
+                onClick={generateVideoOverview}
+                disabled={loadingVideo}
+              >
+                {loadingVideo ? (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-4 w-4 mr-2" />
+                    Watch 2-min Overview
+                  </>
+                )}
               </Button>
+              {videoOverview && (
+                <p className="text-xs text-green-600 mt-2">✓ Overview ready!</p>
+              )}
             </div>
           </div>
           <div className="space-y-2">
@@ -331,6 +374,7 @@ export default function InteractiveOnboardingGuide() {
   const progress = ((currentStep + 1) / steps.length) * 100;
 
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -435,5 +479,129 @@ export default function InteractiveOnboardingGuide() {
         )}
       </DialogContent>
     </Dialog>
+
+    {/* Video Overview Modal */}
+    <Dialog open={showVideoModal} onOpenChange={setShowVideoModal}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-orange-600" />
+            {videoOverview?.topic || 'Video Overview'}
+          </DialogTitle>
+          <p className="text-sm text-slate-600">
+            AI-generated {videoOverview?.duration}-second overview script
+          </p>
+        </DialogHeader>
+
+        {videoOverview && (
+          <div className="space-y-6">
+            {/* Metadata */}
+            <div className="flex gap-2 flex-wrap">
+              <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                Duration: {videoOverview.duration}s
+              </Badge>
+              <Badge variant="outline" className="bg-green-50 text-green-700">
+                Words: {videoOverview.metadata.wordCount}
+              </Badge>
+              <Badge variant="outline" className="bg-purple-50 text-purple-700">
+                Reading Time: ~{videoOverview.metadata.estimatedReadingTime}min
+              </Badge>
+            </div>
+
+            {/* Script Sections */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg">Video Script</h3>
+              {videoOverview.sections.map((section, idx) => (
+                <Card key={idx} className="border-l-4 border-l-orange-500">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base">{section.title}</CardTitle>
+                      {section.timestamp && (
+                        <Badge variant="outline" className="text-xs">
+                          {section.timestamp}s
+                        </Badge>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-slate-700 whitespace-pre-line">
+                      {section.content}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Visual Suggestions */}
+            {videoOverview.visualSuggestions?.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg">Visual Suggestions</h3>
+                <div className="grid gap-3">
+                  {videoOverview.visualSuggestions.map((visual, idx) => (
+                    <div key={idx} className="flex gap-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
+                      <div className="flex-shrink-0 w-16 h-16 bg-purple-100 rounded flex items-center justify-center">
+                        <Play className="h-6 w-6 text-purple-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <p className="font-semibold text-sm">{visual.visual}</p>
+                          {visual.timestamp && (
+                            <Badge variant="outline" className="text-xs">
+                              {visual.timestamp}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-600">{visual.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Full Script */}
+            <div className="space-y-2">
+              <h3 className="font-semibold text-lg">Complete Script</h3>
+              <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                <pre className="text-xs text-slate-700 whitespace-pre-wrap font-sans">
+                  {videoOverview.script}
+                </pre>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-2 pt-4 border-t">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  navigator.clipboard.writeText(videoOverview.script);
+                  toast.success('Script copied to clipboard!');
+                }}
+              >
+                Copy Script
+              </Button>
+              <Button
+                onClick={generateVideoOverview}
+                disabled={loadingVideo}
+                className="bg-orange-600 hover:bg-orange-700"
+              >
+                {loadingVideo ? (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2 animate-spin" />
+                    Regenerating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Regenerate Script
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
