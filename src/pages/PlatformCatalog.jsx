@@ -13,8 +13,10 @@ import { createPageUrl } from '@/utils';
 import QuickAssessmentPanel from '../components/catalog/QuickAssessmentPanel';
 import ROISimulator from '../components/catalog/ROISimulator';
 import SemanticSearch from '../components/catalog/SemanticSearch';
+import { useContextualTooltip } from '../components/onboarding/ContextualTooltips';
 
 export default function PlatformCatalog() {
+  const { TooltipComponent, triggerTooltip } = useContextualTooltip('PlatformCatalog');
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');

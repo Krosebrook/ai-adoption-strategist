@@ -163,6 +163,20 @@ export default function Assessment() {
           <p style={{ color: 'var(--color-text-secondary)' }}>Complete the assessment to get your personalized recommendation</p>
         </div>
 
+        {/* Contextual Tooltips */}
+        <TooltipComponent />
+
+        {/* AI Tutorial */}
+        {showTutorial && (
+          <AITutorialEngine 
+            feature="AI Readiness Assessment" 
+            onComplete={() => {
+              setShowTutorial(false);
+              localStorage.setItem('tutorial_Assessment', 'completed');
+            }}
+          />
+        )}
+
         {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-3">

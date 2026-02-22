@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { Brain, Home, FileText, LayoutDashboard, Star, Settings, TrendingUp, Sparkles, GraduationCap, Shield, Activity } from 'lucide-react';
 import OnboardingBanner from './components/onboarding/OnboardingBanner';
 import InteractiveOnboardingGuide from './components/onboarding/InteractiveOnboardingGuide';
+import PersonalizedOnboardingFlow from './components/onboarding/PersonalizedOnboardingFlow';
 import PWAInstallPrompt from './components/pwa/PWAInstallPrompt';
 import ContextualGuidancePanel from './components/guidance/ContextualGuidancePanel';
 import NotificationCenter from './components/notifications/NotificationCenter';
@@ -43,9 +44,12 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-background)' }}>
+      {/* Personalized Onboarding Flow */}
+      <PersonalizedOnboardingFlow />
+
       {/* Onboarding Banner */}
       <OnboardingBanner />
-      
+
       {/* Interactive Onboarding Guide */}
       <InteractiveOnboardingGuide />
       
