@@ -20,6 +20,9 @@ import DashboardBuilder from '../components/dashboard/DashboardBuilder';
 import DrillDownReport from '../components/reports/DrillDownReport';
 import ExportManager from '../components/reports/ExportManager';
 import ComparisonView from '../components/comparison/ComparisonView';
+import KPIDashboard from '../components/dashboard/KPIDashboard';
+import ActiveAssessmentsPanel from '../components/dashboard/ActiveAssessmentsPanel';
+import AIRecommendationsPanel from '../components/dashboard/AIRecommendationsPanel';
 
 const AVAILABLE_WIDGETS = [
   { id: 'risk_summary', name: 'Risk Overview', component: RiskSummaryWidget, category: 'risk' },
@@ -85,6 +88,19 @@ export default function CustomDashboard() {
   const { data: policies = [] } = useQuery({
     queryKey: ['aiPolicies'],
     queryFn: () => base44.entities.AIPolicy.filter({ status: 'active' }),
+    initialData: []
+  });
+
+  const { data: platforms = [] } = useQuery({
+    queryKey: ['aiPlatforms'],
+    queryFn: () => base44.entities.AIPlatform.list('-overall_score', 100),
+    initialData: []
+  });
+
+  const { data: tasks = [] } = useQuery({
+    queryKey: ['tasks', user?.email],
+    queryFn: () => user ? base44.entities.Task.filter({ assigned_to: user.email, status: { $ne: 'completed' } }) : [],
+    enabled: !!user,
     initialData: []
   });
 
@@ -301,26 +317,53 @@ export default function CustomDashboard() {
           </TabsList>
 
           <TabsContent value="dashboard">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {selectedWidgets.map(widgetId => {
-                const widgetDef = AVAILABLE_WIDGETS.find(w => w.id === widgetId);
-                if (!widgetDef) return null;
-                const WidgetComponent = widgetDef.component;
-                return (
-                  <div key={widgetId}>
-                    <WidgetComponent config={{}} />
+            <div className="space-y-6">
+              {/* KPI Overview */}
+              <div>
+                <h2 className="text-lg font-semibold mb-4 text-slate-900">Performance Indicators</h2>
+                <KPIDashboard 
+                  assessments={assessments}
+                  trainingProgress={trainingProgress}
+                  strategies={[]}
+                  platforms={platforms}
+                />
+              </div>
+
+              {/* Active Assessments & Tasks */}
+              <div>
+                <h2 className="text-lg font-semibold mb-4 text-slate-900">Active Work</h2>
+                <ActiveAssessmentsPanel 
+                  assessments={assessments}
+                  tasks={tasks}
+                />
+              </div>
+
+              {/* AI Recommendations */}
+              <div>
+                <h2 className="text-lg font-semibold mb-4 text-slate-900">Personalized Insights</h2>
+                <AIRecommendationsPanel 
+                  assessments={assessments}
+                  userRole={user?.role || 'user'}
+                  userEmail={user?.email}
+                />
+              </div>
+
+              {/* Custom Widgets */}
+              {selectedWidgets.length > 0 && (
+                <div>
+                  <h2 className="text-lg font-semibold mb-4 text-slate-900">Custom Widgets</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {selectedWidgets.map(widgetId => {
+                      const widgetDef = AVAILABLE_WIDGETS.find(w => w.id === widgetId);
+                      if (!widgetDef) return null;
+                      const WidgetComponent = widgetDef.component;
+                      return (
+                        <div key={widgetId}>
+                          <WidgetComponent config={{}} />
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
-              {selectedWidgets.length === 0 && (
-                <div className="col-span-full text-center py-12">
-                  <Grid3x3 className="h-16 w-16 text-slate-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-slate-700 mb-2">No Widgets Selected</h3>
-                  <p className="text-slate-500 mb-4">Click "Customize" to add widgets to your dashboard</p>
-                  <Button onClick={() => setEditMode(true)}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Widgets
-                  </Button>
                 </div>
               )}
             </div>
