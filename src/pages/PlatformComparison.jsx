@@ -8,17 +8,23 @@ import { ArrowLeft, Download, Check, X, Minus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import ExportManager from '../components/reports/ExportManager';
+import AIComparisonInsights from '../components/comparison/AIComparisonInsights';
 
 export default function PlatformComparison() {
   const navigate = useNavigate();
   const [platformIds, setPlatformIds] = useState([]);
   const [showExport, setShowExport] = useState(false);
+  const [assessmentId, setAssessmentId] = useState(null);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const ids = urlParams.get('ids');
+    const assessment = urlParams.get('assessment');
     if (ids) {
       setPlatformIds(ids.split(','));
+    }
+    if (assessment) {
+      setAssessmentId(assessment);
     }
   }, []);
 
@@ -121,6 +127,9 @@ export default function PlatformComparison() {
           </Card>
         ) : (
           <div className="space-y-6">
+            {/* AI-Powered Insights */}
+            <AIComparisonInsights platforms={platforms} assessmentId={assessmentId} />
+
             {/* Platform Headers */}
             <div className="grid gap-4" style={{ gridTemplateColumns: `200px repeat(${platforms.length}, 1fr)` }}>
               <div></div>
