@@ -9,17 +9,30 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { topic, duration = 120 } = await req.json();
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch (e) {
+      return Response.json({ error: 'Invalid JSON in request body' }, { status: 400 });
+    }
+
+    const { topic, duration = 120 } = requestBody;
 
     // Validate input
     if (!topic) {
       return Response.json({ error: 'Topic is required' }, { status: 400 });
     }
 
+    // Validate duration
+    const validDuration = Math.min(Math.max(parseInt(duration) || 120, 30), 300);
+
     // Use Gemini to generate a comprehensive video script overview
     const apiKey = Deno.env.get('GOOGLE_API_KEY');
     if (!apiKey) {
-      return Response.json({ error: 'Google API key not configured' }, { status: 500 });
+      console.error('GOOGLE_API_KEY environment variable not set');
+      return Response.json({ 
+        error: 'Google API key not configured. Please set GOOGLE_API_KEY in environment variables.' 
+      }, { status: 500 });
     }
 
     const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
@@ -33,7 +46,7 @@ Create a compelling video script that includes:
 1. **Hook (0-10 seconds)**: An attention-grabbing opening that immediately conveys value
 2. **Problem Statement (10-30 seconds)**: Identify the key challenges organizations face
 3. **Solution Overview (30-90 seconds)**: Explain how the platform solves these problems with specific features
-4. **Call to Action (90-${duration} seconds)**: Clear next steps for the viewer
+4. **Call to Action (90-${validDuration} seconds)**: Clear next steps for the viewer
 
 Format your response as a structured video script with:
 - Timestamp markers
@@ -44,12 +57,14 @@ Format your response as a structured video script with:
 
 Make it professional, engaging, and actionable. Focus on enterprise value proposition.`;
 
-    const geminiResponse = await fetch(`${geminiUrl}?key=${apiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    let geminiResponse;
+    try {
+      geminiResponse = await fetch(`${geminiUrl}?key=${apiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
         contents: [{
           parts: [{
             text: prompt
@@ -62,7 +77,14 @@ Make it professional, engaging, and actionable. Focus on enterprise value propos
           maxOutputTokens: 2048,
         }
       })
-    });
+      });
+    } catch (fetchError) {
+      console.error('Gemini API fetch error:', fetchError);
+      return Response.json(
+        { error: 'Failed to connect to Gemini API', details: fetchError.message },
+        { status: 500 }
+      );
+    }
 
     if (!geminiResponse.ok) {
       const error = await geminiResponse.text();
@@ -131,7 +153,7 @@ ${scriptContent}`;
       success: true,
       overview: {
         topic,
-        duration,
+        duration: validDuration,
         script: scriptContent,
         sections,
         visualSuggestions,
@@ -139,15 +161,19 @@ ${scriptContent}`;
           generatedAt: new Date().toISOString(),
           generatedBy: 'Gemini 1.5 Flash',
           wordCount: scriptContent.split(/\s+/).length,
-          estimatedReadingTime: Math.ceil(scriptContent.split(/\s+/).length / 150) // avg speaking rate
+          estimatedReadingTime: Math.ceil(scriptContent.split(/\s+/).length / 150)
         }
       }
     });
 
   } catch (error) {
-    console.error('Error generating video overview:', error);
+    console.error('Unexpected error in generateVideoOverview:', error);
     return Response.json(
-      { error: 'Internal server error', message: error.message },
+      { 
+        error: 'Internal server error', 
+        message: error.message,
+        stack: Deno.env.get('NODE_ENV') === 'development' ? error.stack : undefined
+      },
       { status: 500 }
     );
   }

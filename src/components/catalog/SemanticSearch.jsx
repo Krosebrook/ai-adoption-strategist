@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Search, Loader2, X } from 'lucide-react';
+import { Sparkles, Search, Loader2, X, AlertCircle } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 
-export default function SemanticSearch({ platforms, onFilterResults }) {
+export default function SemanticSearch({ platforms = [], onFilterResults }) {
   const [query, setQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [lastQuery, setLastQuery] = useState(null);
   const [searchResults, setSearchResults] = useState(null);
+  const [error, setError] = useState(null);
 
   const exampleQueries = [
     "Find platforms good for customer service in healthcare with GDPR compliance",
@@ -20,13 +21,98 @@ export default function SemanticSearch({ platforms, onFilterResults }) {
     "Enterprise-ready solutions with Microsoft ecosystem integration"
   ];
 
-  const handleSemanticSearch = async () => {
-    if (!query.trim()) {
+  const scoreAndFilterPlatforms = useCallback((platforms, searchResponse) => {
+    if (!platforms?.length || !searchResponse) return [];
+
+    const scoredPlatforms = platforms.map(platform => {
+      const aiScore = searchResponse.platform_scores?.find(
+        ps => ps.platform_name?.toLowerCase().includes(platform.name?.toLowerCase()) ||
+              platform.name?.toLowerCase().includes(ps.platform_name?.toLowerCase())
+      );
+
+      let score = 0;
+      const matchReasons = [];
+
+      // Category match (30 points)
+      if (searchResponse.extracted_criteria?.categories?.some(cat => 
+        platform.category?.toLowerCase().includes(cat.toLowerCase())
+      )) {
+        score += 30;
+        matchReasons.push('Category match');
+      }
+
+      // Compliance match (25 points)
+      if (searchResponse.extracted_criteria?.compliance_requirements?.some(comp =>
+        platform.compliance_certifications?.some(cert => 
+          cert.toLowerCase().includes(comp.toLowerCase())
+        )
+      )) {
+        score += 25;
+        matchReasons.push('Compliance certified');
+      }
+
+      // Use case match (20 points)
+      if (searchResponse.extracted_criteria?.use_cases?.some(uc =>
+        platform.use_cases?.some(puc => 
+          puc.toLowerCase().includes(uc.toLowerCase())
+        ) ||
+        platform.description?.toLowerCase().includes(uc.toLowerCase())
+      )) {
+        score += 20;
+        matchReasons.push('Use case alignment');
+      }
+
+      // Integration match (15 points)
+      if (searchResponse.extracted_criteria?.integrations_needed?.some(integ =>
+        platform.integration_options?.some(pi => 
+          pi.toLowerCase().includes(integ.toLowerCase())
+        )
+      )) {
+        score += 15;
+        matchReasons.push('Integration support');
+      }
+
+      // Deployment match (10 points)
+      if (searchResponse.extracted_criteria?.deployment_preference &&
+          platform.deployment_options?.some(dep =>
+            dep.toLowerCase().includes(searchResponse.extracted_criteria.deployment_preference.toLowerCase())
+          )) {
+        score += 10;
+        matchReasons.push('Deployment option available');
+      }
+
+      // Use AI score if available and higher
+      if (aiScore?.score) {
+        score = Math.max(score, aiScore.score);
+      }
+
+      return {
+        ...platform,
+        semanticScore: score,
+        matchReasons: aiScore?.match_reasons || matchReasons,
+        concerns: aiScore?.concerns || []
+      };
+    });
+
+    return scoredPlatforms
+      .filter(p => p.semanticScore > 30)
+      .sort((a, b) => b.semanticScore - a.semanticScore);
+  }, []);
+
+  const handleSemanticSearch = useCallback(async () => {
+    if (!query?.trim()) {
       toast.error('Please enter a search query');
       return;
     }
 
+    if (!platforms?.length) {
+      toast.error('No platforms available to search');
+      return;
+    }
+
     setIsSearching(true);
+    setError(null);
+    
     try {
       const prompt = `You are an AI platform recommendation expert. Analyze this natural language query and extract structured search criteria.
 
@@ -59,6 +145,7 @@ Return a scoring rationale and top matching platforms.`;
 
       const response = await base44.integrations.Core.InvokeLLM({
         prompt,
+        add_context_from_internet: false,
         response_json_schema: {
           type: "object",
           properties: {
@@ -92,102 +179,46 @@ Return a scoring rationale and top matching platforms.`;
         }
       });
 
+      if (!response) {
+        throw new Error('No response from AI');
+      }
+
       setLastQuery(query);
       setSearchResults(response);
 
-      // Score and filter platforms based on AI analysis
-      const scoredPlatforms = platforms.map(platform => {
-        const aiScore = response.platform_scores?.find(
-          ps => ps.platform_name.toLowerCase().includes(platform.name.toLowerCase()) ||
-                platform.name.toLowerCase().includes(ps.platform_name.toLowerCase())
-        );
+      const filteredPlatforms = scoreAndFilterPlatforms(platforms, response);
 
-        let score = 0;
-        const matchReasons = [];
-
-        // Category match
-        if (response.extracted_criteria?.categories?.some(cat => 
-          platform.category?.toLowerCase().includes(cat.toLowerCase())
-        )) {
-          score += 30;
-          matchReasons.push('Category match');
-        }
-
-        // Compliance match
-        if (response.extracted_criteria?.compliance_requirements?.some(comp =>
-          platform.compliance_certifications?.some(cert => 
-            cert.toLowerCase().includes(comp.toLowerCase())
-          )
-        )) {
-          score += 25;
-          matchReasons.push('Compliance certified');
-        }
-
-        // Use case match
-        if (response.extracted_criteria?.use_cases?.some(uc =>
-          platform.use_cases?.some(puc => 
-            puc.toLowerCase().includes(uc.toLowerCase())
-          ) ||
-          platform.description?.toLowerCase().includes(uc.toLowerCase())
-        )) {
-          score += 20;
-          matchReasons.push('Use case alignment');
-        }
-
-        // Integration match
-        if (response.extracted_criteria?.integrations_needed?.some(integ =>
-          platform.integration_options?.some(pi => 
-            pi.toLowerCase().includes(integ.toLowerCase())
-          )
-        )) {
-          score += 15;
-          matchReasons.push('Integration support');
-        }
-
-        // Deployment match
-        if (response.extracted_criteria?.deployment_preference &&
-            platform.deployment_options?.some(dep =>
-              dep.toLowerCase().includes(response.extracted_criteria.deployment_preference.toLowerCase())
-            )) {
-          score += 10;
-          matchReasons.push('Deployment option available');
-        }
-
-        // Use AI score if available
-        if (aiScore?.score) {
-          score = Math.max(score, aiScore.score);
-        }
-
-        return {
-          ...platform,
-          semanticScore: score,
-          matchReasons: aiScore?.match_reasons || matchReasons,
-          concerns: aiScore?.concerns || []
-        };
-      });
-
-      // Filter platforms with score > 30 and sort by score
-      const filteredPlatforms = scoredPlatforms
-        .filter(p => p.semanticScore > 30)
-        .sort((a, b) => b.semanticScore - a.semanticScore);
-
-      onFilterResults(filteredPlatforms, response);
+      if (onFilterResults) {
+        onFilterResults(filteredPlatforms, response);
+      }
       
       toast.success(`Found ${filteredPlatforms.length} matching platforms`);
     } catch (error) {
       console.error('Semantic search error:', error);
-      toast.error('Search failed. Please try again.');
+      const errorMessage = error.message || 'Search failed. Please try again.';
+      setError(errorMessage);
+      toast.error(errorMessage);
+      
+      // Reset to show all platforms on error
+      if (onFilterResults) {
+        onFilterResults(platforms, null);
+      }
     } finally {
       setIsSearching(false);
     }
-  };
+  }, [query, platforms, scoreAndFilterPlatforms, onFilterResults]);
 
-  const clearSearch = () => {
+  const clearSearch = useCallback(() => {
     setQuery('');
     setLastQuery(null);
     setSearchResults(null);
-    onFilterResults(platforms, null);
-  };
+    setError(null);
+    if (onFilterResults) {
+      onFilterResults(platforms, null);
+    }
+  }, [platforms, onFilterResults]);
+
+  const exampleQueriesMemo = useMemo(() => exampleQueries, []);
 
   return (
     <Card className="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 border-purple-200">
@@ -241,11 +272,30 @@ Return a scoring rationale and top matching platforms.`;
           </div>
 
           {/* Example Queries */}
-          {!lastQuery && (
+          {/* Error Display */}
+          {error && (
+            <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <AlertCircle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-red-900">Search Error</p>
+                <p className="text-xs text-red-700">{error}</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setError(null)}
+                className="text-red-600"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          )}
+
+          {!lastQuery && !error && (
             <div className="space-y-2">
               <p className="text-xs text-slate-500">Try these examples:</p>
               <div className="flex flex-wrap gap-2">
-                {exampleQueries.map((example, idx) => (
+                {exampleQueriesMemo.map((example, idx) => (
                   <button
                     key={idx}
                     onClick={() => setQuery(example)}

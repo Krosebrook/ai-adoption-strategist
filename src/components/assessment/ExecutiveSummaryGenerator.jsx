@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Download, Loader2, Sparkles } from 'lucide-react';
+import { FileText, Download, Loader2, Sparkles, AlertCircle, X } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
@@ -10,9 +10,17 @@ import ReactMarkdown from 'react-markdown';
 export default function ExecutiveSummaryGenerator({ assessmentData, scoringWeights, riskAnalysis }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [summary, setSummary] = useState(null);
+  const [error, setError] = useState(null);
 
-  const generateSummary = async () => {
+  const generateSummary = useCallback(async () => {
+    if (!assessmentData) {
+      toast.error('No assessment data available');
+      return;
+    }
+
     setIsGenerating(true);
+    setError(null);
+    
     try {
       const prompt = `Generate a comprehensive executive summary for AI platform adoption assessment:
 
@@ -62,6 +70,7 @@ Format in professional markdown. Be concise but comprehensive. Include specific 
 
       const response = await base44.integrations.Core.InvokeLLM({
         prompt,
+        add_context_from_internet: false,
         response_json_schema: {
           type: "object",
           properties: {
@@ -84,18 +93,27 @@ Format in professional markdown. Be concise but comprehensive. Include specific 
         }
       });
 
+      if (!response) {
+        throw new Error('No response from AI');
+      }
+
       setSummary(response);
       toast.success('Executive summary generated!');
     } catch (error) {
       console.error('Error generating summary:', error);
-      toast.error('Failed to generate summary');
+      const errorMessage = error.message || 'Failed to generate summary';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsGenerating(false);
     }
-  };
+  }, [assessmentData, scoringWeights, riskAnalysis]);
 
-  const downloadSummary = () => {
-    if (!summary) return;
+  const downloadSummary = useCallback(() => {
+    if (!summary?.executive_summary || !assessmentData?.organization_name) {
+      toast.error('No summary available to download');
+      return;
+    }
     
     const content = `# Executive Assessment Summary - ${assessmentData.organization_name}\n\n${summary.executive_summary}`;
     const blob = new Blob([content], { type: 'text/markdown' });
@@ -103,10 +121,12 @@ Format in professional markdown. Be concise but comprehensive. Include specific 
     const a = document.createElement('a');
     a.href = url;
     a.download = `executive-summary-${assessmentData.organization_name}.md`;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
     toast.success('Summary downloaded!');
-  };
+  }, [summary, assessmentData]);
 
   return (
     <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50">
@@ -120,6 +140,22 @@ Format in professional markdown. Be concise but comprehensive. Include specific 
         </p>
       </CardHeader>
       <CardContent>
+        {error && (
+          <div className="mb-4 flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <AlertCircle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-red-900">Generation Error</p>
+              <p className="text-xs text-red-700">{error}</p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setError(null)}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        )}
         {!summary ? (
           <Button
             onClick={generateSummary}

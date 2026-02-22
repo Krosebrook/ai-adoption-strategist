@@ -1,17 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Shield, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { AlertTriangle, Shield, Loader2, CheckCircle, AlertCircle, X } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 
 export default function RiskAnalysisEngine({ assessmentData, onRisksIdentified }) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [risks, setRisks] = useState(null);
+  const [error, setError] = useState(null);
 
-  const analyzeRisks = async () => {
+  const analyzeRisks = useCallback(async () => {
+    if (!assessmentData) {
+      toast.error('No assessment data available');
+      return;
+    }
+
     setIsAnalyzing(true);
+    setError(null);
+    
     try {
       const prompt = `Analyze potential risks for AI platform adoption based on the following assessment:
 
@@ -37,6 +45,7 @@ For each risk, provide:
 
       const response = await base44.integrations.Core.InvokeLLM({
         prompt,
+        add_context_from_internet: false,
         response_json_schema: {
           type: "object",
           properties: {
@@ -72,16 +81,24 @@ For each risk, provide:
         }
       });
 
+      if (!response) {
+        throw new Error('No response from AI');
+      }
+
       setRisks(response);
-      onRisksIdentified(response);
+      if (onRisksIdentified) {
+        onRisksIdentified(response);
+      }
       toast.success('Risk analysis complete!');
     } catch (error) {
       console.error('Error analyzing risks:', error);
-      toast.error('Failed to analyze risks');
+      const errorMessage = error.message || 'Failed to analyze risks';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsAnalyzing(false);
     }
-  };
+  }, [assessmentData, onRisksIdentified]);
 
   const getSeverityColor = (severity) => {
     const colors = {
@@ -112,6 +129,22 @@ For each risk, provide:
           </p>
         </CardHeader>
         <CardContent>
+          {error && (
+            <div className="mb-4 flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <AlertCircle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-red-900">Analysis Error</p>
+                <p className="text-xs text-red-700">{error}</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setError(null)}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          )}
           {!risks ? (
             <Button
               onClick={analyzeRisks}

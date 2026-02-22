@@ -50,16 +50,21 @@ export default function InteractiveOnboardingGuide() {
         duration: 120
       });
 
-      if (response.data?.success) {
+      if (!response?.data) {
+        throw new Error('No response from server');
+      }
+
+      if (response.data.success) {
         setVideoOverview(response.data.overview);
         setShowVideoModal(true);
         toast.success('Video overview generated!');
       } else {
-        throw new Error(response.data?.error || 'Failed to generate overview');
+        throw new Error(response.data.error || 'Failed to generate overview');
       }
     } catch (error) {
       console.error('Error generating video overview:', error);
-      toast.error('Failed to generate video overview. Please try again.');
+      const errorMessage = error.message || 'Failed to generate video overview';
+      toast.error(errorMessage);
     } finally {
       setLoadingVideo(false);
     }

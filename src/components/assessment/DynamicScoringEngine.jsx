@@ -1,37 +1,75 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, TrendingUp } from 'lucide-react';
+import { Sparkles, RotateCcw } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+
+const DEFAULT_WEIGHTS = {
+  roi_weight: 25,
+  compliance_weight: 25,
+  integration_weight: 25,
+  features_weight: 25
+};
 
 export default function DynamicScoringEngine({ onWeightsChange, initialWeights }) {
-  const [weights, setWeights] = useState(initialWeights || {
-    roi_weight: 25,
-    compliance_weight: 25,
-    integration_weight: 25,
-    features_weight: 25
-  });
+  const [weights, setWeights] = useState(() => ({
+    ...DEFAULT_WEIGHTS,
+    ...initialWeights
+  }));
 
-  const handleWeightChange = (key, value) => {
+  const handleWeightChange = useCallback((key, value) => {
     const newWeights = { ...weights, [key]: value };
     setWeights(newWeights);
-    onWeightsChange(newWeights);
-  };
+    if (onWeightsChange) {
+      onWeightsChange(newWeights);
+    }
+  }, [weights, onWeightsChange]);
 
-  const totalWeight = Object.values(weights).reduce((sum, val) => sum + val, 0);
+  const resetWeights = useCallback(() => {
+    setWeights(DEFAULT_WEIGHTS);
+    if (onWeightsChange) {
+      onWeightsChange(DEFAULT_WEIGHTS);
+    }
+  }, [onWeightsChange]);
+
+  const totalWeight = useMemo(() => 
+    Object.values(weights).reduce((sum, val) => sum + val, 0), 
+    [weights]
+  );
+  
   const isBalanced = totalWeight === 100;
+
+  useEffect(() => {
+    if (initialWeights && JSON.stringify(initialWeights) !== JSON.stringify(weights)) {
+      setWeights({ ...DEFAULT_WEIGHTS, ...initialWeights });
+    }
+  }, [initialWeights]);
 
   return (
     <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-blue-600" />
-          AI Scoring Priorities
-        </CardTitle>
-        <p className="text-sm text-slate-600">
-          Adjust weights to prioritize what matters most to your organization
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-blue-600" />
+              AI Scoring Priorities
+            </CardTitle>
+            <p className="text-sm text-slate-600">
+              Adjust weights to prioritize what matters most to your organization
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={resetWeights}
+            className="text-xs"
+          >
+            <RotateCcw className="h-3 w-3 mr-1" />
+            Reset
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-4">
