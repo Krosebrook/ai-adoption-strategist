@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { FileText, Clock, CheckCircle, AlertCircle, ArrowRight, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { formatDate } from '../utils/formatters';
+import { formatDate } from '../../components/utils/formatters';
 
 export default function ActiveAssessmentsPanel({ assessments, tasks }) {
   const activeAssessments = assessments.filter(a => a.status !== 'completed');
@@ -114,11 +114,9 @@ export default function ActiveAssessmentsPanel({ assessments, tasks }) {
                       )}
                     </div>
                   </div>
-                  <Link to={createPageUrl('Results', { id: assessment.id })}>
-                    <Button variant="ghost" size="sm">
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
+                  <Button variant="ghost" size="sm">
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
                 </div>
               ))}
               {activeAssessments.length > 5 && (
