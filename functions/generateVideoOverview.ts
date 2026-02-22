@@ -171,8 +171,7 @@ ${scriptContent}`;
     return Response.json(
       { 
         error: 'Internal server error', 
-        message: error.message,
-        stack: Deno.env.get('NODE_ENV') === 'development' ? error.stack : undefined
+        message: error.message
       },
       { status: 500 }
     );
