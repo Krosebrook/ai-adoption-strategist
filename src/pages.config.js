@@ -65,6 +65,7 @@ import Onboarding from './pages/Onboarding';
 import PlatformCatalog from './pages/PlatformCatalog';
 import PlatformComparison from './pages/PlatformComparison';
 import PredictiveAnalytics from './pages/PredictiveAnalytics';
+import ROISimulation from './pages/ROISimulation';
 import Reports from './pages/Reports';
 import Results from './pages/Results';
 import RiskMonitoring from './pages/RiskMonitoring';
@@ -73,7 +74,6 @@ import StrategyAutomation from './pages/StrategyAutomation';
 import TemplateBuilder from './pages/TemplateBuilder';
 import Training from './pages/Training';
 import Trends from './pages/Trends';
-import ROISimulation from './pages/ROISimulation';
 import __Layout from './Layout.jsx';
 
 
@@ -96,6 +96,7 @@ export const PAGES = {
     "PlatformCatalog": PlatformCatalog,
     "PlatformComparison": PlatformComparison,
     "PredictiveAnalytics": PredictiveAnalytics,
+    "ROISimulation": ROISimulation,
     "Reports": Reports,
     "Results": Results,
     "RiskMonitoring": RiskMonitoring,
@@ -104,7 +105,6 @@ export const PAGES = {
     "TemplateBuilder": TemplateBuilder,
     "Training": Training,
     "Trends": Trends,
-    "ROISimulation": ROISimulation,
 }
 
 export const pagesConfig = {
