@@ -1,19 +1,64 @@
-import { ROI_BENCHMARKS, COMPLIANCE_DATA, INTEGRATION_SUPPORT, PAIN_POINT_SOLUTIONS, PLATFORM_PRICING, AI_PLATFORMS } from './AssessmentData';
+/**
+ * CalculationEngine.jsx
+ *
+ * Pure business-logic functions for the AI platform assessment.
+ * No React dependencies — safe to import anywhere.
+ *
+ * Scoring model:
+ *   totalScore = (roiScore * roiW) + (complianceScore * compW) +
+ *                (integrationScore * intW) + (painScore * painW)
+ *
+ * Default weights: ROI 35 / Compliance 25 / Integration 25 / Pain 15
+ */
 
+import {
+  ROI_BENCHMARKS,
+  COMPLIANCE_DATA,
+  INTEGRATION_SUPPORT,
+  PAIN_POINT_SOLUTIONS,
+  PLATFORM_PRICING,
+  AI_PLATFORMS
+} from './AssessmentData';
+
+/** Ordered list of platform IDs evaluated by this engine. */
+const PLATFORM_IDS = AI_PLATFORMS.map(p => p.id);
+
+/** Weeks worked per year (excludes ~2 weeks vacation). */
+const WEEKS_PER_YEAR = 50;
+
+/** Default scoring weights (must sum to 1.0). */
+const DEFAULT_WEIGHTS = {
+  roi_weight: 0.35,
+  compliance_weight: 0.25,
+  integration_weight: 0.25,
+  pain_point_weight: 0.15
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ROI
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Calculates annualised ROI for a single platform across all departments.
+ *
+ * @param {Array<{name: string, user_count: number, hourly_rate: number}>} departments
+ * @param {string} platform - Platform ID
+ * @returns {object} ROI breakdown for this platform
+ */
 export function calculateROI(departments, platform) {
   let totalAnnualSavings = 0;
   let totalCost = 0;
   const departmentBreakdown = [];
 
-  departments.forEach(dept => {
-    const hoursPerWeek = ROI_BENCHMARKS[dept.name]?.[platform] || 0;
-    const weeksPerYear = 50; // Account for vacation
-    const annualHoursSaved = hoursPerWeek * weeksPerYear * dept.user_count;
-    const annualSavings = annualHoursSaved * dept.hourly_rate;
-    
-    const platformCost = (PLATFORM_PRICING[platform] || 20) * 12 * dept.user_count;
-    totalCost += platformCost;
+  (departments || []).forEach(dept => {
+    const hoursPerWeek = ROI_BENCHMARKS[dept.name]?.[platform] ?? 0;
+    const annualHoursSaved = hoursPerWeek * WEEKS_PER_YEAR * (dept.user_count || 0);
+    const hourlyRate = dept.hourly_rate || 0;
+    const annualSavings = annualHoursSaved * hourlyRate;
+    const platformCost = (PLATFORM_PRICING[platform] ?? 20) * 12 * (dept.user_count || 0);
+
     totalAnnualSavings += annualSavings;
+    totalCost += platformCost;
 
     departmentBreakdown.push({
       department: dept.name,
@@ -27,8 +72,8 @@ export function calculateROI(departments, platform) {
   });
 
   const netAnnualSavings = totalAnnualSavings - totalCost;
-  const oneYearROI = totalCost > 0 ? ((netAnnualSavings / totalCost) * 100) : 0;
-  const threeYearROI = totalCost > 0 ? (((netAnnualSavings * 3) / totalCost) * 100) : 0;
+  const oneYearROI = totalCost > 0 ? (netAnnualSavings / totalCost) * 100 : 0;
+  const threeYearROI = totalCost > 0 ? ((netAnnualSavings * 3) / totalCost) * 100 : 0;
 
   return {
     platform,
@@ -41,40 +86,51 @@ export function calculateROI(departments, platform) {
   };
 }
 
+/**
+ * Calculates ROI for all platforms in PLATFORM_IDS.
+ *
+ * @param {Array} departments
+ * @returns {Array} One ROI object per platform
+ */
 export function calculateAllROI(departments) {
-  const platforms = ['google_gemini', 'microsoft_copilot', 'anthropic_claude', 'openai_chatgpt'];
-  return platforms.map(platform => calculateROI(departments, platform));
+  return PLATFORM_IDS.map(platform => calculateROI(departments, platform));
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Compliance
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Scores each platform against the provided compliance requirements.
+ *
+ * @param {string[]} complianceRequirements
+ * @returns {Record<string, object>} Compliance result keyed by platform ID
+ */
 export function assessCompliance(complianceRequirements) {
-  const platforms = ['google_gemini', 'microsoft_copilot', 'anthropic_claude', 'openai_chatgpt'];
   const results = {};
 
-  platforms.forEach(platform => {
-    let certifiedCount = 0;
-    let inProgressCount = 0;
-    let notCertifiedCount = 0;
+  PLATFORM_IDS.forEach(platform => {
+    let certified = 0;
+    let inProgress = 0;
+    let notCertified = 0;
     const statusDetails = {};
 
-    complianceRequirements.forEach(requirement => {
-      const status = COMPLIANCE_DATA[platform]?.[requirement] || 'unknown';
-      statusDetails[requirement] = status;
-      
-      if (status === 'certified') certifiedCount++;
-      else if (status === 'in_progress') inProgressCount++;
-      else if (status === 'not_certified') notCertifiedCount++;
+    (complianceRequirements || []).forEach(req => {
+      const status = COMPLIANCE_DATA[platform]?.[req] || 'unknown';
+      statusDetails[req] = status;
+      if (status === 'certified') certified++;
+      else if (status === 'in_progress') inProgress++;
+      else if (status === 'not_certified') notCertified++;
     });
 
-    const totalRequirements = complianceRequirements.length;
-    const complianceScore = totalRequirements > 0 
-      ? ((certifiedCount / totalRequirements) * 100) 
-      : 0;
+    const total = complianceRequirements?.length || 0;
+    const complianceScore = total > 0 ? (certified / total) * 100 : 0;
 
     results[platform] = {
       compliance_score: complianceScore,
-      certified: certifiedCount,
-      in_progress: inProgressCount,
-      not_certified: notCertifiedCount,
+      certified,
+      in_progress: inProgress,
+      not_certified: notCertified,
       status_details: statusDetails
     };
   });
@@ -82,38 +138,50 @@ export function assessCompliance(complianceRequirements) {
   return results;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Integrations
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Integration support weights:
+ *   native = 1.0, api = 0.8, limited = 0.4, not_supported = 0
+ */
+const INTEGRATION_WEIGHTS = { native: 1.0, api: 0.8, limited: 0.4, not_supported: 0 };
+
+/**
+ * Scores each platform against the desired integrations.
+ *
+ * @param {string[]} desiredIntegrations
+ * @returns {Record<string, object>}
+ */
 export function assessIntegrations(desiredIntegrations) {
-  const platforms = ['google_gemini', 'microsoft_copilot', 'anthropic_claude', 'openai_chatgpt'];
   const results = {};
 
-  platforms.forEach(platform => {
-    let nativeCount = 0;
-    let apiCount = 0;
-    let limitedCount = 0;
-    let notSupportedCount = 0;
+  PLATFORM_IDS.forEach(platform => {
+    let native = 0, api = 0, limited = 0, notSupported = 0;
+    let weightedSum = 0;
     const integrationDetails = {};
 
-    desiredIntegrations.forEach(integration => {
+    (desiredIntegrations || []).forEach(integration => {
       const support = INTEGRATION_SUPPORT[platform]?.[integration] || 'not_supported';
       integrationDetails[integration] = support;
-      
-      if (support === 'native') nativeCount++;
-      else if (support === 'api') apiCount++;
-      else if (support === 'limited') limitedCount++;
-      else notSupportedCount++;
+      weightedSum += INTEGRATION_WEIGHTS[support] ?? 0;
+
+      if (support === 'native') native++;
+      else if (support === 'api') api++;
+      else if (support === 'limited') limited++;
+      else notSupported++;
     });
 
-    const totalIntegrations = desiredIntegrations.length;
-    const integrationScore = totalIntegrations > 0 
-      ? (((nativeCount * 1.0) + (apiCount * 0.8) + (limitedCount * 0.4)) / totalIntegrations) * 100
-      : 0;
+    const total = desiredIntegrations?.length || 0;
+    const integrationScore = total > 0 ? (weightedSum / total) * 100 : 0;
 
     results[platform] = {
       integration_score: integrationScore,
-      native: nativeCount,
-      api: apiCount,
-      limited: limitedCount,
-      not_supported: notSupportedCount,
+      native,
+      api,
+      limited,
+      not_supported: notSupported,
       integration_details: integrationDetails
     };
   });
@@ -121,131 +189,144 @@ export function assessIntegrations(desiredIntegrations) {
   return results;
 }
 
-export function assessPainPoints(painPoints) {
-  const platformScores = {
-    'google_gemini': 0,
-    'microsoft_copilot': 0,
-    'anthropic_claude': 0,
-    'openai_chatgpt': 0
-  };
+// ─────────────────────────────────────────────────────────────────────────────
+// Pain Points
+// ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Maps pain points to platforms using a ranked-choice scoring model.
+ * First-ranked platform gets 3 pts, second gets 2, third gets 1.
+ *
+ * @param {string[]} painPoints
+ * @returns {{ platform_scores: Record<string,number>, pain_point_mappings: Array }}
+ */
+export function assessPainPoints(painPoints) {
+  const platformScores = Object.fromEntries(PLATFORM_IDS.map(id => [id, 0]));
   const mappings = [];
 
-  painPoints.forEach(painPoint => {
+  (painPoints || []).forEach(painPoint => {
     const solution = PAIN_POINT_SOLUTIONS[painPoint];
-    if (solution) {
-      solution.platforms.forEach((platform, index) => {
-        // Weight: first platform gets 3 points, second gets 2, third gets 1
-        platformScores[platform] += (3 - index);
-      });
+    if (!solution) return;
 
-      mappings.push({
-        pain_point: painPoint,
-        solution: solution.solution,
-        recommended_platforms: solution.platforms.map(p => 
-          AI_PLATFORMS.find(plat => plat.id === p)?.name || p
-        )
-      });
-    }
+    solution.platforms.forEach((platform, index) => {
+      if (platformScores[platform] !== undefined) {
+        platformScores[platform] += Math.max(0, 3 - index);
+      }
+    });
+
+    mappings.push({
+      pain_point: painPoint,
+      solution: solution.solution,
+      recommended_platforms: solution.platforms.map(
+        p => AI_PLATFORMS.find(plat => plat.id === p)?.name || p
+      )
+    });
   });
 
-  return {
-    platform_scores: platformScores,
-    pain_point_mappings: mappings
-  };
+  return { platform_scores: platformScores, pain_point_mappings: mappings };
 }
 
-export function generateRecommendations(roiData, complianceData, integrationData, painPointData, customWeights = null, refinedWeights = null, assessment = null) {
-  const platforms = ['google_gemini', 'microsoft_copilot', 'anthropic_claude', 'openai_chatgpt'];
-  const recommendations = [];
+// ─────────────────────────────────────────────────────────────────────────────
+// Recommendations
+// ─────────────────────────────────────────────────────────────────────────────
 
-  // Use refined weights from insights engine, then custom weights from AI, then defaults
-  const weights = refinedWeights?.recommended_weights || customWeights || {
-    roi_weight: 0.35,
-    compliance_weight: 0.25,
-    integration_weight: 0.25,
-    pain_point_weight: 0.15
-  };
+/**
+ * Derives budget fit label for a platform given the assessment's budget constraints.
+ *
+ * @param {number} platformCost - Annual total cost for this platform
+ * @param {object} budgetConstraints - { max_budget, budget_period }
+ * @returns {'excellent'|'good'|'moderate'|'exceeds'}
+ */
+function deriveBudgetFit(platformCost, budgetConstraints) {
+  if (!budgetConstraints?.max_budget) return 'moderate';
 
-  platforms.forEach(platformId => {
+  const { max_budget, budget_period } = budgetConstraints;
+  const annualMax = budget_period === 'monthly' ? max_budget * 12 : max_budget;
+
+  if (platformCost <= annualMax * 0.7) return 'excellent';
+  if (platformCost <= annualMax) return 'good';
+  if (platformCost <= annualMax * 1.2) return 'moderate';
+  return 'exceeds';
+}
+
+/**
+ * Generates a ranked list of platform recommendations.
+ *
+ * @param {Array}  roiData
+ * @param {object} complianceData
+ * @param {object} integrationData
+ * @param {object} painPointData
+ * @param {object|null} customWeights    - From AIEnhancer feedback analysis
+ * @param {object|null} refinedWeights   - From DynamicScoringEngine
+ * @param {object|null} assessment       - Full assessment object for budget/goal context
+ * @returns {Array} Sorted recommendations (highest score first)
+ */
+export function generateRecommendations(
+  roiData,
+  complianceData,
+  integrationData,
+  painPointData,
+  customWeights = null,
+  refinedWeights = null,
+  assessment = null
+) {
+  // Priority: refinedWeights > customWeights > defaults
+  const weights = refinedWeights?.recommended_weights || customWeights || DEFAULT_WEIGHTS;
+
+  const recommendations = PLATFORM_IDS.map(platformId => {
     const roi = roiData.find(r => r.platform === platformId);
     const compliance = complianceData[platformId];
     const integration = integrationData[platformId];
-    const painPointScore = painPointData.platform_scores[platformId] || 0;
+    const rawPainScore = painPointData.platform_scores[platformId] ?? 0;
 
-    // Weighted scoring
-    const roiScore = roi ? (roi.one_year_roi / 10) : 0; // Scale to 0-100
-    const complianceScore = compliance?.compliance_score || 0;
-    const integrationScore = integration?.integration_score || 0;
-    const painScore = (painPointScore / 10) * 100; // Normalize
+    // Normalise each dimension to 0–100
+    const roiScore = roi ? Math.min(roi.one_year_roi / 10, 100) : 0;
+    const complianceScore = compliance?.compliance_score ?? 0;
+    const integrationScore = integration?.integration_score ?? 0;
+    const painScore = Math.min((rawPainScore / 10) * 100, 100);
 
-    // Apply dynamic weights
-    const totalScore = 
-      (roiScore * weights.roi_weight) + 
-      (complianceScore * weights.compliance_weight) + 
-      (integrationScore * weights.integration_weight) + 
-      (painScore * weights.pain_point_weight);
+    const totalScore =
+      roiScore * weights.roi_weight +
+      complianceScore * weights.compliance_weight +
+      integrationScore * weights.integration_weight +
+      painScore * weights.pain_point_weight;
 
-    const platformName = AI_PLATFORMS.find(p => p.id === platformId)?.name || platformId;
     const platformInfo = AI_PLATFORMS.find(p => p.id === platformId);
+    const platformName = platformInfo?.name || platformId;
 
+    // Narrative justification
     let justification = `${platformName} scores ${totalScore.toFixed(1)}/100. `;
-    
-    if (roi && roi.one_year_roi > 200) {
-      justification += `Strong ROI at ${roi.one_year_roi.toFixed(0)}%. `;
-    }
-    if (compliance && compliance.compliance_score > 80) {
-      justification += `Excellent compliance coverage (${compliance.compliance_score.toFixed(0)}%). `;
-    }
-    if (integration && integration.integration_score > 70) {
-      justification += `Robust integration support. `;
-    }
+    if (roi?.one_year_roi > 200) justification += `Strong ROI at ${roi.one_year_roi.toFixed(0)}%. `;
+    if (complianceScore > 80) justification += `Excellent compliance coverage (${complianceScore.toFixed(0)}%). `;
+    if (integrationScore > 70) justification += `Robust integration support. `;
 
-    // Budget fit analysis
-    let budgetFit = 'moderate';
-    if (assessment?.budget_constraints) {
-      const platformCost = roi?.total_cost || 0;
-      const { max_budget, budget_period } = assessment.budget_constraints;
-      const annualMaxBudget = budget_period === 'monthly' ? max_budget * 12 : max_budget;
-      
-      if (platformCost <= annualMaxBudget * 0.7) budgetFit = 'excellent';
-      else if (platformCost <= annualMaxBudget) budgetFit = 'good';
-      else if (platformCost <= annualMaxBudget * 1.2) budgetFit = 'moderate';
-      else budgetFit = 'exceeds';
-    }
-
-    // Generate pros and cons
+    // Pros / cons
     const pros = [];
     const cons = [];
-    
-    if (roi && roi.one_year_roi > 150) pros.push(`Exceptional ROI: ${roi.one_year_roi.toFixed(0)}% in year 1`);
-    if (compliance && compliance.compliance_score > 80) pros.push(`Strong compliance coverage`);
-    if (integration && integration.integration_score > 80) pros.push(`Excellent integration support`);
-    if (platformInfo?.features?.includes('enterprise_ready')) pros.push(`Enterprise-grade security and scalability`);
-    
-    if (roi && roi.one_year_roi < 100) cons.push(`Lower ROI compared to alternatives`);
-    if (compliance && compliance.compliance_score < 60) cons.push(`Limited compliance certifications`);
-    if (integration && integration.integration_score < 50) cons.push(`May require custom integration work`);
-    if (budgetFit === 'exceeds') cons.push(`Exceeds stated budget constraints`);
 
-    // Best suited for
+    if (roi?.one_year_roi > 150) pros.push(`Exceptional ROI: ${roi.one_year_roi.toFixed(0)}% in year 1`);
+    if (complianceScore > 80) pros.push('Strong compliance coverage');
+    if (integrationScore > 80) pros.push('Excellent integration support');
+    if (platformInfo?.features?.includes('enterprise_ready')) pros.push('Enterprise-grade security and scalability');
+
+    if (roi?.one_year_roi < 100) cons.push('Lower ROI compared to alternatives');
+    if (complianceScore < 60) cons.push('Limited compliance certifications');
+    if (integrationScore < 50) cons.push('May require custom integration work');
+
+    const budgetFit = deriveBudgetFit(roi?.total_cost ?? 0, assessment?.budget_constraints);
+    if (budgetFit === 'exceeds') cons.push('Exceeds stated budget constraints');
+
+    // Best-use-case labels derived from business goals
     const bestFor = [];
-    if (assessment?.business_goals) {
-      assessment.business_goals.forEach(goal => {
-        if (goal.toLowerCase().includes('customer') && platformId === 'openai_chatgpt') {
-          bestFor.push('Customer-facing AI applications');
-        }
-        if (goal.toLowerCase().includes('productivity') && platformId === 'microsoft_copilot') {
-          bestFor.push('Enterprise productivity enhancement');
-        }
-        if (goal.toLowerCase().includes('research') && platformId === 'anthropic_claude') {
-          bestFor.push('Research and analysis tasks');
-        }
-      });
-    }
-    if (bestFor.length === 0) bestFor.push(`${platformInfo?.ideal_for || 'General purpose AI tasks'}`);
+    (assessment?.business_goals || []).forEach(goal => {
+      const lower = goal.toLowerCase();
+      if (lower.includes('customer') && platformId === 'openai_chatgpt') bestFor.push('Customer-facing AI applications');
+      if (lower.includes('productivity') && platformId === 'microsoft_copilot') bestFor.push('Enterprise productivity enhancement');
+      if (lower.includes('research') && platformId === 'anthropic_claude') bestFor.push('Research and analysis tasks');
+    });
+    if (bestFor.length === 0) bestFor.push(platformInfo?.ideal_for || 'General purpose AI tasks');
 
-    recommendations.push({
+    return {
       platform: platformId,
       platform_name: platformName,
       score: totalScore,
@@ -258,50 +339,79 @@ export function generateRecommendations(roiData, complianceData, integrationData
       cons: cons.length > 0 ? cons : ['Consider specific use case requirements'],
       best_for: bestFor,
       budget_fit: budgetFit
-    });
+    };
   });
 
-  // Sort by total score descending
-  recommendations.sort((a, b) => b.score - a.score);
-
-  return recommendations;
+  return recommendations.sort((a, b) => b.score - a.score);
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Executive Summary
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Generates a markdown executive summary from assessment results.
+ *
+ * @param {object} assessmentData
+ * @param {Array}  recommendations - Sorted (highest score first)
+ * @returns {string} Markdown string
+ */
 export function generateExecutiveSummary(assessmentData, recommendations) {
-  const topPlatform = recommendations[0];
+  if (!recommendations?.length) return '# Executive Summary\n\nNo recommendations available.';
+
+  const top = recommendations[0];
   const runnerUp = recommendations[1];
-  
-  const totalUsers = assessmentData.departments.reduce((sum, d) => sum + d.user_count, 0);
-  const topROI = assessmentData.roi_calculations?.[topPlatform.platform];
+  const totalUsers = (assessmentData.departments || []).reduce((sum, d) => sum + (d.user_count || 0), 0);
+  const topROI = assessmentData.roi_calculations?.[top.platform];
 
-  let summary = `# Executive Summary\n\n`;
-  summary += `**Organization:** ${assessmentData.organization_name}\n`;
-  summary += `**Assessment Date:** ${new Date(assessmentData.assessment_date).toLocaleDateString()}\n`;
-  summary += `**Total Users Evaluated:** ${totalUsers}\n\n`;
-  
-  summary += `## Top Recommendation: ${topPlatform.platform_name}\n\n`;
-  summary += `${topPlatform.justification}\n\n`;
-  
+  const lines = [
+    '# Executive Summary',
+    '',
+    `**Organization:** ${assessmentData.organization_name}`,
+    `**Assessment Date:** ${new Date(assessmentData.assessment_date).toLocaleDateString()}`,
+    `**Total Users Evaluated:** ${totalUsers}`,
+    '',
+    `## Top Recommendation: ${top.platform_name}`,
+    '',
+    top.justification,
+    ''
+  ];
+
   if (topROI) {
-    summary += `### Financial Impact\n`;
-    summary += `- **Annual Net Savings:** $${topROI.net_annual_savings.toLocaleString()}\n`;
-    summary += `- **1-Year ROI:** ${topROI.one_year_roi.toFixed(0)}%\n`;
-    summary += `- **3-Year ROI:** ${topROI.three_year_roi.toFixed(0)}%\n\n`;
+    lines.push(
+      '### Financial Impact',
+      `- **Annual Net Savings:** $${topROI.net_annual_savings.toLocaleString()}`,
+      `- **1-Year ROI:** ${topROI.one_year_roi.toFixed(0)}%`,
+      `- **3-Year ROI:** ${topROI.three_year_roi.toFixed(0)}%`,
+      ''
+    );
   }
-  
-  summary += `### Key Strengths\n`;
-  summary += `- Compliance Score: ${topPlatform.compliance_score.toFixed(0)}%\n`;
-  summary += `- Integration Compatibility: ${topPlatform.integration_score.toFixed(0)}%\n`;
-  summary += `- Pain Point Alignment: ${topPlatform.pain_point_score.toFixed(0)}%\n\n`;
-  
-  summary += `## Alternative Option: ${runnerUp.platform_name}\n\n`;
-  summary += `${runnerUp.justification}\n\n`;
-  
-  summary += `## Next Steps\n\n`;
-  summary += `1. Schedule pilot program with ${topPlatform.platform_name}\n`;
-  summary += `2. Identify 10-20 early adopters from key departments\n`;
-  summary += `3. Establish success metrics and KPIs\n`;
-  summary += `4. Plan phased rollout over 6-12 months\n`;
 
-  return summary;
+  lines.push(
+    '### Key Strengths',
+    `- Compliance Score: ${top.compliance_score.toFixed(0)}%`,
+    `- Integration Compatibility: ${top.integration_score.toFixed(0)}%`,
+    `- Pain Point Alignment: ${top.pain_point_score.toFixed(0)}%`,
+    ''
+  );
+
+  if (runnerUp) {
+    lines.push(
+      `## Alternative Option: ${runnerUp.platform_name}`,
+      '',
+      runnerUp.justification,
+      ''
+    );
+  }
+
+  lines.push(
+    '## Recommended Next Steps',
+    '',
+    `1. Schedule a pilot program with ${top.platform_name} (10–20 early adopters)`,
+    '2. Define success metrics and KPIs before launch',
+    '3. Identify change-management stakeholders across key departments',
+    '4. Plan phased rollout over 6–12 months with quarterly reviews'
+  );
+
+  return lines.join('\n');
 }

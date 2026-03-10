@@ -1,44 +1,57 @@
 import { useState, useCallback, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 import { generatePlatformInsights, generateImplementationRoadmap } from '../assessment/AIEnhancer';
 import { generateEnhancedRoadmap } from '../assessment/EnhancedRoadmapGenerator';
 import { fetchMarketTrends } from '../analytics/MarketTrendsEngine';
 import { toast } from 'sonner';
 
-// AI Insights Hook
+/**
+ * Loads AI-generated platform insights and an implementation roadmap
+ * for a given platform + assessment combination.
+ *
+ * Guards against duplicate in-flight calls via the `loading` flag.
+ */
 export function useAIInsights() {
   const [insights, setInsights] = useState(null);
   const [roadmap, setRoadmap] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const loadInsights = useCallback(async (platform, assessment, roiData, complianceScores, integrationScores, useEnhanced = true) => {
+  const loadInsights = useCallback(async (
+    platform,
+    assessment,
+    roiData,
+    complianceScores,
+    integrationScores,
+    useEnhanced = true
+  ) => {
     if (!platform || loading || insights) return;
 
     setLoading(true);
     setError(null);
 
     try {
-      // Fetch market trends for enhanced roadmap
       let marketTrends = null;
       if (useEnhanced) {
         try {
           toast.info('Fetching market intelligence for optimized roadmap...');
           marketTrends = await fetchMarketTrends();
-        } catch (error) {
-          console.warn('Failed to fetch market trends, using basic roadmap:', error);
+        } catch {
+          console.warn('Market trends unavailable — falling back to basic roadmap.');
         }
       }
 
       const [platformInsights, implementationRoadmap] = await Promise.all([
         generatePlatformInsights(platform, assessment, roiData, complianceScores, integrationScores),
-        useEnhanced && marketTrends 
+        useEnhanced && marketTrends
           ? generateEnhancedRoadmap(platform, assessment, marketTrends)
           : generateImplementationRoadmap(platform, assessment)
       ]);
 
       setInsights(platformInsights);
       setRoadmap(implementationRoadmap);
-      
+
       if (useEnhanced && marketTrends) {
         toast.success('Enhanced roadmap generated with market intelligence!');
       }
@@ -61,7 +74,10 @@ export function useAIInsights() {
   return { insights, roadmap, loading, error, loadInsights, reset };
 }
 
-// Assessment Filters Hook
+/**
+ * Client-side filtering for a list of assessments.
+ * Supports free-text search, platform filter, status filter, and time range.
+ */
 export function useAssessmentFilters(assessments) {
   const [filters, setFilters] = useState({
     search: '',
@@ -71,23 +87,39 @@ export function useAssessmentFilters(assessments) {
   });
 
   const filteredAssessments = useMemo(() => {
-    return assessments.filter(assessment => {
-      if (filters.search && !assessment.organization_name?.toLowerCase().includes(filters.search.toLowerCase())) {
+    return (assessments || []).filter(assessment => {
+      // Free-text search on org name
+      if (
+        filters.search &&
+        !assessment.organization_name?.toLowerCase().includes(filters.search.toLowerCase())
+      ) {
         return false;
       }
-      if (filters.platform !== 'all' && assessment.recommended_platforms?.[0]?.platform_name !== filters.platform) {
+
+      // Top-recommended platform filter
+      if (
+        filters.platform !== 'all' &&
+        assessment.recommended_platforms?.[0]?.platform_name !== filters.platform
+      ) {
         return false;
       }
+
+      // Status filter
       if (filters.status !== 'all' && assessment.status !== filters.status) {
         return false;
       }
+
+      // Time-range filter (value is days, e.g. '30', '90', '180', '365')
       if (filters.timeRange !== 'all') {
-        const date = new Date(assessment.assessment_date || assessment.created_date);
-        const now = new Date();
-        const daysAgo = parseInt(filters.timeRange);
-        const cutoff = new Date(now.setDate(now.getDate() - daysAgo));
-        if (date < cutoff) return false;
+        const days = parseInt(filters.timeRange, 10);
+        if (!isNaN(days)) {
+          const date = new Date(assessment.assessment_date || assessment.created_date);
+          const cutoff = new Date();
+          cutoff.setDate(cutoff.getDate() - days);
+          if (date < cutoff) return false;
+        }
       }
+
       return true;
     });
   }, [assessments, filters]);
@@ -95,42 +127,37 @@ export function useAssessmentFilters(assessments) {
   return { filters, setFilters, filteredAssessments };
 }
 
-// Hook for fetching assessments with common logic
-// Note: This function requires @tanstack/react-query to be available in the calling component
+/**
+ * Fetches assessments from the database with optional status filter.
+ * Uses TanStack Query for caching and background refetching.
+ *
+ * @param {string|null} status - Filter by status ('draft' | 'completed' | null for all)
+ * @param {number} limit - Maximum records to return
+ */
 export function useAssessments(status = null, limit = 100) {
-  // This hook should only be used in components that have proper React Query setup
-  const { useQuery } = require('@tanstack/react-query');
-  const { base44 } = require('@/api/base44Client');
-  
   return useQuery({
-    queryKey: ['assessments', status],
-    queryFn: async () => {
-      if (status) {
-        return await base44.entities.Assessment.filter({ status }, '-created_date', limit);
-      }
-      return await base44.entities.Assessment.list('-created_date', limit);
-    },
+    queryKey: ['assessments', status, limit],
+    queryFn: () =>
+      status
+        ? base44.entities.Assessment.filter({ status }, '-created_date', limit)
+        : base44.entities.Assessment.list('-created_date', limit),
+    staleTime: 2 * 60 * 1000,
     initialData: []
   });
 }
 
-// Hook for loading user settings
-// Note: This function requires @tanstack/react-query and base44 client to be available
+/**
+ * Fetches the current user and their persisted UserSettings record.
+ * Keeps the query key stable by resolving the user email inside queryFn.
+ */
 export function useUserSettings() {
-  const { useQuery } = require('@tanstack/react-query');
-  const { base44 } = require('@/api/base44Client');
-  const [user, setUser] = useState(null);
-  
-  const { data: settings, isLoading } = useQuery({
-    queryKey: ['userSettings', user?.email],
+  return useQuery({
+    queryKey: ['userSettings'],
     queryFn: async () => {
       const currentUser = await base44.auth.me();
-      setUser(currentUser);
-      const result = await base44.entities.UserSettings.filter({ user_email: currentUser.email });
-      return result[0] || null;
+      const results = await base44.entities.UserSettings.filter({ user_email: currentUser.email });
+      return { user: currentUser, settings: results[0] || null };
     },
-    enabled: false
+    staleTime: 5 * 60 * 1000
   });
-
-  return { settings, isLoading, user };
 }
