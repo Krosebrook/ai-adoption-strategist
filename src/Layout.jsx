@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { Brain, Home, FileText, LayoutDashboard, Star, Settings, TrendingUp, Sparkles, GraduationCap, Shield, Activity } from 'lucide-react';
+import { Brain, Home, FileText, LayoutDashboard, Star, Settings, TrendingUp, Sparkles, GraduationCap, Shield, Activity, Menu, X } from 'lucide-react';
 import OnboardingBanner from './components/onboarding/OnboardingBanner';
 import InteractiveOnboardingGuide from './components/onboarding/InteractiveOnboardingGuide';
 import PersonalizedOnboardingFlow from './components/onboarding/PersonalizedOnboardingFlow';
@@ -13,6 +13,8 @@ import NotificationCenter from './components/notifications/NotificationCenter';
 import CommandPalette from './components/command/CommandPalette';
 
 export default function Layout({ children, currentPageName }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
@@ -103,15 +105,51 @@ export default function Layout({ children, currentPageName }) {
             </nav>
             
             <NotificationCenter />
+            {/* Mobile menu toggle */}
+            <button
+              className="md:hidden p-2 rounded-lg ml-2"
+              style={{ color: 'var(--color-text-secondary)' }}
+              onClick={() => setMobileMenuOpen(o => !o)}
+              aria-label="Toggle navigation menu"
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
         </div>
+        {/* Mobile nav drawer */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+            <nav className="flex flex-col px-4 py-2 max-h-[70vh] overflow-y-auto">
+              {navigation.map((item) => {
+                const Icon = item.icon;
+                const isActive = currentPageName === item.page;
+                return (
+                  <Link
+                    key={item.name}
+                    to={createPageUrl(item.page)}
+                    aria-current={isActive ? 'page' : undefined}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-3 py-3 font-medium transition-all rounded-lg my-0.5"
+                    style={{
+                      background: isActive ? 'linear-gradient(135deg, #E88A1D, #D07612)' : 'transparent',
+                      color: isActive ? 'white' : 'var(--color-text-secondary)'
+                    }}
+                  >
+                    <Icon className="h-4 w-4 flex-shrink-0" />
+                    {item.name}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+        )}
       </header>
       
       {/* Command Palette */}
       <CommandPalette />
 
       {/* Main Content */}
-      <main>{children}</main>
+      <main role="main">{children}</main>
       
       {/* PWA Install Prompt */}
       <PWAInstallPrompt />
