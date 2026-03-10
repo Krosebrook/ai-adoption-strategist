@@ -190,8 +190,6 @@ export default function Results() {
   const roiData = Object.values(assessment.roi_calculations || {});
   const recommendations = assessment.recommended_platforms || [];
 
-  const queryClient = useQueryClient();
-
   const handleLoadAIInsights = () => {
     if (!recommendations[0]) return;
     loadInsights(

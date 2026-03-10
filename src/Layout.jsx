@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
+import { useQuery } from '@tanstack/react-query';
 import { Brain, Home, FileText, LayoutDashboard, Star, Settings, TrendingUp, Sparkles, GraduationCap, Shield, Activity } from 'lucide-react';
 import OnboardingBanner from './components/onboarding/OnboardingBanner';
 import InteractiveOnboardingGuide from './components/onboarding/InteractiveOnboardingGuide';

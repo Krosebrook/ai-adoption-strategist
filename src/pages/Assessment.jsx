@@ -81,12 +81,19 @@ export default function Assessment() {
     
     if (formData.additional_context && formData.additional_context.trim()) {
       toast.info('Analyzing your input with AI...');
-      aiInsights = await analyzeUnstructuredInput(formData.additional_context, 'assessment');
-      
-      // Get feedback trends and refine scoring
-      const feedbackAnalysis = await analyzeFeedbackTrends();
-      if (feedbackAnalysis && aiInsights) {
-        customWeights = await refineScoringWithFeedback(formData, feedbackAnalysis);
+      // Wrapped individually so one failure doesn't abort the entire assessment save
+      try {
+        aiInsights = await analyzeUnstructuredInput(formData.additional_context, 'assessment');
+      } catch (e) {
+        console.warn('AI insight analysis failed, continuing without it:', e);
+      }
+      try {
+        const feedbackAnalysis = await analyzeFeedbackTrends();
+        if (feedbackAnalysis && aiInsights) {
+          customWeights = await refineScoringWithFeedback(formData, feedbackAnalysis);
+        }
+      } catch (e) {
+        console.warn('Feedback trend analysis failed, continuing without it:', e);
       }
     }
 

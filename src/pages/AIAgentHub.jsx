@@ -18,47 +18,8 @@ import CollaborativeTask from '../components/agents/CollaborativeTask';
 import SharedContextPanel from '../components/agents/SharedContextPanel';
 import ImplementationPlanInitiator from '../components/agents/ImplementationPlanInitiator';
 
-export default function AIAgentHub() {
-  const [selectedAgent, setSelectedAgent] = useState(null);
-  const [activeConversation, setActiveConversation] = useState(null);
-  const [collaborativeMode, setCollaborativeMode] = useState(false);
-  const [selectedAgents, setSelectedAgents] = useState([]);
-  const [sharedContext, setSharedContext] = useState(null);
-
-  const queryClient = useQueryClient();
-
-  const { data: user } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me()
-  });
-
-  const { data: conversations = [] } = useQuery({
-    queryKey: ['agentConversations'],
-    queryFn: async () => {
-      const allConvos = [];
-      for (const agent of agents) {
-        try {
-          const convos = await base44.agents.listConversations({ agent_name: agent.id });
-          allConvos.push(...convos.map(c => ({ ...c, agentId: agent.id })));
-        } catch (e) {
-          // Agent may not exist yet
-        }
-      }
-      return allConvos.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
-    }
-  });
-
-  const { data: assessments = [] } = useQuery({
-    queryKey: ['assessments'],
-    queryFn: () => base44.entities.Assessment.filter({ status: 'completed' }, '-created_date', 10)
-  });
-
-  const { data: strategies = [] } = useQuery({
-    queryKey: ['strategies'],
-    queryFn: () => base44.entities.AdoptionStrategy.list('-created_date', 10)
-  });
-
-  const agents = [
+// Static data — defined outside component to avoid recreation on every render
+const AGENTS = [
     {
       id: 'StrategyAdvisor',
       name: 'Strategy Advisor',
