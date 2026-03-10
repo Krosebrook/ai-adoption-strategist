@@ -13,13 +13,13 @@ import NotificationCenter from './components/notifications/NotificationCenter';
 import CommandPalette from './components/command/CommandPalette';
 
 export default function Layout({ children, currentPageName }) {
-  const [user, setUser] = React.useState(null);
-
-  React.useEffect(() => {
-    base44.auth.me()
-      .then(userData => setUser(userData))
-      .catch(() => setUser({ role: 'user' }));
-  }, []);
+  const { data: user } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    retry: false
+  });
 
   const allNavigation = [
         { name: 'Home', icon: Home, page: 'Home', roles: ['admin', 'executive', 'product_manager', 'analyst', 'user'] },
@@ -40,8 +40,9 @@ export default function Layout({ children, currentPageName }) {
         { name: 'Settings', icon: Settings, page: 'Settings', roles: ['admin', 'executive', 'product_manager', 'analyst', 'user'] }
       ];
 
-  const navigation = allNavigation.filter(item => 
-    !item.roles || item.roles.includes(user?.role || 'user')
+  const navigation = React.useMemo(
+    () => allNavigation.filter(item => !item.roles || item.roles.includes(user?.role || 'user')),
+    [user?.role]
   );
 
   return (
@@ -78,7 +79,7 @@ export default function Layout({ children, currentPageName }) {
               </div>
             </Link>
 
-            <nav className="flex items-center gap-2 overflow-x-auto scrollbar-hide" style={{ maxWidth: 'calc(100vw - 400px)' }}>
+            <nav className="hidden md:flex items-center gap-1 overflow-x-auto scrollbar-hide flex-1 mx-4">
               {navigation.map((item) => {
                 const Icon = item.icon;
                 const isActive = currentPageName === item.page;
@@ -86,7 +87,8 @@ export default function Layout({ children, currentPageName }) {
                   <Link
                     key={item.name}
                     to={createPageUrl(item.page)}
-                    className="flex items-center gap-2 px-4 py-2 font-medium transition-all whitespace-nowrap flex-shrink-0"
+                    aria-current={isActive ? 'page' : undefined}
+                    className="flex items-center gap-2 px-3 py-2 font-medium transition-all whitespace-nowrap flex-shrink-0 text-sm"
                     style={{
                       borderRadius: 'var(--radius-base)',
                       background: isActive ? 'linear-gradient(135deg, #E88A1D, #D07612)' : 'transparent',
@@ -94,7 +96,7 @@ export default function Layout({ children, currentPageName }) {
                     }}
                   >
                     <Icon className="h-4 w-4" />
-                    <span className="hidden md:inline">{item.name}</span>
+                    <span className="hidden lg:inline">{item.name}</span>
                   </Link>
                 );
               })}
