@@ -23,29 +23,27 @@ export default function Layout({ children, currentPageName }) {
     retry: false
   });
 
-  const allNavigation = [
-        { name: 'Home', icon: Home, page: 'Home', roles: ['admin', 'executive', 'product_manager', 'analyst', 'user'] },
-        { name: 'Dashboard', icon: LayoutDashboard, page: 'CustomDashboard', roles: ['admin', 'executive', 'product_manager', 'analyst', 'user'] },
-        { name: 'Platforms', icon: Star, page: 'PlatformCatalog', roles: ['admin', 'executive', 'product_manager', 'analyst', 'user'] },
-        { name: 'Executive', icon: LayoutDashboard, page: 'ExecutiveDashboard', roles: ['admin', 'executive'] },
-        { name: 'ROI Simulator', icon: TrendingUp, page: 'ROISimulation', roles: ['admin', 'executive', 'product_manager', 'analyst', 'user'] },
-        { name: 'Analytics', icon: TrendingUp, page: 'Analytics', roles: ['admin', 'executive', 'analyst'] },
-        { name: 'Assessment', icon: FileText, page: 'Assessment', roles: ['admin', 'executive', 'product_manager', 'analyst', 'user'] },
-        { name: 'Strategy', icon: Sparkles, page: 'StrategyAutomation', roles: ['admin', 'executive', 'product_manager'] },
-        { name: 'AI Agents', icon: Brain, page: 'AIAgentHub', roles: ['admin', 'product_manager', 'user'] },
-        { name: 'Risk Monitor', icon: Shield, page: 'RiskMonitoring', roles: ['admin', 'executive', 'product_manager'] },
-        { name: 'Training', icon: GraduationCap, page: 'Training', roles: ['admin', 'product_manager', 'analyst', 'user'] },
-        { name: 'Governance', icon: Shield, page: 'AIGovernance', roles: ['admin', 'executive'] },
-        { name: 'AI Performance', icon: Activity, page: 'AIPerformanceMonitor', roles: ['admin', 'executive'] },
-        { name: 'Reports', icon: FileText, page: 'Reports', roles: ['admin', 'executive', 'analyst'] },
-        { name: 'Admin Panel', icon: Shield, page: 'AdminPanel', roles: ['admin'] },
-        { name: 'Settings', icon: Settings, page: 'Settings', roles: ['admin', 'executive', 'product_manager', 'analyst', 'user'] }
-      ];
-
-  const navigation = React.useMemo(
-    () => allNavigation.filter(item => !item.roles || item.roles.includes(user?.role || 'user')),
-    [user?.role]
-  );
+  const navigation = React.useMemo(() => {
+    const all = [
+      { name: 'Home', icon: Home, page: 'Home', roles: ['admin', 'executive', 'product_manager', 'analyst', 'user'] },
+      { name: 'Dashboard', icon: LayoutDashboard, page: 'CustomDashboard', roles: ['admin', 'executive', 'product_manager', 'analyst', 'user'] },
+      { name: 'Platforms', icon: Star, page: 'PlatformCatalog', roles: ['admin', 'executive', 'product_manager', 'analyst', 'user'] },
+      { name: 'Executive', icon: LayoutDashboard, page: 'ExecutiveDashboard', roles: ['admin', 'executive'] },
+      { name: 'ROI Simulator', icon: TrendingUp, page: 'ROISimulation', roles: ['admin', 'executive', 'product_manager', 'analyst', 'user'] },
+      { name: 'Analytics', icon: TrendingUp, page: 'Analytics', roles: ['admin', 'executive', 'analyst'] },
+      { name: 'Assessment', icon: FileText, page: 'Assessment', roles: ['admin', 'executive', 'product_manager', 'analyst', 'user'] },
+      { name: 'Strategy', icon: Sparkles, page: 'StrategyAutomation', roles: ['admin', 'executive', 'product_manager'] },
+      { name: 'AI Agents', icon: Brain, page: 'AIAgentHub', roles: ['admin', 'product_manager', 'user'] },
+      { name: 'Risk Monitor', icon: Shield, page: 'RiskMonitoring', roles: ['admin', 'executive', 'product_manager'] },
+      { name: 'Training', icon: GraduationCap, page: 'Training', roles: ['admin', 'product_manager', 'analyst', 'user'] },
+      { name: 'Governance', icon: Shield, page: 'AIGovernance', roles: ['admin', 'executive'] },
+      { name: 'AI Performance', icon: Activity, page: 'AIPerformanceMonitor', roles: ['admin', 'executive'] },
+      { name: 'Reports', icon: FileText, page: 'Reports', roles: ['admin', 'executive', 'analyst'] },
+      { name: 'Admin Panel', icon: Shield, page: 'AdminPanel', roles: ['admin'] },
+      { name: 'Settings', icon: Settings, page: 'Settings', roles: ['admin', 'executive', 'product_manager', 'analyst', 'user'] }
+    ];
+    return all.filter(item => !item.roles || item.roles.includes(user?.role || 'user'));
+  }, [user?.role]);
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-background)' }}>
